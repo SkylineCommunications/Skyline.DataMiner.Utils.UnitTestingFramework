@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net48</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.Utils.UnitTestingFramework</AssemblyName>
@@ -18,6 +18,8 @@
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>
     <Description>The Unit Testing Framework was developed to simplify how Unit Tests are made when developing Connectors. The purpose is to allow developers to focus on actual tests without being tied to the code implementation of the method that's being tested.</Description>
+    <OutputType>Library</OutputType>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,9 +27,14 @@
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
     <None Include="nuget\Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="1.2.3">
+    <PackageReference Include="FluentAssertions" Version="7.2.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="NuGet.Packaging" Version="6.13.2" />
+    <PackageReference Include="Skyline.DataMiner.CICD.Models.Protocol" Version="1.0.14" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Protocol" Version="10.3.0" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

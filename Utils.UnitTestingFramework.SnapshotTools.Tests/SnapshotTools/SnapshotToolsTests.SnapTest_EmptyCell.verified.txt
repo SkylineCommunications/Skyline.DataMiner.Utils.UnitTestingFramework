@@ -1,0 +1,58 @@
+﻿{
+  Name: PollingConfiguration,
+  TableID: 900,
+  KeyColumn: PollingConfigurationInstance,
+  KeyColumnIdx: 0,
+  Rows: [
+    {
+      RowIndex: 0,
+      Content: [
+        {
+          ColumnName: PollingConfigurationInstance_901,
+          Value: one
+        },
+        {
+          ColumnName: PollingConfigurationDescription_902,
+          Value: EMPTY CELL
+        },
+        {
+          ColumnName: PollingConfigurationPeriod_903,
+          Value: 3
+        },
+        {
+          ColumnName: PollingConfigurationLastPolled_904,
+          Value: 4
+        },
+        {
+          ColumnName: PollingConfigurationConnectionId_905,
+          Value: 5
+        }
+      ]
+    },
+    {
+      RowIndex: 1,
+      Content: [
+        {
+          ColumnName: PollingConfigurationInstance_901,
+          Value: notOne
+        },
+        {
+          ColumnName: PollingConfigurationDescription_902,
+          Value: notTwo
+        },
+        {
+          ColumnName: PollingConfigurationPeriod_903,
+          Value: 6
+        },
+        {
+          ColumnName: PollingConfigurationLastPolled_904,
+          Value: 7
+        },
+        {
+          ColumnName: PollingConfigurationConnectionId_905,
+          Value: EMPTY CELL
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+﻿{
+  Name: PollingConfiguration,
+  TableID: 900,
+  KeyColumn: PollingConfigurationInstance,
+  KeyColumnIdx: 0,
+  Rows: EMPTY TABLE
+}

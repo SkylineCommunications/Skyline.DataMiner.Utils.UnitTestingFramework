@@ -1,0 +1,16 @@
+﻿[
+  {
+    Name: PollingConfiguration,
+    TableID: 900,
+    KeyColumn: PollingConfigurationInstance,
+    KeyColumnIdx: 0,
+    Rows: EMPTY TABLE
+  },
+  {
+    Name: snapTable,
+    TableID: 1100,
+    KeyColumn: snapIndex,
+    KeyColumnIdx: 0,
+    Rows: EMPTY TABLE
+  }
+]
