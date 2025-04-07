@@ -19,7 +19,7 @@
     <Company>Skyline Communications</Company>
     <Description>The Unit Testing Framework was developed to simplify how Unit Tests are made when developing Connectors. The purpose is to allow developers to focus on actual tests without being tied to the code implementation of the method that's being tested.</Description>
     <OutputType>Library</OutputType>
-    <Platforms>AnyCPU;x86</Platforms>
+    <Platforms>x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
