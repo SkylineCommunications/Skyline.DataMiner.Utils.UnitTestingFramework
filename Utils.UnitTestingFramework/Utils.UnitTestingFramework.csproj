@@ -19,6 +19,8 @@
     <Company>Skyline Communications</Company>
     <Description>The Unit Testing Framework was developed to simplify how Unit Tests are made when developing Connectors. The purpose is to allow developers to focus on actual tests without being tied to the code implementation of the method that's being tested.</Description>
     <OutputType>Library</OutputType>
+    <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Utils.UnitTestingFramework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
