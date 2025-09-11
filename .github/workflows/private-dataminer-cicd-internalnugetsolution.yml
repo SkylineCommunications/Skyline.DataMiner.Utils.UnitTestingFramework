@@ -4,7 +4,8 @@ name: Internal DataMiner CICD NuGet Solution
 on:
   # Triggers the workflow on push or pull request events.
   push:
-    branches: []
+    branches:
+      - '**'
     tags:
       - "[0-9]+.[0-9]+.[0-9]+.[0-9]+"
       - "[0-9]+.[0-9]+.[0-9]+"
@@ -21,12 +22,7 @@ jobs:
   CICD:
     uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/Internal NuGet Solution Master Workflow.yml@main
     with:
-      referenceName: ${{ github.ref_name }}
-      runNumber: ${{ github.run_number }}
-      referenceType: ${{ github.ref_type }}
-      repository: ${{ github.repository }}
-      owner: ${{ github.repository_owner }}
       sonarCloudProjectName: SkylineCommunications_Skyline.DataMiner.Utils.UnitTestingFramework
     secrets:
-      sonarCloudToken: ${{ secrets.SONAR_TOKEN }}
+      # sonarCloudToken: ${{ secrets.SONAR_TOKEN }} # Not needed anymore for SkylineCommunications organization
       nugetApiKey: ${{ secrets.NUGETAPIKEY_GITHUB }}
