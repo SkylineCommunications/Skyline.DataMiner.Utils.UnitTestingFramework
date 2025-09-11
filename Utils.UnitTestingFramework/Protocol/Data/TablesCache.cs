@@ -667,6 +667,58 @@
         }
 
         /// <summary>
+        /// Sets columns in a table based on the provided column info and values information.
+        /// </summary>
+        /// <param name="columnInfo">
+        /// Object array where:
+        /// columnInfo[0] is the ID of the table parameter,
+        /// columnInfo[1…n-1] are the IDs of the column parameters.
+        /// </param>
+        /// <param name="values">
+        /// Object array where:
+        /// values[0] is the primary key (string),
+        /// values[1…n] are the values to set or update.
+        /// </param>
+        /// <returns><c>true</c></returns>
+        /// <exception cref="ArgumentException">There should be as many primary keys as values.</exception>
+        public object FillArrayWithColumns(object[] columnInfo, object[] values)
+        {
+            if (columnInfo.Length != values.Length && columnInfo.Length > 0)
+            {
+                throw new ArgumentException("There should be as many column pids as values arrays to set.");
+            }
+
+            var tableId = Convert.ToInt32(columnInfo[0]);
+            if (!TablesCacheDict.TryGetValue(tableId, out var tableModel))
+            {
+                return true;
+            }
+
+            var primaryKeysArray = ((object[])values[0]).Cast<string>().ToArray();
+
+            for (int i = 1; i < values.Length; i++)
+            {
+                object[] valuesToSet = (object[])values[i];
+                if (primaryKeysArray.Length != valuesToSet.Length)
+                {
+                    throw new ArgumentException("There should be as many column pids as values arrays to set.");
+                }
+
+                var columnIdxToPid = tableModel.ColumnIndexesToPids.FirstOrDefault(x => x.Value == Convert.ToInt32(columnInfo[i]));
+
+                if (columnIdxToPid.Equals(default(KeyValuePair<int, int>)))
+                {
+                    continue;
+                }
+
+                var idx = columnIdxToPid.Key;
+
+                tableModel.SetColumn(idx, primaryKeysArray, valuesToSet);
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Gets the table columns.
         /// </summary>
         /// <param name="tableId">The table identifier.</param>

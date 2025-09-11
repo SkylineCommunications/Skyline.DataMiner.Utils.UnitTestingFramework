@@ -2456,6 +2456,260 @@
         }
 
         [TestMethod]
+        public void FillArrayWithColumnsColumnsTest_FillArraysWithArgumentsDifferentLengths_Exception()
+        {
+            // Arrange
+            var protocolModel = new ProtocolModelExt(path);
+            var protocolCache = new ProtocolCache();
+            protocolModel.LoadParameterValues(protocolCache);
+            var tablesCache = protocolCache.Tables;
+
+            int tableID = 900;
+            int columnID1 = 902;
+
+            object[] columnInfo = new object[] { tableID, columnID1, };
+            object[] pk = new object[] { "skyline1", "skyline2" };
+            object[] column1Values = new object[] { "value1", "value2" };
+            object[] column2Values = new object[] { 1, 2 };
+            object[] values = new object[] { pk, column1Values, column2Values };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentException>(
+                () => tablesCache.FillArrayWithColumns(columnInfo, values));
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumnsColumnsTest_FillArraysWithColumnsDifferentLengths_Exception()
+        {
+            // Arrange
+            var protocolModel = new ProtocolModelExt(path);
+            var protocolCache = new ProtocolCache();
+            protocolModel.LoadParameterValues(protocolCache);
+            var tablesCache = protocolCache.Tables;
+
+            int tableID = 900;
+            int columnID1 = 902;
+            int columnID2 = 903;
+
+            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
+            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            object[] column1Values = new object[] { "value1", "value2" };
+            object[] column2Values = new object[] { 1, 2 };
+            object[] values = new object[] { pk, column1Values, column2Values };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentException>(
+                () => tablesCache.FillArrayWithColumns(columnInfo, values));
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumnsColumnsTest_FillArray_GetCorrectRows()
+        {
+            // Arrange
+            var protocolModel = new ProtocolModelExt(path);
+            var protocolCache = new ProtocolCache();
+            protocolModel.LoadParameterValues(protocolCache);
+            var tablesCache = protocolCache.Tables;
+
+            int tableID = 900;
+            int columnID1 = 902;
+            int columnID2 = 903;
+
+            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
+            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            object[] column1Values = new object[] { "value1", "value2", "value3" };
+            object[] column2Values = new object[] { 1, 2, 3 };
+            object[] values = new object[] { pk, column1Values, column2Values };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            tablesCache.FillArrayWithColumns(columnInfo, values);
+
+            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
+            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
+            object[] rowOutput2 = (object[])tablesCache.GetRow(900, "skyline3");
+
+            // Assert
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("value1", rowOutput0[1]);
+            Assert.AreEqual(1, rowOutput0[2]);
+            Assert.IsNull(rowOutput0[3]);
+            Assert.IsNull(rowOutput0[4]);
+
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("value2", rowOutput1[1]);
+            Assert.AreEqual(2, rowOutput1[2]);
+            Assert.IsNull(rowOutput1[3]);
+            Assert.IsNull(rowOutput1[4]);
+
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.AreEqual("value3", rowOutput2[1]);
+            Assert.AreEqual(3, rowOutput2[2]);
+            Assert.IsNull(rowOutput2[3]);
+            Assert.IsNull(rowOutput2[4]);
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumnsColumnsTest_FillArray_ReplaceRow()
+        {
+            // Arrange
+            var protocolModel = new ProtocolModelExt(path);
+            var protocolCache = new ProtocolCache();
+            protocolModel.LoadParameterValues(protocolCache);
+            var tablesCache = protocolCache.Tables;
+
+            int tableID = 900;
+            int columnID1 = 902;
+            int columnID2 = 903;
+
+            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
+            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            object[] column1Values = new object[] { "value1", "value2", "value3" };
+            object[] column2Values = new object[] { 1, 2, 3 };
+            object[] values = new object[] { pk, column1Values, column2Values };
+
+            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1000, "2", "3" };
+            object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 2000, "22", "33" };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            tablesCache.AddRow(900, row1);
+            tablesCache.AddRow(900, row2);
+
+            tablesCache.FillArrayWithColumns(columnInfo, values);
+
+            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
+            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
+            object[] rowOutput2 = (object[])tablesCache.GetRow(900, "skyline3");
+
+            // Assert
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("value1", rowOutput0[1]);
+            Assert.AreEqual(1, rowOutput0[2]);
+            Assert.AreEqual("2", rowOutput0[3]);
+            Assert.AreEqual("3", rowOutput0[4]);
+
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("value2", rowOutput1[1]);
+            Assert.AreEqual(2, rowOutput1[2]);
+            Assert.AreEqual("22", rowOutput1[3]);
+            Assert.AreEqual("33", rowOutput1[4]);
+
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.AreEqual("value3", rowOutput2[1]);
+            Assert.AreEqual(3, rowOutput2[2]);
+            Assert.IsNull(rowOutput2[3]);
+            Assert.IsNull(rowOutput2[4]);
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumnsTest_NotConsecutiveRows_GetCorrectRows()
+        {
+            // Arrange
+            var protocolModel = new ProtocolModelExt(path);
+            var protocolCache = new ProtocolCache();
+            protocolModel.LoadParameterValues(protocolCache);
+            var tablesCache = protocolCache.Tables;
+
+            int tableID = 900;
+            int columnID1 = 903;
+            int columnID2 = 905;
+
+            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
+            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            object[] column1Values = new object[] { "value1", "value2", "value3" };
+            object[] column2Values = new object[] { 1, 2, 3 };
+            object[] values = new object[] { pk, column1Values, column2Values };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            tablesCache.FillArrayWithColumns(columnInfo, values);
+
+            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
+            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
+            object[] rowOutput2 = (object[])tablesCache.GetRow(900, "skyline3");
+
+            // Assert
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.IsNull(rowOutput0[1]);
+            Assert.AreEqual("value1", rowOutput0[2]);
+            Assert.IsNull(rowOutput0[3]);
+            Assert.AreEqual(1, rowOutput0[4]);
+
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.IsNull(rowOutput1[1]);
+            Assert.AreEqual("value2", rowOutput1[2]);
+            Assert.IsNull(rowOutput1[3]);
+            Assert.AreEqual(2, rowOutput1[4]);
+
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.IsNull(rowOutput2[1]);
+            Assert.AreEqual("value3", rowOutput2[2]);
+            Assert.IsNull(rowOutput2[3]);
+            Assert.AreEqual(3, rowOutput2[4]);
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumnsTest_InexistentColumnPid_EmptyColumn()
+        {
+            // Arrange
+            var protocolModel = new ProtocolModelExt(path);
+            var protocolCache = new ProtocolCache();
+            protocolModel.LoadParameterValues(protocolCache);
+            var tablesCache = protocolCache.Tables;
+
+            int tableID = 900;
+            int columnID1 = 902;
+            int columnID2 = 906;    // does not exist
+
+            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
+            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            object[] column1Values = new object[] { "value1", "value2", "value3" };
+            object[] column2Values = new object[] { 1, 2, 3 };
+            object[] values = new object[] { pk, column1Values, column2Values };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            var output = tablesCache.FillArrayWithColumns(columnInfo, values);
+
+            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
+            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
+            object[] rowOutput2 = (object[])tablesCache.GetRow(900, "skyline3");
+
+            // Assert
+            Assert.IsTrue((bool)output);
+
+            // Assert
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("value1", rowOutput0[1]);
+            Assert.IsNull(rowOutput0[2]);
+            Assert.IsNull(rowOutput0[3]);
+            Assert.IsNull(rowOutput0[4]);
+
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("value2", rowOutput1[1]);
+            Assert.IsNull(rowOutput1[2]);
+            Assert.IsNull(rowOutput1[3]);
+            Assert.IsNull(rowOutput1[4]);
+
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.AreEqual("value3", rowOutput2[1]);
+            Assert.IsNull(rowOutput2[2]);
+            Assert.IsNull(rowOutput2[3]);
+            Assert.IsNull(rowOutput2[4]);
+        }
+
+        [TestMethod]
         public void TableModelTest_RowCount_InexistentTableID()
         {
             // Arrange
