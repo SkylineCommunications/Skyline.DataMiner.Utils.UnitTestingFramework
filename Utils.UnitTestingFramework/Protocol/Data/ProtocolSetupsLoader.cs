@@ -16,7 +16,7 @@
             LoadAddsAndExists(mock, tablesCache);
             LoadDeleteAndClearKeys(mock, tablesCache);
             LoadParametersIndexByKeys(mock, tablesCache);
-            LoadParametersIndexByCoordenates(mock, tablesCache);
+            LoadParametersIndexByCoordinates(mock, tablesCache);
             LoadGetRowsAndKeyPositionSetups(mock, tablesCache);
             LoadSetRowsSetups(mock, tablesCache);
             LoadFillArraySetups(mock, tablesCache);
@@ -313,7 +313,7 @@
                });
         }
 
-        private static void LoadParametersIndexByCoordenates(Mock<SLProtocol> mock, TablesCache tablesCache)
+        private static void LoadParametersIndexByCoordinates(Mock<SLProtocol> mock, TablesCache tablesCache)
         {
             mock.Setup(p => p.GetParameterIndex(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                .Returns(
