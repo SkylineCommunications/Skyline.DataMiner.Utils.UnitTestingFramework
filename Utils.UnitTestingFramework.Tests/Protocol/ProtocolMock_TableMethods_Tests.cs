@@ -11,7 +11,7 @@
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
-    public class ProtocolTableTests
+    public class ProtocolMock_TableMethods_Tests
     {
         private readonly string path = "protocol.xml";
 
@@ -19,14 +19,13 @@
         public void GetParameterIndexByKeyTest()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             var row1 = new object[] { "one", "one", 3, 4, 5 };
             var row2 = new object[] { "two", "two", 6, 7, 8 };
 
-            mock.ProtocolCache.Tables.AddRow(900, row1);
-            mock.ProtocolCache.Tables.AddRow(900, row2);
+            mock.Object.AddRow(900, row1);
+            mock.Object.AddRow(900, row2);
 
             // Act
             var rowsNumber = mock.Object.GetParameterIndexByKey(900, "one", 3);
@@ -41,8 +40,8 @@
         public void SetParameterIndexByKeyTest()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             var row1 = new object[] { "one", "one", 3, 4, 5 };
             var row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -50,15 +49,18 @@
             var row1ColumnIdx = 2;
             var row2ColumnIdx = 3;
 
-            mock.ProtocolCache.Tables.AddRow(900, row1);
-            mock.ProtocolCache.Tables.AddRow(900, row2);
+            mock.Object.AddRow(900, row1);
+            mock.Object.AddRow(900, row2);
 
             // Act
             mock.Object.SetParameterIndexByKey(900, "one", row1ColumnIdx, "one-changed");
             mock.Object.SetParameterIndexByKey(900, "two", row2ColumnIdx, 99);
 
-            var valueRow1 = ((object[])mock.ProtocolCache.Tables.GetRow(900, "one"))[row1ColumnIdx - 1];
-            var valueRow2 = ((object[])mock.ProtocolCache.Tables.GetRow(900, "two"))[row2ColumnIdx - 1];
+
+            mock.Object.GetParameterIndexByKey(900, "one", row1ColumnIdx);
+
+            var valueRow1 = mock.Object.GetParameterIndexByKey(900, "one", row1ColumnIdx);
+            var valueRow2 = mock.Object.GetParameterIndexByKey(900, "two", row2ColumnIdx);
 
             // Assert
             Assert.AreEqual("one-changed", valueRow1);
@@ -69,8 +71,8 @@
         public void SetParametersIndexByKeyTest()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             var row1 = new object[] { "one", "one", 3, 4, 5 };
             var row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -78,8 +80,8 @@
             var row1ColumnIdx = 2;
             var row2ColumnIdx = 3;
 
-            mock.ProtocolCache.Tables.AddRow(900, row1);
-            mock.ProtocolCache.Tables.AddRow(900, row2);
+            mock.Object.AddRow(900, row1);
+            mock.Object.AddRow(900, row2);
 
             // Act
             mock.Object.SetParametersIndexByKey(
@@ -88,8 +90,8 @@
                 new int[] { row1ColumnIdx, row2ColumnIdx },
                 new object[] { "one-changed", 99 });
 
-            var valueRow1 = ((object[])mock.ProtocolCache.Tables.GetRow(900, "one"))[row1ColumnIdx - 1];
-            var valueRow2 = ((object[])mock.ProtocolCache.Tables.GetRow(900, "two"))[row2ColumnIdx - 1];
+            var valueRow1 = mock.Object.GetParameterIndexByKey(900, "one", row1ColumnIdx);
+            var valueRow2 = mock.Object.GetParameterIndexByKey(900, "two", row2ColumnIdx);
 
             // Assert
             Assert.AreEqual("one-changed", valueRow1);
@@ -100,8 +102,8 @@
         public void AddRowTest_ValidPKRowArray_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -119,8 +121,8 @@
         public void AddRowTest_DuplicatedPKInRowArray_OnlyAddsFirst()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "one", "notTwo", 6, 7, 8 };
@@ -138,8 +140,8 @@
         public void AddRowTest_InexistentTableIdRowArray_DoesNotAdd()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
@@ -154,8 +156,8 @@
         public void AddRowTest_MoreEntriesThanColumnsRowArray_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "one", "two", 3, 4, 5, 6, 7 };
 
@@ -170,8 +172,8 @@
         public void AddRowTest_LessEntriesThanColumnsRowArray_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "one", "two" };
 
@@ -186,8 +188,8 @@
         public void AddRowTest_ValidOnlyPK_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -202,8 +204,8 @@
         public void AddRowTest_DuplicatedPK_OnlyAddsFirst()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -218,8 +220,8 @@
         public void AddRowTest_InexistentTableId_DoesNotAdd()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(800, "skyline1");
@@ -232,8 +234,8 @@
         public void ExistsTest_ValidAddRow_PKExists()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -248,8 +250,8 @@
         public void ExistsTest_ValidAddRow_InvalidTableId()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -264,8 +266,8 @@
         public void ExistsTest_ValidAddRow_PKDoesNotExist()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -280,8 +282,8 @@
         public void AddRowReturnKeyTest_ValidPK_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "notOne", "notTwo", 6, 7, 8 };
@@ -299,8 +301,8 @@
         public void AddRowReturnKeyTest_DuplicatedPK_OnlyAddsFirst()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
@@ -317,8 +319,8 @@
         public void AddRowReturnKeyTest_InexistentTableId_DoesNotAdd()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
@@ -333,8 +335,8 @@
         public void AddRowReturnKeyTest_MoreEntriesThanColumns_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "one", "two", 3, 4, 5, 6, 7 };
 
@@ -349,8 +351,8 @@
         public void AddRowReturnKeyTest_LessEntriesThanColumns_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "one", "two" };
 
@@ -365,8 +367,8 @@
         public void DeleteRowTest_DeleteOnlyFirstIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -404,8 +406,8 @@
         public void DeleteRowTest_DeleteOnlySecondIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -445,8 +447,8 @@
         public void DeleteRowTest_DeleteTwoIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -488,8 +490,8 @@
         public void DeleteRowTest_DeleteThreeIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -566,8 +568,8 @@
         public void DeleteRowTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -584,8 +586,8 @@
         public void DeleteRowTest_InexistentRowIndex_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -602,8 +604,8 @@
         public void DeleteRowPrimaryKeyTest_DeleteOnlyFirstIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -641,8 +643,8 @@
         public void DeleteRowPrimaryKeyTest_DeleteOnlySecondIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -682,8 +684,8 @@
         public void DeleteRowPrimaryKeyTest_DeleteTwoIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -725,8 +727,8 @@
         public void DeleteRowPrimaryKeyTest_DeleteThreeIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -803,8 +805,8 @@
         public void DeleteRowPrimaryKeyTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -821,8 +823,8 @@
         public void DeleteRowPrimaryKeyTest_InexistentRowIndex_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -839,8 +841,8 @@
         public void DeleteRowPKArrayTest_DeleteTwoPK_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -881,8 +883,8 @@
         public void DeleteRowPKArrayTest_DeleteInexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -913,8 +915,8 @@
         public void DeleteRowPKArrayTest_EmptyArray_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -945,8 +947,8 @@
         public void ClearAllKeysTest_ValidTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -966,8 +968,8 @@
         public void ClearAllKeysTest_InexistentTableId_ReturnsNegativeOne()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -987,8 +989,8 @@
         public void ClearAllKeysTest_EmptyTable_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsLeft = mock.Object.ClearAllKeys(900);
@@ -1001,8 +1003,8 @@
         public void GetKeyPositionTest_ValidOnlyPK_EqualKeyPosition()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -1031,8 +1033,8 @@
         public void GetKeyPositionTest_InvalidTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -1047,8 +1049,8 @@
         public void GetKeyPositionTest_InexistentKey_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
@@ -1063,8 +1065,8 @@
         public void SetRowWithIndexTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1082,8 +1084,8 @@
         public void SetRowWithIndexTest_InexistentRowIndex_ReturnsArrayWithZeros()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1106,8 +1108,8 @@
         public void SetRowWithIndexTest_LessEntriesThanColumns_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 10 };
@@ -1134,8 +1136,8 @@
         public void SetRowWithIndexTest_TryChangePK_DoesNotChangePK()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline1", 10 };
@@ -1162,8 +1164,8 @@
         public void SetRowWithPKTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1181,8 +1183,8 @@
         public void SetRowWithPKTest_InexistentRowIndex_ReturnsArrayWithZeros()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1204,8 +1206,8 @@
         public void SetRowWithPKTest_LessEntriesThanColumns_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 10 };
@@ -1231,8 +1233,8 @@
         public void GetRowWithIndexTest_InexistentRowIndex_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1255,8 +1257,8 @@
         public void GetRowWithIndexTest_InexistentTableId_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1275,8 +1277,8 @@
         public void GetRowWithIndexTest_ValidTaleIdAndIndex_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
@@ -1299,8 +1301,8 @@
         public void GetRowWithPKTest_InexistentPK_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1323,8 +1325,8 @@
         public void GetRowWithPKTest_InexistentTableId_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1343,8 +1345,8 @@
         public void GetRowWithPKTest_ValidTaleIdAndIndex_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
@@ -1367,8 +1369,8 @@
         public void FillArrayPartialTest_FillArrayBeforeAddRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1432,8 +1434,8 @@
         public void FillArrayPartialTest_FillArrayAfterAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1499,8 +1501,8 @@
         public void FillArrayPartialTest_FillArrayAfterAddRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1564,8 +1566,8 @@
         public void FillArrayPartialTest_FillArrayAfterAddRowChangesRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1631,8 +1633,8 @@
         public void FillArrayFullTest_FillArrayBeforeAddRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1684,8 +1686,8 @@
         public void FillArrayListColumnsTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
 
@@ -1746,8 +1748,8 @@
         public void FillArrayListColumnsTest_FillArrayAfterTwoAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
             object[] row2 = new object[] { "two", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1803,8 +1805,8 @@
         public void FillArrayListColumnsTest_FillArrayAfterTwoAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1846,8 +1848,8 @@
         public void FillArrayListColumnsTest_FillArrayAfterAddRowWithTimestamp_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             DateTime timestamps = new DateTime(2022, 7, 14);
 
@@ -1910,8 +1912,8 @@
         public void FillArrayColumnsArrayTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
 
@@ -1965,8 +1967,8 @@
         public void FillArrayNoDeleteListColumnsTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
 
@@ -2034,8 +2036,8 @@
         public void FillArrayNoDeleteListColumnsTest_FillArrayAfterAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -2105,8 +2107,8 @@
         public void FillArrayNoDeleteArrayColumnsTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
 
@@ -2167,8 +2169,8 @@
         public void FillArrayNoDeleteArrayColumnsTest_FillArrayAfterAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -2231,8 +2233,8 @@
         public void FillArrayWithColumnColumnsTest_FillArrayWithSameUniqueValue_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] pk = new object[] { "skyline1", "skyline2" };
 
@@ -2264,8 +2266,8 @@
         public void FillArrayWithColumnColumnsTest_FillArraysWithDifferentLengths_Exception()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
 
@@ -2283,8 +2285,8 @@
         public void FillArrayWithColumnColumnsTest_FillArray_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] pk = new object[] { "skyline1", "skyline2" };
 
@@ -2316,8 +2318,8 @@
         public void FillArrayWithColumnColumnsTest_FillArray_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
 

@@ -6,35 +6,8 @@
     /// <seealso cref="IProtocolCache" />
     public class ProtocolCache : IProtocolCache
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProtocolCache"/> class.
-        /// </summary>
-        public ProtocolCache()
-        {
-            Parameters = new ParametersCache();
-            Tables = new TablesCache();
-        }
+        public ParametersCache Parameters { get; } = new ParametersCache();
 
-        /// <summary>
-        /// Gets the cache of the standalone parameters.
-        /// </summary>
-        /// <value>
-        /// The cache of the standalone parameters.
-        /// </value>
-        public ParametersCache Parameters
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the cache of the tables.
-        /// </summary>
-        /// <value>
-        /// The cache of the tables.
-        /// </value>
-        public TablesCache Tables
-        {
-            get;
-        }
+        public TablesCache Tables { get; } = new TablesCache();
     }
 }

@@ -10,7 +10,6 @@
     using Skyline.DataMiner.Scripting;
 
     using UnitTestingFramework.Protocol.Data;
-    using UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -22,9 +21,7 @@
         public void AddRowTest_ValidPKRowArray_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "notOne", "notTwo", 6, 7, 8 };
@@ -42,9 +39,7 @@
         public void AddRowTest_DuplicatedPKInRowArray_OnlyAddsFirst()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "one", "notTwo", 6, 7, 8 };
@@ -62,9 +57,8 @@
         public void AddRowTest_InexistentTableIdRowArray_DoesNotAdd()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
@@ -79,9 +73,8 @@
         public void AddRowTest_MoreEntriesThanColumnsRowArray_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two", 3, 4, 5, 6, 7 };
 
@@ -96,9 +89,8 @@
         public void AddRowTest_LessEntriesThanColumnsRowArray_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two" };
 
@@ -113,9 +105,8 @@
         public void AddRowTest_ValidOnlyPK_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -131,9 +122,8 @@
         public void AddRowTest_DuplicatedPK_OnlyAddsFirst()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -149,9 +139,8 @@
         public void AddRowTest_InexistentTableId_DoesNotAdd()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -165,9 +154,8 @@
         public void ExistsTest_ValidAddRow_PKExists()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -183,9 +171,8 @@
         public void ExistsTest_ValidAddRow_InvalidTableId()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -201,9 +188,8 @@
         public void ExistsTest_ValidAddRow_PKDoesNotExist()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -219,9 +205,8 @@
         public void AddRowReturnKeyTest_ValidPK_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "notOne", "notTwo", 6, 7, 8 };
@@ -239,9 +224,8 @@
         public void AddRowReturnKeyTest_DuplicatedPK_OnlyAddsFirst()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
@@ -258,9 +242,9 @@
         public void AddRowReturnKeyTest_InexistentTableId_DoesNotAdd()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
@@ -275,9 +259,9 @@
         public void AddRowReturnKeyTest_MoreEntriesThanColumns_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two", 3, 4, 5, 6, 7 };
 
@@ -292,9 +276,9 @@
         public void AddRowReturnKeyTest_LessEntriesThanColumns_CorrectAdds()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two" };
 
@@ -309,9 +293,9 @@
         public void DeleteRowTest_DeleteOnlyFirstIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -349,9 +333,9 @@
         public void DeleteRowTest_DeleteOnlySecondIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -391,9 +375,9 @@
         public void DeleteRowTest_DeleteTwoIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -435,9 +419,9 @@
         public void DeleteRowTest_DeleteThreeIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -514,9 +498,9 @@
         public void DeleteRowTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -533,9 +517,9 @@
         public void DeleteRowTest_InexistentRowIndex_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -552,9 +536,9 @@
         public void DeleteRowPrimaryKeyTest_DeleteOnlyFirstIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -592,9 +576,9 @@
         public void DeleteRowPrimaryKeyTest_DeleteOnlySecondIndex_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -634,9 +618,9 @@
         public void DeleteRowPrimaryKeyTest_DeleteTwoIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -678,9 +662,9 @@
         public void DeleteRowPrimaryKeyTest_DeleteThreeIndexes_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -757,9 +741,9 @@
         public void DeleteRowPrimaryKeyTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -776,9 +760,9 @@
         public void DeleteRowPrimaryKeyTest_InexistentRowIndex_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -795,9 +779,9 @@
         public void DeleteRowPKArrayTest_DeleteTwoPK_EqualRowNumber()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -837,9 +821,9 @@
         public void DeleteRowPKArrayTest_DeleteInexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -869,9 +853,9 @@
         public void DeleteRowPKArrayTest_EmptyArray_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -901,9 +885,9 @@
         public void ClearAllKeysTest_ValidTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -923,9 +907,9 @@
         public void ClearAllKeysTest_InexistentTableId_ReturnsNegativeOne()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -945,9 +929,9 @@
         public void ClearAllKeysTest_EmptyTable_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -961,9 +945,9 @@
         public void GetKeyPositionTest_ValidOnlyPK_EqualKeyPosition()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -993,9 +977,9 @@
         public void GetKeyPositionTest_InvalidTableId_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -1011,9 +995,9 @@
         public void GetKeyPositionTest_InexistentKey_ReturnsZero()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -1029,9 +1013,9 @@
         public void SetRowWithIndexTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1049,9 +1033,9 @@
         public void SetRowWithIndexTest_InexistentRowIndex_ReturnsArrayWithZeros()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1073,9 +1057,9 @@
         public void SetRowWithIndexTest_LessEntriesThanColumns_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 10 };
@@ -1100,9 +1084,9 @@
         public void SetRowWithIndexTest_TryChangePK_DoesNotChangePK()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline1", 10 };
@@ -1128,9 +1112,9 @@
         public void SetRowWithPKTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1148,9 +1132,9 @@
         public void SetRowWithPKTest_InexistentRowIndex_ReturnsArrayWithZeros()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1172,9 +1156,9 @@
         public void SetRowWithPKTest_LessEntriesThanColumns_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 10 };
@@ -1200,9 +1184,9 @@
         public void GetRowWithIndexTest_InexistentRowIndex_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1225,9 +1209,9 @@
         public void GetRowWithIndexTest_InexistentTableId_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1246,9 +1230,9 @@
         public void GetRowWithIndexTest_ValidTaleIdAndIndex_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
@@ -1271,9 +1255,9 @@
         public void GetRowWithPKTest_InexistentPK_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1296,9 +1280,9 @@
         public void GetRowWithPKTest_InexistentTableId_IsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
@@ -1317,9 +1301,9 @@
         public void GetRowWithPKTest_ValidTaleIdAndIndex_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
@@ -1342,9 +1326,9 @@
         public void FillArrayPartialTest_FillArrayBeforeAddRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1409,9 +1393,9 @@
         public void FillArrayPartialTest_FillArrayAfterAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1479,9 +1463,9 @@
         public void FillArrayPartialTest_FillArrayAfterAddRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1545,9 +1529,9 @@
         public void FillArrayPartialTest_FillArrayAfterAddRowChangesRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1613,9 +1597,9 @@
         public void FillArrayFullTest_FillArrayBeforeAddRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1667,9 +1651,9 @@
         public void FillArrayListColumnsTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1731,9 +1715,9 @@
         public void FillArrayListColumnsTest_FillArrayAfterTwoAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1790,9 +1774,9 @@
         public void FillArrayListColumnsTest_FillArrayAfterTwoAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1835,9 +1819,9 @@
         public void FillArrayListColumnsTest_FillArrayAfterAddRowWithTimestamp_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             DateTime timestamps = new DateTime(2022, 7, 14);
@@ -1901,9 +1885,9 @@
         public void FillArrayColumnsArrayTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1958,9 +1942,9 @@
         public void FillArrayNoDeleteListColumnsTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -2029,9 +2013,9 @@
         public void FillArrayNoDeleteListColumnsTest_FillArrayAfterAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -2102,9 +2086,9 @@
         public void FillArrayNoDeleteArrayColumnsTest_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -2166,9 +2150,9 @@
         public void FillArrayNoDeleteArrayColumnsTest_FillArrayAfterAddRow_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -2232,9 +2216,9 @@
         public void FillArrayWithColumnColumnsTest_FillArrayWithSameUniqueValue_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] pk = new object[] { "skyline1", "skyline2" };
@@ -2267,9 +2251,9 @@
         public void FillArrayWithColumnColumnsTest_FillArraysWithDifferentLengths_Exception()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
@@ -2288,9 +2272,9 @@
         public void FillArrayWithColumnColumnsTest_FillArray_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] pk = new object[] { "skyline1", "skyline2" };
@@ -2323,9 +2307,9 @@
         public void FillArrayWithColumnColumnsTest_FillArray_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
@@ -2362,9 +2346,9 @@
         public void FillArrayWithColumnTest_NotConsecutiveRows_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] pk = new object[] { "skyline1", "skyline2" };
@@ -2397,9 +2381,9 @@
         public void FillArrayWithColumnTest_InexistentColumnPid_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] pk = new object[] { "skyline1", "skyline2" };
@@ -2434,9 +2418,9 @@
         public void TableModelTest_GetColumn_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableId = 900;
@@ -2459,9 +2443,9 @@
         public void FillArrayWithColumnsColumnsTest_FillArraysWithArgumentsDifferentLengths_Exception()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2485,9 +2469,9 @@
         public void FillArrayWithColumnsColumnsTest_FillArraysWithColumnsDifferentLengths_Exception()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2512,9 +2496,9 @@
         public void FillArrayWithColumnsColumnsTest_FillArray_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2560,9 +2544,9 @@
         public void FillArrayWithColumnsColumnsTest_FillArray_ReplaceRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2614,9 +2598,9 @@
         public void FillArrayWithColumnsTest_NotConsecutiveRows_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2662,9 +2646,9 @@
         public void FillArrayWithColumnsTest_InexistentColumnPid_EmptyColumn()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2713,9 +2697,9 @@
         public void TableModelTest_RowCount_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2736,9 +2720,9 @@
         public void TableModelTest_RowCount_GetCorrectCount()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2760,9 +2744,9 @@
         public void TableModelTest_RowCount_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int expected = 0;
@@ -2779,9 +2763,9 @@
         public void TableModelTest_RowCount_AfterDeletedRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2807,9 +2791,9 @@
         public void TableModelTest_GetKeys_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             string[] expected = new string[0];
@@ -2826,9 +2810,9 @@
         public void TableModelTest_GetKeys_GetCorrectKeys()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2850,9 +2834,9 @@
         public void TableModelTest_GetKeys_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             string[] expected = new string[] { };
@@ -2869,9 +2853,9 @@
         public void TableModelTest_GetParameterIndex_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2894,9 +2878,9 @@
         public void TableModelTest_GetParameterIndex_Invalid_X_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2920,9 +2904,9 @@
         public void TableModelTest_GetParameterIndex_Invalid_Y_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2946,9 +2930,9 @@
         public void TableModelTest_GetParameterIndex_GetCorrectCell()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2970,9 +2954,9 @@
         public void TableModelTest_GetParameterIndex_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object expected = null;
@@ -2989,9 +2973,9 @@
         public void TableModelTest_SetParameterIndex_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3013,9 +2997,9 @@
         public void TableModelTest_SetParameterIndex_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             bool expected = false;
@@ -3032,9 +3016,9 @@
         public void TableModelTest_SetParameterIndex_Invalid_X_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3058,9 +3042,9 @@
         public void TableModelTest_SetParameterIndex_Invalid_Y_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3084,9 +3068,9 @@
         public void TableModelTest_SetParameterIndex_SetCorrectValue()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3112,9 +3096,9 @@
         public void TableModelTest_SetParametersIndex_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] ids = new int[] { 901 };
@@ -3135,9 +3119,9 @@
         public void TableModelTest_SetParametersIndex_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] ids = new int[] { 900 };
@@ -3159,9 +3143,9 @@
         public void TableModelTest_SetParametersIndex_Invalid_X_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3188,9 +3172,9 @@
         public void TableModelTest_SetParametersIndex_Invalid_Y_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3217,9 +3201,9 @@
         public void TableModelTest_SetParametersIndex_DifferentSizeArrays()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3246,9 +3230,9 @@
         public void TableModelTest_SetParametersIndex_SetCorrectValues()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3281,9 +3265,9 @@
         public void TableModelTest_GetParameterIndexByKey_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3306,9 +3290,9 @@
         public void TableModelTest_GetParameterIndexByKey_Invalid_PrimaryKey()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3332,9 +3316,9 @@
         public void TableModelTest_GetParameterIndexByKey_Invalid_Y_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3358,9 +3342,9 @@
         public void TableModelTest_GetParameterIndexByKey_GetCorrectCell()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3382,9 +3366,9 @@
         public void TableModelTest_GetParameterIndexByKey_UninitializedCells()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[3];
@@ -3407,9 +3391,9 @@
         public void TableModelTest_SetParameterIndexByKey_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3431,9 +3415,9 @@
         public void TableModelTest_SetParameterIndexByKey_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             bool expected = false;
@@ -3450,9 +3434,9 @@
         public void TableModelTest_SetParameterIndexByKey_Invalid_PrimaryKey()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3476,9 +3460,9 @@
         public void TableModelTest_SetParameterIndexByKey_Invalid_Y_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3502,9 +3486,9 @@
         public void TableModelTest_SetParameterIndexByKey_SetCorrectValue()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3530,9 +3514,9 @@
         public void TableModelTest_SetParametersIndexByKey_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] ids = new int[] { 901 };
@@ -3553,9 +3537,9 @@
         public void TableModelTest_SetParametersIndexByKey_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] ids = new int[] { 900 };
@@ -3577,9 +3561,9 @@
         public void TableModelTest_SetParametersIndexByKey_Invalid_PrimaryKey()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3606,9 +3590,9 @@
         public void TableModelTest_SetParametersIndexByKey_Invalid_Y_Coordinate()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3635,9 +3619,9 @@
         public void TableModelTest_SetParametersIndexByKey_DifferentSizeArrays()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3664,9 +3648,9 @@
         public void TableModelTest_SetParametersIndexByKey_SetCorrectValues()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3699,9 +3683,9 @@
         public void TableModelTest_AddRowReturnKey_InexistentTableID()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -3716,9 +3700,9 @@
         public void TableModelTest_AddRowReturnKey_ToEmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             string expected = "1";
@@ -3738,9 +3722,9 @@
         public void TableModelTest_AddRowReturnKey_ToNormalTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "1", null, null, null, null };
@@ -3763,9 +3747,9 @@
         public void TableModelTest_AddRowReturnKey_InconsistentKeys()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+
+
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "1", null, null, null, null };

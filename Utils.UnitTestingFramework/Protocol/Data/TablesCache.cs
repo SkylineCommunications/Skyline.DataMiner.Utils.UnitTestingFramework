@@ -65,7 +65,7 @@
         /// <param name="row">The row data.</param>
         /// <returns>The 1-based row number or 0 if the cache does not contain a table model for the specified table ID.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="row"/> is <see langword="null"/>.</exception>
-        public int AddRow(int tablePid, object[] row)
+        public int AddRow(int tablePid, object[] row, DateTime? timestamp = null)
         {
             if (row == null)
             {
@@ -87,7 +87,7 @@
                 return tableModel.KeyToRowIndex[primaryKey] + 1;
             }
 
-            tableModel.SetRow(row);
+            tableModel.SetRow(row, timestamp);
 
             int oneBasedRowNumber = tableModel.KeyToRowIndex[primaryKey] + 1;
 
@@ -1054,11 +1054,6 @@
 
             pids = columnsPids;
             names = columnsNames;
-        }
-
-        internal void LoadSetups(Mock<SLProtocol> mock)
-        {
-            ProtocolSetupsLoader.LoadSetups(mock, this);
         }
 
         /// <summary>

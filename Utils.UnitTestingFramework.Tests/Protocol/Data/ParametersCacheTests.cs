@@ -464,8 +464,7 @@
             // Arrange
             var cache = new ParametersCacheTestInstance();
 
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             int pid = 101;
 
@@ -485,8 +484,7 @@
             int pid = 100;
             cache.LoadParameter(pid, null);
 
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             // Act
             bool actual = cache.IsEmpty(pid, mock);
@@ -503,8 +501,7 @@
             var cache = new ParametersCacheTestInstance();
             cache.LoadParameter(100, 20);
 
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             // Act
             bool actual = cache.IsEmpty(100, mock);

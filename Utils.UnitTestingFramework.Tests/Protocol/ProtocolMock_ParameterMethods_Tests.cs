@@ -10,7 +10,7 @@
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
-    public class ProtocolSingleParameterTests
+    public class ProtocolMock_ParameterMethods_Tests
     {
         private readonly string path = "protocol.xml";
 
@@ -18,8 +18,7 @@
         public void SLProtocolMockTest_ValidInput_GetAndSetParameter()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             // Act
             mock.Object.SetParameter(1000, 20);
@@ -33,8 +32,8 @@
         public void SLProtocolMockTest_InvalidTypeStringPidGet_ArgumentException()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             string[] parameterIds = { "100", "200", "300" };
 
             // Act
@@ -51,8 +50,8 @@
         public void SLProtocolMockTest_InvalidTypeObjectPidGet_ArgumentException()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             object[] parameterIds = { "100", "200", "300" };
 
             // Act
@@ -69,8 +68,8 @@
         public void SLProtocolMockTest_InvalidStringGet_GetAndSetParameter()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var outputSet = mock.Object.SetParameter(1000, 20);
@@ -85,8 +84,8 @@
         public void SLProtocolMockTest_DuplicatedSet_SetAndSetParameterValidGet()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var outputSet1 = mock.Object.SetParameter(1000, 20);
@@ -103,8 +102,8 @@
         public void SLProtocolMockTest_InvalidSetParameters_ArrayWithFailConstant()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int[] parameterIdsArray = { 1000, 1001, 1002, 1003, 1004 };
             object[] valuesArray = { 10, "15", 0x0A, "parameterValue", 11 };
@@ -134,8 +133,8 @@
         public void SLProtocolMockTest_ValidInput_GetParameterAndSetParameters()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             int[] parameterIdsArray = { 1000, 1001, 1002 };
             object[] valuesArray = { 10, "15", 0x0A };
 
@@ -158,8 +157,8 @@
         public void SLProtocolMockTest_ValidInput_GetParametersAndSetParameters()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             uint[] uintParameterIds = { 1000, 1001, 1002 };
             int[] parameterIdsArray = { 1000, 1001, 1002 };
             object[] valuesArray = { 11, "16", 0x0B };
@@ -181,8 +180,8 @@
         public void SLProtocolMockTest_InexistentPidGetParameters_GetIsNull()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             int[] parameterIds = { 1, 2, 3 };
             object[] values = { 10, 20, 30 };
             uint[] uintParameterIds = { 4, 5, 6 };
@@ -201,8 +200,8 @@
         public void SLProtocolMockTest_ValidInput_GetParametersAndSetParametersWithTimestamp()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             uint[] uintParameterIds = { 1000, 1001, 1002 };
             int[] parameterIdsArray = { 1000, 1001, 1002 };
             object[] valuesArray = { 11, "16", 0x0B };
@@ -225,8 +224,8 @@
         public void SLProtocolMockTest_DifferentInputLengths_GetParametersAndSetParametersWithTimestamp()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             int[] parameterIds = { 4, 5, 6 };
             object[] values = { 40, 50 };
             uint[] uintParameterIds = { 4, 5, 6 };
@@ -247,8 +246,8 @@
         public void SLProtocolMockTest_InvalidGetInput_ThrowsArgumentException()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             int[] parameterIds = { 1, 2, 3 };
             object[] values = { 10, 20, 30 };
             int[] intParameterIds = { 1, 2, 3 };
@@ -265,8 +264,8 @@
         public void SLProtocolMockTest_ValidInput_GetParameterByNameNumeric()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var value = mock.Object.GetParameterByName("NumericParameter");
@@ -279,8 +278,8 @@
         public void SLProtocolMockTest_ValidInput_GetParameterByNameString()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var value = mock.Object.GetParameterByName("StringParameterFixed");
@@ -293,8 +292,8 @@
         public void SetParameterByNameTest_ValidInput_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var setOutput = mock.Object.SetParameterByName("NumericParameter", 111);
@@ -309,8 +308,8 @@
         public void SetParameterByNameTest_WrongParameterName_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var setOutput = mock.Object.SetParameterByName("NumericParameter2", 111);
@@ -325,8 +324,8 @@
         public void SetParametersByNameTest_ValidInput_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             string[] names = { "NumericParameter", "StringParameter" };
             object[] values = { 222, "333" };
@@ -347,8 +346,8 @@
         public void SetParametersByNameTest_FixedValueParameter_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             string[] names = { "NumericParameterFixed", "StringParameter" };
             object[] values = { 222, "333" };
