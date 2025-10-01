@@ -84,55 +84,55 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_AddRow_IsEqual()
+        [DataRow(null)]
+        [DataRow("900")]
+        [DataRow(new[] { 900 })]
+        public void AddRow_InvalidSecondArgument_ThrowsException(object notifyProtocolSecondArgument)
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            int tableID = 900;
-            string primaryKey1 = "Row 1 PK";
-            string primaryKey2 = "Row 2 PK";
-            string primaryKey3 = "Row 3 PK";
-            string primaryKey4 = "Row 4 PK";
-
-            // Act
-            var outputAddRow1 = mock.Object.NotifyProtocol(149, tableID, primaryKey1); // AddRow
-            var outputAddRow2 = mock.Object.NotifyProtocol(149, tableID, primaryKey2); // AddRow
-            var outputAddRow3 = mock.Object.NotifyProtocol(149, tableID, primaryKey3); // AddRow
-            var outputAddRow4 = mock.Object.NotifyProtocol(149, tableID, primaryKey4); // AddRow
-
-            // Assert
-            Assert.AreEqual(1, outputAddRow1);
-            Assert.AreEqual(2, outputAddRow2);
-            Assert.AreEqual(3, outputAddRow3);
-            Assert.AreEqual(4, outputAddRow4);
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => mock.Object.NotifyProtocol((int)NotifyType.AddRow, notifyProtocolSecondArgument, "Row 1 PK"));
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_AddRepeatedRow_IsEqual()
+        [DataRow(null)]
+        [DataRow(1)]
+        public void AddRow_InvalidThirdArgument_ThrowsException(object notifyProtocolThirdArgument)
         {
             // Arrange
+            var mock = new SLProtocolMock(path);
 
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => mock.Object.NotifyProtocol((int)NotifyType.AddRow, 900, notifyProtocolThirdArgument));
+        }
+
+        [TestMethod]
+        [DataRow(new[] {"PK1", "PK2", "PK3", "PK4"}, new[] {1, 2, 3, 4})]
+        [DataRow(new[] {"PK1", "PK1", "PK3", "PK4"}, new[] {1, 1, 2, 3})]
+        [DataRow(new[] {"PK1", "PK2", "PK3", "PK1"}, new[] {1, 2, 3, 1})]
+        [DataRow(new object[] { new[] { "PK1" }, new[] { "PK2" }, new[] { "PK3" }, new[] { "PK4" } }, new[] { 1, 2, 3, 4 })]
+        [DataRow(new object[] { new[] { "PK1" }, new[] { "PK1" }, new[] { "PK3" }, new[] { "PK4" } }, new[] { 1, 1, 2, 3 })]
+        [DataRow(new object[] { new[] { "PK1" }, new[] { "PK2" }, new[] { "PK3" }, new[] { "PK1" } }, new[] { 1, 2, 3, 1 })]
+        public void AddRow_IsEqual(object[] notifyProtocolThirdArguments, int[] expectedRowIndexes)
+        {
+            // Arrange
             var mock = new SLProtocolMock(path);
 
             int tableID = 900;
-            string primaryKey1 = "Row 1 PK";
-            string primaryKey2 = "Row 2 PK";
-            string primaryKey3 = "Row 3 PK";
-            string primaryKey4 = "Row 1 PK";
 
             // Act
-            var outputAddRow1 = mock.Object.NotifyProtocol(149, tableID, primaryKey1); // AddRow
-            var outputAddRow2 = mock.Object.NotifyProtocol(149, tableID, primaryKey2); // AddRow
-            var outputAddRow3 = mock.Object.NotifyProtocol(149, tableID, primaryKey3); // AddRow
-            var outputAddRow4 = mock.Object.NotifyProtocol(149, tableID, primaryKey4); // AddRow
+            var outputAddRow1 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[0]);
+            var outputAddRow2 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[1]);
+            var outputAddRow3 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[2]);
+            var outputAddRow4 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[3]);
 
             // Assert
-            Assert.AreEqual(1, outputAddRow1);
-            Assert.AreEqual(2, outputAddRow2);
-            Assert.AreEqual(3, outputAddRow3);
-            Assert.AreEqual(1, outputAddRow4);
+            Assert.AreEqual(expectedRowIndexes[0], outputAddRow1);
+            Assert.AreEqual(expectedRowIndexes[1], outputAddRow2);
+            Assert.AreEqual(expectedRowIndexes[2], outputAddRow3);
+            Assert.AreEqual(expectedRowIndexes[3], outputAddRow4);
         }
 
         [TestMethod]
@@ -507,7 +507,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetTableColumns_IsEqual()
+        public void GetTableColumns_IsEqual()
         {
             // Arrange
 
@@ -554,7 +554,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetTableColumnsInexistentIdx_IsEqual()
+        public void GetTableColumns_InexistentIdx_IsEqual()
         {
             // Arrange
 

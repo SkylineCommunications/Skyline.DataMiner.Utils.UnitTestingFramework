@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
@@ -20,10 +21,10 @@
                 {
                     { NotifyType.DeleteRow, DeleteRow },
                     { NotifyType.GetParameterIndex, GetParameterIndex },
-
                     { NotifyType.AddRow, AddRow },
-                    { NotifyType.NT_FILL_ARRAY_WITH_COLUMN, FillArrayWithColumn },
+                    { NotifyType.NT_GET_TABLE_COLUMNS, GetTableColumns },
 
+                    { NotifyType.NT_FILL_ARRAY_WITH_COLUMN, FillArrayWithColumn },
                     { NotifyType.GetParameter, (value1, value2) => protocolCache.Parameters.GetParameter(Convert.ToInt32(value1)) },
                     { NotifyType.GetParameterByName, (value1, value2) => protocolCache.Parameters.GetParameterByName(Convert.ToString(value1)) },
                     { NotifyType.SetParameter, (value1, value2) => protocolCache.Parameters.SetParameter(Convert.ToInt32(((uint[])value1)[2]), value2) },
@@ -35,7 +36,6 @@
                     { NotifyType.NT_SET_ROW, (value1, value2) => protocolCache.Tables.SetRow(Convert.ToInt32(((object[])value1)[0]), Convert.ToString(((object[])value1)[1]), value2) },
                     { NotifyType.FillArray, (value1, value2) => protocolCache.Tables.FillArray(Convert.ToInt32(value1), (object[])value2) },
                     { NotifyType.FillArrayNoDelete, (value1, value2) => protocolCache.Tables.FillArrayNoDelete(Convert.ToInt32(value1), (object[])value2) },
-                    { NotifyType.NT_GET_TABLE_COLUMNS, (value1, value2) => protocolCache.Tables.GetTableColumns(Convert.ToInt32(value1), (uint[])value2) },
                     { NotifyType.ArrayRowCount, (value1, value2) => protocolCache.Tables.RowCount(Convert.ToInt32(value1)) },
                     { NotifyType.NT_GET_KEYS_SLPROTOCOL, (value1, value2) => protocolCache.Tables.RowCount(Convert.ToInt32(value1)) },
                     { NotifyType.PutParameterIndex, (value1, value2) => protocolCache.Tables.SetParameterIndex(Convert.ToInt32(((object[])value1)[0]), Convert.ToInt32(((object[])value1)[1]), Convert.ToInt32(((object[])value1)[2]), Convert.ToString(value2)) },
@@ -54,6 +54,21 @@
                 {
                     throw new ArgumentException($"Notify type '{castedNotifyType} ({notifyType})' is unavailable.");
                 }
+            }
+
+            internal object GetTableColumns(object value1, object value2)
+            {
+                if (!(value1 is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.GetTableColumns expects first argument to be of type int, but got {value1?.GetType()} instead.");
+                }
+
+                if (!(value2 is uint[] columnIndices))
+                {
+                    throw new ArgumentException($"NotifyType.GetTableColumns expects second argument to be of type uint[], but got {value2?.GetType()} instead.");
+                }
+
+                return protocolCache.Tables.GetTableColumns(tablePid, columnIndices);
             }
 
             internal object AddRow(object value1, object value2)
@@ -124,6 +139,12 @@
 
                 if (columnInfo.Length == 2 && values.Length == 2)
                 {
+                    if (!(columnInfo[0] is int tablePid))
+                    {
+                        throw new ArgumentException($"");
+                    }
+
+
                     return protocolCache.Tables.FillArrayWithColumn(Convert.ToInt32(columnInfo[0]), Convert.ToInt32(columnInfo[1]), (object[])values[0], (object[])values[1]);
                 }
                 else if (columnInfo.Length == values.Length)
