@@ -477,32 +477,6 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_InexistentColumnPid_EmptyTable()
-        {
-            // Arrange
-
-            var mock = new SLProtocolMock(path);
-
-            object[] pk = new object[] { "skyline1", "skyline2" };
-            object[] values = new object[] { "3rdColValue1", "3rdColValue2" };
-
-            // Act
-            mock.Object.ClearAllKeys(900);
-
-            mock.Object.FillArrayWithColumn(900, 906, pk, values);
-
-            mock.Object.GetRow(900, "skyline1");
-            mock.Object.GetRow(900, "skyline2");
-
-            // Assert
-            mock.Assert().Table(900).Column(901).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(902).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(903).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(904).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(905).Length.Should().Be(0);
-        }
-
-        [TestMethod]
         public void TablesMockAssertTest_NotConsecutiveRows_GetCorrectRows()
         {
             // Arrange

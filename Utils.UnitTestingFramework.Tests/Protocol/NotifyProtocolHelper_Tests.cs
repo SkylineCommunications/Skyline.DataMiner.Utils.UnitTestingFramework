@@ -6,8 +6,6 @@
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -450,10 +448,9 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_FillArrayWithColumn_IsEqual()
+        public void FillArrayWithColumn_IsEqual()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             int tableID = 900;
@@ -479,8 +476,8 @@
             var values2 = new object[] { primaryKeys, columnValues2 };
 
             // Act
-            mock.Object.NotifyProtocol(220, columnInfo1, values1); // FillArrayWithColumn
-            mock.Object.NotifyProtocol(220, columnInfo2, values2); // FillArrayWithColumn
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, columnInfo1, values1);
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, columnInfo2, values2);
             var outputGetRow1 = (object[])mock.Object.NotifyProtocol(215, rowDetails1, null); // GetRow
             var outputGetRow2 = (object[])mock.Object.NotifyProtocol(215, rowDetails2, null); // GetRow
 
@@ -674,6 +671,70 @@
 
             // Assert
             Assert.AreEqual(expectedCellValue, cellValue);
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumn_SingleColumn_UseProtocolLeaveAndClear()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            string primaryKey1 = "Row 1 PK";
+
+            mock.Object.AddRow(tableID, new[] { primaryKey1, "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+
+            object[] info = new object[] { tableID, 902, new object[] { true } }; // Column 902 (2nd column), with protocol_leave and protocol_clear
+            object[] primaryKeys = new object[] { primaryKey1, "Row 2 PK", "Row 3 PK" };
+            object[] columnValues = new object[] { double.PositiveInfinity, "new value 2.1", Constants.Constants.PROTOCOL_CLEAR };
+
+            // Act
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, info, new object[] { primaryKeys, columnValues });
+
+            // Assert
+            var firstColumn = mock.Assert().Table(tableID).Column(902);
+
+            Assert.AreEqual("value 1.1", firstColumn[0]); // Not changed because of protocol_leave
+            Assert.AreEqual("new value 2.1", firstColumn[1]); // Changed
+            Assert.AreEqual(null, firstColumn[2]); // Cleared because of protocol_clear
+        }
+
+
+        [TestMethod]
+        public void FillArrayWithColumn_MultipleColumns_UseProtocolLeaveAndClear()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            mock.Object.AddRow(tableID, new[] { "Row 1 PK", "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+
+            object[] info = new object[] { tableID, 902, 904, new object[] { true } }; // Column 902 & 903, with protocol_leave and protocol_clear
+            object[] primaryKeys = new object[] { "Row 1 PK", "Row 2 PK", "Row 3 PK" };
+            object[] column1Values = new object[] { double.PositiveInfinity, "new value 2.1",  Constants.Constants.PROTOCOL_CLEAR };
+            object[] column2Values = new object[] { double.PositiveInfinity, "new value 2.3", Constants.Constants.PROTOCOL_CLEAR };
+
+            // Act
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, info, new object[] { primaryKeys, column1Values, column2Values });
+
+            // Assert
+            var firstColumn = mock.Assert().Table(tableID).Column(902);
+            var secondColumn = mock.Assert().Table(tableID).Column(904);
+
+            Assert.AreEqual("value 1.1", firstColumn[0]); // Not changed because of protocol_leave
+            Assert.AreEqual("new value 2.1", firstColumn[1]); // Changed
+            Assert.AreEqual(null, firstColumn[2]); // Cleared because of protocol_clear
+
+
+            Assert.AreEqual("value 1.3", secondColumn[0]); // Not changed because of protocol_leave
+            Assert.AreEqual("new value 2.3", secondColumn[1]); // Changed
+            Assert.AreEqual(null, secondColumn[2]); // Cleared because of protocol_clear
         }
     }
 }

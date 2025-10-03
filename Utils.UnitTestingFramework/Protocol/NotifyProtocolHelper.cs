@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
@@ -23,8 +24,8 @@
                     { NotifyType.GetParameterIndex, GetParameterIndex },
                     { NotifyType.AddRow, AddRow },
                     { NotifyType.NT_GET_TABLE_COLUMNS, GetTableColumns },
-
                     { NotifyType.NT_FILL_ARRAY_WITH_COLUMN, FillArrayWithColumn },
+
                     { NotifyType.GetParameter, (value1, value2) => protocolCache.Parameters.GetParameter(Convert.ToInt32(value1)) },
                     { NotifyType.GetParameterByName, (value1, value2) => protocolCache.Parameters.GetParameterByName(Convert.ToString(value1)) },
                     { NotifyType.SetParameter, (value1, value2) => protocolCache.Parameters.SetParameter(Convert.ToInt32(((uint[])value1)[2]), value2) },
@@ -132,29 +133,80 @@
                     throw new ArgumentException($"NotifyType.NT_FILL_ARRAY_WITH_COLUMN expects first argument to be of type object[], but got {value1?.GetType()} instead.");
                 }
 
+                if (columnInfo.Length < 2)
+                {
+                    throw new ArgumentException($"NotifyType.NT_FILL_ARRAY_WITH_COLUMN expects first argument to contain at least two objects, but got {columnInfo.Length} objects instead.");
+                }
+
+                if (!(columnInfo[0] is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.NT_FILL_ARRAY_WITH_COLUMN expects first argument to contain an int as first object, but got {columnInfo[0]?.GetType()} instead.");
+                }
+
                 if (!(value2 is object[] values))
                 {
                     throw new ArgumentException($"NotifyType.NT_FILL_ARRAY_WITH_COLUMN expects first argument to be of type object[], but got {value2?.GetType()} instead.");
                 }
 
-                if (columnInfo.Length == 2 && values.Length == 2)
+                if (!(values[0] is object[] primaryKeysAsObjects))
                 {
-                    if (!(columnInfo[0] is int tablePid))
-                    {
-                        throw new ArgumentException($"");
-                    }
-
-
-                    return protocolCache.Tables.FillArrayWithColumn(Convert.ToInt32(columnInfo[0]), Convert.ToInt32(columnInfo[1]), (object[])values[0], (object[])values[1]);
+                    throw new ArgumentException($"NotifyType.NT_FILL_ARRAY_WITH_COLUMN expects second argument to contain an object[] as first object, but got {values[0]?.GetType()} instead.");
                 }
-                else if (columnInfo.Length == values.Length)
+
+                var primaryKeys = Array.ConvertAll(primaryKeysAsObjects, Convert.ToString);
+                var columnValues = values.Skip(1).Cast<object[]>().ToArray();
+
+                bool oneOrMoreCellValuesAreArrays = columnValues.Any(cv => cv.Any(cellValue => cellValue is object[]));
+                if (oneOrMoreCellValuesAreArrays)
                 {
-                    return protocolCache.Tables.FillArrayWithColumns(columnInfo, values);
+                    // Adding timestamps to individual column values is not supported.
+                    throw new ArgumentException("This mock implementation of NotifyType.NT_FILL_ARRAY_WITH_COLUMN does not support adding timestamps to individual column values.");
+                }
+
+                int columnsToSetCount = values.Length - 1; // First item is always the primary keys.
+
+                bool useClearAndLeave = false;
+                var timestamp = DateTime.Now;
+
+                bool columnInfoHasOptions = columnInfo.Length == columnsToSetCount + 2;
+                if (columnInfoHasOptions) 
+                {
+                    var optionsItem = columnInfo.Last();
+
+                    if (optionsItem is bool lastColumnInfoItemAsBoolean)
+                    {
+                        useClearAndLeave = lastColumnInfoItemAsBoolean;
+                    }
+                    else if (optionsItem is object[] lastColumInfoItemAsArray)
+                    {
+                        if (lastColumInfoItemAsArray.Length > 0 && lastColumInfoItemAsArray[0] is bool lastColumInfoItemAsArrayFirstItem)
+                        {
+                            useClearAndLeave = lastColumInfoItemAsArrayFirstItem;
+                        }
+
+                        if (lastColumInfoItemAsArray.Length == 2 && lastColumInfoItemAsArray[1] is DateTime lastColumInfoItemAsArraySecondItem)
+                        {
+                            timestamp = lastColumInfoItemAsArraySecondItem;
+                        }
+                    }
+                }
+
+                if (columnsToSetCount == 1)
+                {
+                    int columnPid = Convert.ToInt32(columnInfo[1]);
+
+                    protocolCache.Tables.FillArrayWithColumn(tablePid, columnPid, primaryKeys, columnValues.Single(), timestamp, useClearAndLeave);
                 }
                 else
                 {
-                    throw new ArgumentException($"Unsupported NotifyType.NT_FILL_ARRAY_WITH_COLUMN parameters with different lengths between columnInfo ({columnInfo.Length}) and values ({values.Length})");
+                    var columnPids = Array.ConvertAll(columnInfo.Skip(1).Take(columnsToSetCount).ToArray(), Convert.ToInt32);
+
+                    var columnPidsToValues = columnPids.ToDictionary(pid => pid, pid => columnValues[Array.IndexOf(columnPids, pid)]);
+
+                    protocolCache.Tables.FillArrayWithColumns(tablePid, primaryKeys, columnPidsToValues, timestamp, useClearAndLeave);
                 }
+
+                return null; // Irrelevant return value.
             }
 
             internal object GetParameterIndex(object value1, object value2)

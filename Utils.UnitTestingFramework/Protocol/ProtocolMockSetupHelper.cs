@@ -359,14 +359,16 @@
                     .Returns(
                     (int tableId, int columnPid, object[] keys, object[] values, DateTime? timeInfo) =>
                     {
-                        return tablesCache.FillArrayWithColumn(tableId, columnPid, keys, values, timeInfo);
+                        tablesCache.FillArrayWithColumn(tableId, columnPid, Array.ConvertAll(keys, Convert.ToString), values, timeInfo);
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArrayWithColumn(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object[]>(), It.IsAny<object[]>()))
                     .Returns(
                     (int tableId, int columnPid, object[] keys, object[] values) =>
                     {
-                        return tablesCache.FillArrayWithColumn(tableId, columnPid, keys, values);
+                        tablesCache.FillArrayWithColumn(tableId, columnPid, Array.ConvertAll(keys, Convert.ToString), values);
+                        return null; // Irrelevant return value.
                     });
             }
 

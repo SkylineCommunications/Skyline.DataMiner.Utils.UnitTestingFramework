@@ -3,10 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using FluentAssertions.Numeric;
     using Moq;
 
     using Skyline.DataMiner.Scripting;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     /// <summary>
@@ -48,11 +49,11 @@
         /// <param name="tablePid">The ID of the table parameter.</param>
         /// <returns>The table model for the table with the specified ID.</returns>
         /// <exception cref="ArgumentException">There is no table with ID " + tableId</exception>
-        public ITableModelReader GetTableModel(int tablePid)
+        public ITableModel GetTableModel(int tablePid)
         {
-            if (TablesCacheDict.TryGetValue(tablePid, out ITableModel output))
+            if (TablesCacheDict.TryGetValue(tablePid, out var tableModel))
             {
-                return output;
+                return tableModel;
             }
 
             throw new ArgumentException($"There is no table with ID '{tablePid}'");
@@ -616,36 +617,26 @@
         /// Sets the specified cells of a column with the provided values.
         /// </summary>
         /// <param name="tableId">The table identifier.</param>
-        /// <param name="columnID">The column identifier.</param>
+        /// <param name="columnPid">The column identifier.</param>
         /// <param name="primaryKeys">The primary keys.</param>
         /// <param name="values">The values.</param>
         /// <param name="timeInfo">The time information.</param>
+        /// <param name="useClearAndLeave">A boolean indicating if values uses protocol.Leave and protocol.Clear.</param>
         /// <returns><c>true</c></returns>
         /// <exception cref="ArgumentException">There should be as many primary keys as values or instead only one value.</exception>
-        public object FillArrayWithColumn(int tableId, int columnID, object[] primaryKeys, object[] values, DateTime? timeInfo = null)
+        public void FillArrayWithColumn(int tableId, int columnPid, string[] primaryKeys, object[] values, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
             if (primaryKeys.Length != values.Length && (primaryKeys.Length == values.Length || values.Length != 1))
             {
                 throw new ArgumentException("There should be as many primary keys as values or instead only one value.");
             }
 
-            if (!TablesCacheDict.ContainsKey(tableId))
+            if (!TablesCacheDict.TryGetValue(tableId, out var tableModel))
             {
-                return true;
+                throw new ArgumentException($"Table with ID '{tableId}' does not exist.");
             }
 
-            ITableModel tableModel = TablesCacheDict[tableId];
-
-            var primaryKeysArray = primaryKeys.Cast<string>().ToArray();
-
-            var columnIdxToPid = tableModel.ColumnIndexesToPids.FirstOrDefault(x => x.Value == columnID);
-
-            if (columnIdxToPid.Equals(default(KeyValuePair<int, int>)))
-            {
-                return true;
-            }
-
-            var idx = columnIdxToPid.Key;
+            int columnIndex = GetColumnIndex(tableModel, columnPid);
 
             if (values.Length == 1)
             {
@@ -656,66 +647,63 @@
                     newValues[i] = values[0];
                 }
 
-                tableModel.SetColumn(idx, primaryKeysArray, newValues, timeInfo);
-
-                return true;
+                tableModel.SetColumn(columnIndex, primaryKeys, newValues, timeInfo);
+                return;
             }
 
-            tableModel.SetColumn(idx, primaryKeysArray, values, timeInfo);
+            if (useClearAndLeave)
+            {
+                ConvertProtocolClearAndleaveToActualValues(primaryKeys, values, tableModel, columnIndex);
+            }
 
-            return true;
+            tableModel.SetColumn(columnIndex, primaryKeys, values, timeInfo);
+        }
+
+        private static int GetColumnIndex(ITableModel tableModel, int columnPid)
+        {
+            var columnIdxToPid = tableModel.ColumnIndexesToPids.FirstOrDefault(x => x.Value == columnPid);
+
+            if (columnIdxToPid.Equals(default(KeyValuePair<int, int>)))
+            {
+                throw new InvalidOperationException($"Column with ID '{columnPid}' does not exist in table with ID '{tableModel.TableId}'.");
+            }
+
+            int columnIndex = columnIdxToPid.Key;
+
+            return columnIndex;
+        }
+
+        private static void ConvertProtocolClearAndleaveToActualValues(string[] primaryKeys, object[] values, ITableModel tableModel, int columnIndex)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (values[i].IsProtocolClear())
+                {
+                    values[i] = null;
+                }
+                else if (values[i].IsProtocolLeave() && tableModel.KeyToRowIndex.TryGetValue(primaryKeys[i], out int rowIndex))
+                {
+                    var existingRow = tableModel.Row(rowIndex);
+                    var existingValue = existingRow[columnIndex];
+                    values[i] = existingValue;
+                }
+            }
         }
 
         /// <summary>
         /// Sets columns in a table based on the provided column info and values information.
         /// </summary>
-        /// <param name="columnInfo">
-        /// Object array where:
-        /// columnInfo[0] is the ID of the table parameter,
-        /// columnInfo[1…n-1] are the IDs of the column parameters.
-        /// </param>
-        /// <param name="values">
-        /// Object array where:
-        /// values[0] is the primary key (string),
-        /// values[1…n] are the values to set or update.
-        /// </param>
-        /// <returns><c>true</c></returns>
-        /// <exception cref="ArgumentException">There should be as many primary keys as values.</exception>
-        public object FillArrayWithColumns(object[] columnInfo, object[] values)
+        public void FillArrayWithColumns(int tablePid, string[] primaryKeys, IEnumerable<KeyValuePair<int, object[]>> columnPidsToValues, DateTime? timestamp = null, bool useClearAndLeave = false)
         {
-            if (columnInfo.Length != values.Length && columnInfo.Length > 0)
+            if (columnPidsToValues == null)
             {
-                throw new ArgumentException("There should be as many column pids as values arrays to set.");
+                throw new ArgumentNullException(nameof(columnPidsToValues));
             }
 
-            var tableId = Convert.ToInt32(columnInfo[0]);
-            if (!TablesCacheDict.TryGetValue(tableId, out var tableModel))
+            foreach (var columnPidToValues in columnPidsToValues)
             {
-                return true;
+                FillArrayWithColumn(tablePid, columnPidToValues.Key, primaryKeys, columnPidToValues.Value, timestamp, useClearAndLeave);
             }
-
-            var primaryKeysArray = ((object[])values[0]).Cast<string>().ToArray();
-
-            for (int i = 1; i < values.Length; i++)
-            {
-                object[] valuesToSet = (object[])values[i];
-                if (primaryKeysArray.Length != valuesToSet.Length)
-                {
-                    throw new ArgumentException("There should be as many column pids as values arrays to set.");
-                }
-
-                var columnIdxToPid = tableModel.ColumnIndexesToPids.FirstOrDefault(x => x.Value == Convert.ToInt32(columnInfo[i]));
-
-                if (columnIdxToPid.Equals(default(KeyValuePair<int, int>)))
-                {
-                    continue;
-                }
-
-                var idx = columnIdxToPid.Key;
-
-                tableModel.SetColumn(idx, primaryKeysArray, valuesToSet);
-            }
-            return true;
         }
 
         /// <summary>
@@ -724,16 +712,11 @@
         /// <param name="tableId">The table identifier.</param>
         /// <param name="columnIndexes">The column indexes.</param>
         /// <returns>A jagged array where each entry represents a column.</returns>
-        public object GetTableColumns(int tableId, uint[] columnIndexes)
+        public object[][] GetTableColumns(int tableId, uint[] columnIndexes)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return null;
-            }
+            var tableModel = GetTableModel(tableId);
 
             object[][] columns = new object[columnIndexes.Length][];
-
-            ITableModel tableModel = TablesCacheDict[tableId];
 
             int index = 0;
 
@@ -764,12 +747,7 @@
         /// <returns>The column data.</returns>
         public object[] GetColumn(int tableId, int columnPid)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return null;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTableModel(tableId);
 
             return tableModel.Column(columnPid);
         }

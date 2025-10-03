@@ -8,7 +8,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Skyline.DataMiner.Scripting;
-
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
     using UnitTestingFramework.Protocol.Data;
 
     [TestClass]
@@ -2213,22 +2213,20 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnColumnsTest_FillArrayWithSameUniqueValue_GetCorrectRows()
+        public void FillArrayWithColumn_FillArrayWithSameUniqueValue_GetCorrectRows()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
-            object[] pk = new object[] { "skyline1", "skyline2" };
+            var primaryKeys = new[] { "skyline1", "skyline2" };
 
             object[] values = new object[] { "value1" };
 
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.FillArrayWithColumn(900, 902, pk, values);
+            tablesCache.FillArrayWithColumn(900, 902, primaryKeys, values);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
@@ -2248,15 +2246,13 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnColumnsTest_FillArraysWithDifferentLengths_Exception()
+        public void FillArrayWithColumn_FillArraysWithDifferentLengths_Exception()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
-            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            var pk = new [] { "skyline1", "skyline2", "skyline3" };
 
             object[] values = new object[] { "value1", "value2" };
 
@@ -2269,17 +2265,15 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnColumnsTest_FillArray_GetCorrectRows()
+        public void FillArrayWithColumn_FillArray_GetCorrectRows()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
-            object[] pk = new object[] { "skyline1", "skyline2" };
+            var pk = new[] { "skyline1", "skyline2" };
 
-            object[] values = new object[] { "value1", "value2" };
+            var values = new object[] { "value1", "value2" };
 
             // Act
             tablesCache.ClearAllKeys(900);
@@ -2304,17 +2298,15 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnColumnsTest_FillArray_ReplaceRow()
+        public void FillArrayWithColumn_FillArray_ReplaceRow()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
 
-            object[] pk = new object[] { "skyline1", "skyline2" };
+            var pk = new[] { "skyline1", "skyline2" };
 
             object[] values = new object[] { "value1", "value2" };
 
@@ -2343,7 +2335,81 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnTest_NotConsecutiveRows_GetCorrectRows()
+        public void FillArrayWithColumn_FillArray_ReplaceRowWithProtocolLeave()
+        {
+            // Arrange
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var tablesCache = protocolCache.Tables;
+
+            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
+
+            var pk = new[] { "skyline1", "skyline2" };
+
+            object[] values = new object[] { double.PositiveInfinity, "value2" };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            tablesCache.AddRow(900, row1);
+
+            tablesCache.FillArrayWithColumn(900, 902, pk, values, useClearAndLeave: true);
+
+            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
+            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
+
+            // Assert
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("2ndColumnSkyline1", rowOutput0[1]); // Value not replaced because of Protocol_Leave
+            Assert.AreEqual("1", rowOutput0[2]);
+            Assert.AreEqual("2", rowOutput0[3]);
+            Assert.AreEqual("3", rowOutput0[4]);
+
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("value2", rowOutput1[1]);
+            Assert.IsNull(rowOutput1[2]);
+            Assert.IsNull(rowOutput1[3]);
+            Assert.IsNull(rowOutput1[4]);
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumn_FillArray_ReplaceRowWithProtocolClear()
+        {
+            // Arrange
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var tablesCache = protocolCache.Tables;
+
+            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
+
+            var pk = new[] { "skyline1", "skyline2" };
+
+            object[] values = new object[] { Constants.PROTOCOL_CLEAR, "value2" };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            tablesCache.AddRow(900, row1);
+
+            tablesCache.FillArrayWithColumn(900, 902, pk, values, useClearAndLeave: true);
+
+            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
+            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
+
+            // Assert
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual(null, rowOutput0[1]); // Value cleared because of Protocol_Clear
+            Assert.AreEqual("1", rowOutput0[2]);
+            Assert.AreEqual("2", rowOutput0[3]);
+            Assert.AreEqual("3", rowOutput0[4]);
+
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("value2", rowOutput1[1]);
+            Assert.IsNull(rowOutput1[2]);
+            Assert.IsNull(rowOutput1[3]);
+            Assert.IsNull(rowOutput1[4]);
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumn_NotConsecutiveRows_GetCorrectRows()
         {
             // Arrange
 
@@ -2351,7 +2417,7 @@
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
-            object[] pk = new object[] { "skyline1", "skyline2" };
+            var pk = new[] { "skyline1", "skyline2" };
 
             object[] values = new object[] { "3rdColValue1", "3rdColValue2" };
 
@@ -2378,29 +2444,25 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnTest_InexistentColumnPid_EmptyTable()
+        public void FillArrayWithColumn_InexistentColumnPid_EmptyTable()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
-            object[] pk = new object[] { "skyline1", "skyline2" };
+            var pk = new[] { "skyline1", "skyline2" };
 
             object[] values = new object[] { "3rdColValue1", "3rdColValue2" };
 
             // Act
             tablesCache.ClearAllKeys(900);
 
-            var output = tablesCache.FillArrayWithColumn(900, 906, pk, values);
+            Assert.Throws<Exception>(() => tablesCache.FillArrayWithColumn(900, 906, pk, values));
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
 
             // Assert
-            Assert.IsTrue((bool)output);
-
             Assert.IsNull(rowOutput0[0]);
             Assert.IsNull(rowOutput0[1]);
             Assert.IsNull(rowOutput0[2]);
@@ -2426,7 +2488,7 @@
             int tableId = 900;
             int columnPid = 902;
 
-            object[] pk = new object[] { "skyline1", "skyline2" };
+            var pk = new[] { "skyline1", "skyline2" };
 
             object[] values = new object[] { "3rdColValue1", "3rdColValue2" };
 
@@ -2440,37 +2502,9 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnsColumnsTest_FillArraysWithArgumentsDifferentLengths_Exception()
+        public void FillArrayWithColumns_FillArraysWithColumnsDifferentLengths_Exception()
         {
             // Arrange
-
-
-            var protocolCache = ProtocolCacheBuilder.Build(path);
-            var tablesCache = protocolCache.Tables;
-
-            int tableID = 900;
-            int columnID1 = 902;
-
-            object[] columnInfo = new object[] { tableID, columnID1, };
-            object[] pk = new object[] { "skyline1", "skyline2" };
-            object[] column1Values = new object[] { "value1", "value2" };
-            object[] column2Values = new object[] { 1, 2 };
-            object[] values = new object[] { pk, column1Values, column2Values };
-
-            // Act
-            tablesCache.ClearAllKeys(900);
-
-            // Act & Assert
-            Assert.ThrowsExactly<ArgumentException>(
-                () => tablesCache.FillArrayWithColumns(columnInfo, values));
-        }
-
-        [TestMethod]
-        public void FillArrayWithColumnsColumnsTest_FillArraysWithColumnsDifferentLengths_Exception()
-        {
-            // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
@@ -2478,26 +2512,28 @@
             int columnID1 = 902;
             int columnID2 = 903;
 
-            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
-            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
-            object[] column1Values = new object[] { "value1", "value2" };
-            object[] column2Values = new object[] { 1, 2 };
-            object[] values = new object[] { pk, column1Values, column2Values };
+            var pk = new[] { "skyline1", "skyline2", "skyline3" };
+            object[] column1Values = new object[] { "value1", "value2", };
+            object[] column2Values = new object[] { 1, 2, };
+
+            var columnPidsToValues = new Dictionary<int, object[]>
+            {
+                { columnID1, column1Values },
+                { columnID2, column2Values }
+            };
 
             // Act
             tablesCache.ClearAllKeys(900);
 
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
-                () => tablesCache.FillArrayWithColumns(columnInfo, values));
+                () => tablesCache.FillArrayWithColumns(tableID, pk, columnPidsToValues));
         }
 
         [TestMethod]
-        public void FillArrayWithColumnsColumnsTest_FillArray_GetCorrectRows()
+        public void FillArrayWithColumns_FillArray_GetCorrectRows()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
@@ -2505,16 +2541,20 @@
             int columnID1 = 902;
             int columnID2 = 903;
 
-            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
-            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            var pk = new[] { "skyline1", "skyline2", "skyline3" };
             object[] column1Values = new object[] { "value1", "value2", "value3" };
             object[] column2Values = new object[] { 1, 2, 3 };
-            object[] values = new object[] { pk, column1Values, column2Values };
+
+            var columnPidsToValues = new Dictionary<int, object[]>
+            {
+                { columnID1, column1Values },
+                { columnID2, column2Values }
+            };
 
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.FillArrayWithColumns(columnInfo, values);
+            tablesCache.FillArrayWithColumns(tableID, pk, columnPidsToValues);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
@@ -2541,11 +2581,9 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnsColumnsTest_FillArray_ReplaceRow()
+        public void FillArrayWithColumns_FillArray_ReplaceRow()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
@@ -2553,11 +2591,15 @@
             int columnID1 = 902;
             int columnID2 = 903;
 
-            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
-            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            var pk = new[] { "skyline1", "skyline2", "skyline3" };
             object[] column1Values = new object[] { "value1", "value2", "value3" };
             object[] column2Values = new object[] { 1, 2, 3 };
-            object[] values = new object[] { pk, column1Values, column2Values };
+
+            var columnPidsToValues = new Dictionary<int, object[]>
+            {
+                { columnID1, column1Values },
+                { columnID2, column2Values }
+            };
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1000, "2", "3" };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 2000, "22", "33" };
@@ -2568,7 +2610,7 @@
             tablesCache.AddRow(900, row1);
             tablesCache.AddRow(900, row2);
 
-            tablesCache.FillArrayWithColumns(columnInfo, values);
+            tablesCache.FillArrayWithColumns(tableID, pk, columnPidsToValues);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
@@ -2595,11 +2637,9 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnsTest_NotConsecutiveRows_GetCorrectRows()
+        public void FillArrayWithColumns_NotConsecutiveRows_GetCorrectRows()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
@@ -2607,16 +2647,20 @@
             int columnID1 = 903;
             int columnID2 = 905;
 
-            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
-            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            var pk = new[] { "skyline1", "skyline2", "skyline3" };
             object[] column1Values = new object[] { "value1", "value2", "value3" };
             object[] column2Values = new object[] { 1, 2, 3 };
-            object[] values = new object[] { pk, column1Values, column2Values };
+
+            var columnPidsToValues = new Dictionary<int, object[]>
+            {
+                { columnID1, column1Values },
+                { columnID2, column2Values }
+            };
 
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.FillArrayWithColumns(columnInfo, values);
+            tablesCache.FillArrayWithColumns(tableID, pk, columnPidsToValues);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
@@ -2643,11 +2687,9 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnsTest_InexistentColumnPid_EmptyColumn()
+        public void FillArrayWithColumns_InexistentColumnPid_ThrowsException()
         {
             // Arrange
-
-
             var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
@@ -2655,42 +2697,18 @@
             int columnID1 = 902;
             int columnID2 = 906;    // does not exist
 
-            object[] columnInfo = new object[] { tableID, columnID1, columnID2, };
-            object[] pk = new object[] { "skyline1", "skyline2", "skyline3" };
+            var pk = new[] { "skyline1", "skyline2", "skyline3" };
             object[] column1Values = new object[] { "value1", "value2", "value3" };
             object[] column2Values = new object[] { 1, 2, 3 };
-            object[] values = new object[] { pk, column1Values, column2Values };
 
-            // Act
-            tablesCache.ClearAllKeys(900);
+            var columnPidsToValues = new Dictionary<int, object[]>
+            {
+                { columnID1, column1Values },
+                { columnID2, column2Values }
+            };
 
-            var output = tablesCache.FillArrayWithColumns(columnInfo, values);
-
-            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
-            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
-            object[] rowOutput2 = (object[])tablesCache.GetRow(900, "skyline3");
-
-            // Assert
-            Assert.IsTrue((bool)output);
-
-            // Assert
-            Assert.AreEqual("skyline1", rowOutput0[0]);
-            Assert.AreEqual("value1", rowOutput0[1]);
-            Assert.IsNull(rowOutput0[2]);
-            Assert.IsNull(rowOutput0[3]);
-            Assert.IsNull(rowOutput0[4]);
-
-            Assert.AreEqual("skyline2", rowOutput1[0]);
-            Assert.AreEqual("value2", rowOutput1[1]);
-            Assert.IsNull(rowOutput1[2]);
-            Assert.IsNull(rowOutput1[3]);
-            Assert.IsNull(rowOutput1[4]);
-
-            Assert.AreEqual("skyline3", rowOutput2[0]);
-            Assert.AreEqual("value3", rowOutput2[1]);
-            Assert.IsNull(rowOutput2[2]);
-            Assert.IsNull(rowOutput2[3]);
-            Assert.IsNull(rowOutput2[4]);
+            // Act & Assert
+            Assert.Throws<Exception>(() => tablesCache.FillArrayWithColumns(tableID, pk, columnPidsToValues));
         }
 
         [TestMethod]

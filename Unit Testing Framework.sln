@@ -15,12 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils.UnitTestingFramework.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils.UnitTestingFramework.SnapshotTools.Tests", "Utils.UnitTestingFramework.SnapshotTools.Tests\Utils.UnitTestingFramework.SnapshotTools.Tests.csproj", "{A9C316CE-F95C-C891-F698-76B3F729B883}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dis", "dis", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "B474A03343CA93D22A971472EF131DE7", "B474A03343CA93D22A971472EF131DE7", "{7B0B10FE-8EAD-4C45-80FA-A9C0C6C244B6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QAction_Helper", "..\..\..\AppData\Local\Temp\DIS\QActions\B474A03343CA93D22A971472EF131DE7\QAction_Helper\QAction_Helper.csproj", "{589098A0-C493-444F-30C4-CEE4EB0D8230}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,17 +33,9 @@ Global
 		{A9C316CE-F95C-C891-F698-76B3F729B883}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9C316CE-F95C-C891-F698-76B3F729B883}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9C316CE-F95C-C891-F698-76B3F729B883}.Release|Any CPU.Build.0 = Release|Any CPU
-		{589098A0-C493-444F-30C4-CEE4EB0D8230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{589098A0-C493-444F-30C4-CEE4EB0D8230}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{589098A0-C493-444F-30C4-CEE4EB0D8230}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{589098A0-C493-444F-30C4-CEE4EB0D8230}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{7B0B10FE-8EAD-4C45-80FA-A9C0C6C244B6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{589098A0-C493-444F-30C4-CEE4EB0D8230} = {7B0B10FE-8EAD-4C45-80FA-A9C0C6C244B6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1B9017BA-7757-407F-8188-FF99531AB7C6}
