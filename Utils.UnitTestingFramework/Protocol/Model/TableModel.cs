@@ -111,19 +111,19 @@
         /// <returns>The column data or <see langword="null"/> if there is no column with the specified ID.</returns>
         public object[] Column(int pid)
         {
-            List<object> columnValues = new List<object>();
-
-            if (ColumnsMapper.TryGetValue(pid, out IList<IParameterModel> columnEntries))
+            if (!ColumnsMapper.TryGetValue(pid, out IList<IParameterModel> columnEntries))
             {
-                foreach (var columnEntry in columnEntries)
-                {
-                    columnValues.Add(columnEntry.Value);
-                }
-
-                return columnValues.ToArray();
+                throw new ArgumentException($"No column with ID {pid} exists.");
             }
 
-            return null;
+            var columnValues = new object[columnEntries.Count];
+
+            for (int i = 0; i < columnEntries.Count; i++)
+            {
+                columnValues[i] = columnEntries[i].Value;
+            }
+
+            return columnValues;
         }
 
         /// <summary>
@@ -153,7 +153,7 @@
         {
             if (!keyToRowIndex.ContainsValue(rowIndex))
             {
-                throw new ArgumentException($"No row with index '{rowIndex}' exists.");
+                throw new ArgumentException($"No row with index {rowIndex} exists.");
             }
 
             return ColumnsMapper.Select(x => x.Value[rowIndex].Value).ToArray();
