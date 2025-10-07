@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Runtime.InteropServices.WindowsRuntime;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
@@ -25,21 +26,21 @@
                     { NotifyType.AddRow, AddRow },
                     { NotifyType.NT_GET_TABLE_COLUMNS, GetTableColumns },
                     { NotifyType.NT_FILL_ARRAY_WITH_COLUMN, FillArrayWithColumn },
+                    { NotifyType.FillArray, FillArray },
+                    { NotifyType.FillArrayNoDelete, FillArrayNoDelete },
+                    { NotifyType.NT_SET_ROW, SetRow },
 
-                    { NotifyType.GetParameter, (value1, value2) => protocolCache.Parameters.GetParameter(Convert.ToInt32(value1)) },
-                    { NotifyType.GetParameterByName, (value1, value2) => protocolCache.Parameters.GetParameterByName(Convert.ToString(value1)) },
-                    { NotifyType.SetParameter, (value1, value2) => protocolCache.Parameters.SetParameter(Convert.ToInt32(((uint[])value1)[2]), value2) },
-                    { NotifyType.SetParameterByName, (value1, value2) => protocolCache.Parameters.SetParameterByName(Convert.ToString(value1), value2) },
                     { NotifyType.NT_ADD_ROW_RETURN_KEY, (value1, value2) => protocolCache.Tables.AddRowReturnKey(Convert.ToInt32(value1), Convert.ToString(value2)) },
                     { NotifyType.NT_EXISTS_ROW, (value1, value2) => protocolCache.Tables.Exists(Convert.ToInt32(value1), Convert.ToString(value2)) },
                     { NotifyType.GetKeyPosition, (value1, value2) => protocolCache.Tables.GetKeyPosition(Convert.ToInt32(value1), Convert.ToString(value2)) },
                     { NotifyType.NT_GET_ROW, (value1, value2) => protocolCache.Tables.GetRow(Convert.ToInt32(((object[])value1)[0]), Convert.ToString(((object[])value1)[1])) },
-                    { NotifyType.NT_SET_ROW, (value1, value2) => protocolCache.Tables.SetRow(Convert.ToInt32(((object[])value1)[0]), Convert.ToString(((object[])value1)[1]), value2) },
-                    { NotifyType.FillArray, (value1, value2) => protocolCache.Tables.FillArray(Convert.ToInt32(value1), (object[])value2) },
-                    { NotifyType.FillArrayNoDelete, (value1, value2) => protocolCache.Tables.FillArrayNoDelete(Convert.ToInt32(value1), (object[])value2) },
                     { NotifyType.ArrayRowCount, (value1, value2) => protocolCache.Tables.RowCount(Convert.ToInt32(value1)) },
                     { NotifyType.NT_GET_KEYS_SLPROTOCOL, (value1, value2) => protocolCache.Tables.RowCount(Convert.ToInt32(value1)) },
                     { NotifyType.PutParameterIndex, (value1, value2) => protocolCache.Tables.SetParameterIndex(Convert.ToInt32(((object[])value1)[0]), Convert.ToInt32(((object[])value1)[1]), Convert.ToInt32(((object[])value1)[2]), Convert.ToString(value2)) },
+                    { NotifyType.GetParameter, (value1, value2) => protocolCache.Parameters.GetParameter(Convert.ToInt32(value1)) },
+                    { NotifyType.GetParameterByName, (value1, value2) => protocolCache.Parameters.GetParameterByName(Convert.ToString(value1)) },
+                    { NotifyType.SetParameter, (value1, value2) => protocolCache.Parameters.SetParameter(Convert.ToInt32(((uint[])value1)[2]), value2) },
+                    { NotifyType.SetParameterByName, (value1, value2) => protocolCache.Parameters.SetParameterByName(Convert.ToString(value1), value2) },
                 };
             }
 
@@ -55,6 +56,140 @@
                 {
                     throw new ArgumentException($"Notify type '{castedNotifyType} ({notifyType})' is unavailable.");
                 }
+            }
+
+            internal object SetRow(object value1, object value2)
+            {
+                if (!(value1 is object[] rowInfo))
+                {
+                    throw new ArgumentException($"NotifyType.SetRow expects first argument to be of type object[], but got {value1?.GetType()} instead.");
+                }
+
+                if (rowInfo.Length < 2)
+                {
+                    throw new ArgumentException($"NotifyType.SetRow expects first argument to contain at least two objects, but got {rowInfo.Length} objects instead.");
+                }
+
+                if (!(rowInfo[0] is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.SetRow expects first argument to contain an int as first object, but got {rowInfo[0]?.GetType()} instead.");
+                }
+
+                if (!(rowInfo[1] is string primaryKey))
+                {
+                    throw new ArgumentException($"NotifyType.SetRow expects first argument to contain a string as second object, but got {rowInfo[1]?.GetType()} instead.");
+                }
+
+                bool useClearAndLeave = false;
+                DateTime? timestamp = null;
+
+                if (rowInfo.Length >= 3)
+                {
+                    if (rowInfo[2] is DateTime timestampPartOfArray)
+                    {
+                        timestamp = timestampPartOfArray;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"NotifyType.SetRow expects first argument to contain a DateTime as third object, but got {rowInfo[2]?.GetType()} instead.");
+                    }
+                }
+
+                if (rowInfo.Length >= 4)
+                {
+                    if (rowInfo[3] is bool useClearAndLeavePartOfArray)
+                    {
+                        useClearAndLeave = useClearAndLeavePartOfArray;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"NotifyType.SetRow expects first argument to contain a bool as fourth object, but got {rowInfo[3]?.GetType()} instead.");
+                    }
+                }
+
+                if (!(value2 is object[] rowValues))
+                {
+                    throw new ArgumentException($"NotifyType.SetRow expects second argument to be of type object[], but got {value2?.GetType()} instead.");
+                }
+
+                protocolCache.Tables.SetRow(tablePid, primaryKey, rowValues, timestamp, useClearAndLeave);
+
+                return new object[rowValues.Length];
+            }
+
+            internal object FillArrayNoDelete(object value1, object value2)
+            {
+                return FillArrayInternal(value1, value2, protocolCache.Tables.FillArrayNoDelete);
+            }
+            
+            internal object FillArray(object value1, object value2)
+            {
+                return FillArrayInternal(value1, value2, protocolCache.Tables.FillArray);
+            }
+
+            private object FillArrayInternal(object value1, object value2, Action<int, object[][], DateTime?, bool> fillArrayMethod)
+            {
+                int tablePid;
+                bool useClearAndLeave = false;
+                DateTime? timestamp = null;
+
+                if (value1 is int tablePidAsSingleValue)
+                {
+                    tablePid = tablePidAsSingleValue;
+                }
+                else if (value1 is object[] tableInfo)
+                {
+                    if (tableInfo.Length >= 2 && tableInfo[0] is int tablePidPartOfArray && tableInfo[1] is bool clearAndLeaveFlagPartOfArray)
+                    {
+                        useClearAndLeave = clearAndLeaveFlagPartOfArray;
+                        tablePid = tablePidPartOfArray;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"NotifyType.FillArray expects first argument to be of type int or an object[] containing an int, a bool and an optional DateTime.");
+                    }
+
+                    if (tableInfo.Length == 3 && tableInfo[2] is DateTime timestampPartOfArray)
+                    {
+                        timestamp = timestampPartOfArray;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"NotifyType.FillArray expects first argument to be of type int or an object[] containing an int, a bool and an optional DateTime.");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException($"NotifyType.FillArray expects first argument to be of type int or an object[] containing an int and a bool, but got {value1?.GetType()} instead.");
+                }
+
+                if (!(value2 is object[] arrayOfColumnValues))
+                {
+                    throw new ArgumentException($"NotifyType.FillArray expects second argument to be of type object[], but got {value2?.GetType()} instead.");
+                }
+
+                var arrayOfObjectArrays = CastItemsOrThrow<object[]>(arrayOfColumnValues);
+
+                fillArrayMethod.Invoke(tablePid, arrayOfObjectArrays, timestamp, useClearAndLeave);
+
+                return null; // Irrelevant return value.
+            }
+
+            public static T[] CastItemsOrThrow<T>(object[] arrayToConvert)
+            {
+                if (arrayToConvert is null)
+                {
+                    throw new ArgumentNullException(nameof(arrayToConvert));
+                }
+
+                var arrayOfType = arrayToConvert.OfType<T>().ToArray();
+
+                if (arrayToConvert.Length != arrayOfType.Length)
+                {
+                    throw new ArgumentException($"Expected all items to be of type {typeof(T).Name}");
+                }
+
+                return arrayOfType;
             }
 
             internal object GetTableColumns(object value1, object value2)

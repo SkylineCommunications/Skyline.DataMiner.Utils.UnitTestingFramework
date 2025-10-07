@@ -1,33 +1,31 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
 {
+    using System;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     internal class AssertHandler : IAssert
     {
+        private readonly IProtocolCache cache;
+
         public AssertHandler(IProtocolCache protocolCache)
         {
-            Cache = protocolCache;
-        }
-
-        private IProtocolCache Cache
-        {
-            get;
+            cache = protocolCache ?? throw new ArgumentNullException(nameof(protocolCache));
         }
 
         public IParameterModel Parameter(int parameterId)
         {
-            return Cache.Parameters.GetParameterModel(parameterId);
+            return cache.Parameters.GetParameterModel(parameterId);
         }
 
         public IParameterModel Parameter(string parameterName)
         {
-            return Cache.Parameters.GetParameterModel(parameterName);
+            return cache.Parameters.GetParameterModel(parameterName);
         }
 
         public ITableModelReader Table(int tablePid)
         {
-            return Cache.Tables.GetTableModel(tablePid);
+            return cache.Tables.GetTable(tablePid);
         }
     }
 }

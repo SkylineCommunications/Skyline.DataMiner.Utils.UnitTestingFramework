@@ -3,8 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using FluentAssertions.Numeric;
-    using Moq;
 
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
@@ -16,24 +14,16 @@
     public class TablesCache
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TablesCache"/> class.
-        /// </summary>
-        public TablesCache()
-        {
-            TablesCacheDict = new Dictionary<int, ITableModel>();
-        }
-
-        /// <summary>
         /// Dictionary containing the table ID to table model map.
         /// </summary>
-        protected Dictionary<int, ITableModel> TablesCacheDict { get; }
+        protected Dictionary<int, ITableModel> TablesCacheDict { get; } = new Dictionary<int, ITableModel>();
 
         /// <summary>
         /// Adds the specified model.
         /// </summary>
         /// <param name="tableModel">The table model.</param>
         /// <exception cref="ArgumentNullException"><paramref name="tableModel"/> is <see langword="null"/>.</exception>
-        public void AddModel(ITableModel tableModel)
+        public void AddTable(ITableModel tableModel)
         {
             if (tableModel == null)
             {
@@ -49,7 +39,7 @@
         /// <param name="tablePid">The ID of the table parameter.</param>
         /// <returns>The table model for the table with the specified ID.</returns>
         /// <exception cref="ArgumentException">There is no table with ID " + tableId</exception>
-        public ITableModel GetTableModel(int tablePid)
+        public ITableModel GetTable(int tablePid)
         {
             if (TablesCacheDict.TryGetValue(tablePid, out var tableModel))
             {
@@ -73,14 +63,9 @@
                 throw new ArgumentNullException(nameof(row));
             }
 
-            if (!TablesCacheDict.ContainsKey(tablePid))
-            {
-                return 0;
-            }
+            var tableModel = GetTable(tablePid);
 
-            ITableModel tableModel = TablesCacheDict[tablePid];
-
-            int primaryKeyIndex = tableModel.KeyColumnIdx;
+            int primaryKeyIndex = tableModel.PrimaryKeyColumnIdx;
             string primaryKey = (string)row[primaryKeyIndex];
 
             if (tableModel.KeyToRowIndex.ContainsKey(primaryKey))
@@ -104,12 +89,7 @@
         /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/>.</exception>
         public int AddRow(int tablePid, string primaryKey)
         {
-            if (!TablesCacheDict.ContainsKey(tablePid))
-            {
-                return 0;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tablePid];
+            var tableModel = GetTable(tablePid);
 
             if (tableModel.KeyToRowIndex.ContainsKey(primaryKey))
             {
@@ -118,7 +98,7 @@
 
             int columnsNumber = tableModel.ColumnCount;
             object[] row = new object[columnsNumber];
-            row[tableModel.KeyColumnIdx] = primaryKey;
+            row[tableModel.PrimaryKeyColumnIdx] = primaryKey;
             tableModel.SetRow(row);
 
             int oneBasedRowNumber = tableModel.KeyToRowIndex[primaryKey] + 1;
@@ -129,65 +109,54 @@
         /// <summary>
         /// Adds the specified row to the table with the specified ID.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tablePid">The table identifier.</param>
         /// <param name="row">The row.</param>
         /// <returns>The primary key of the added row or <see langword="null"/> if the cache does not contain a table model for the specified table ID.</returns>
-        public string AddRowReturnKey(int tableId, object[] row)
+        public string AddRowReturnKey(int tablePid, object[] row)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
+            if (row == null)
             {
-                return null;
-            }
-            else if (row == null)
-            {
-                return AddRowReturnKey(tableId);
+                return AddRowReturnKey(tablePid);
             }
 
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tablePid);
+
             tableModel.SetRow(row);
 
-            return (string)row[tableModel.KeyColumnIdx];
+            return (string)row[tableModel.PrimaryKeyColumnIdx];
         }
 
         /// <summary>
         /// Adds a row with the specified primary key to the table with the specified ID.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tablePid">The table identifier.</param>
         /// <param name="primaryKey">The primary key of the row.</param>
         /// <returns>The primary key of the added row or <see langword="null"/> if the cache does not contain a table model for the specified table ID.</returns>
-        public string AddRowReturnKey(int tableId, string primaryKey)
+        public string AddRowReturnKey(int tablePid, string primaryKey)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
+            if (primaryKey == null)
             {
-                return null;
-            }
-            else if (primaryKey == null)
-            {
-                return AddRowReturnKey(tableId);
+                return AddRowReturnKey(tablePid);
             }
 
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tablePid);
+
             var row = new object[tableModel.ColumnIndexesToPids.Count];
-            row[tableModel.KeyColumnIdx] = primaryKey;
+            row[tableModel.PrimaryKeyColumnIdx] = primaryKey;
 
-            return AddRowReturnKey(tableId, row);
+            return AddRowReturnKey(tablePid, row);
         }
 
         /// <summary>
         /// Adds a row to the specified table and returns the primary key. Only used for auto-increment key tables.
         /// </summary>
-        /// <param name="tableID">The ID of the table parameter.</param>
+        /// <param name="tablePid">The ID of the table parameter.</param>
         /// <returns>The primary key of the added row.</returns>
-        public string AddRowReturnKey(int tableID)
+        public string AddRowReturnKey(int tablePid)
         {
-            if (!TablesCacheDict.ContainsKey(tableID))
-            {
-                throw new NullReferenceException();
-            }
+            var tableModel = GetTable(tablePid);
 
-            ITableModel tableModel = TablesCacheDict[tableID];
-
-            string[] keys = GetKeys(tableID);
+            string[] keys = GetKeys(tablePid);
             string primaryKey = "1";
 
             if (keys.Length != 0)
@@ -198,7 +167,7 @@
             int columnsNumber = tableModel.ColumnCount;
 
             object[] newRow = new object[columnsNumber];
-            newRow[tableModel.KeyColumnIdx] = primaryKey;
+            newRow[tableModel.PrimaryKeyColumnIdx] = primaryKey;
 
             tableModel.SetRow(newRow);
 
@@ -208,19 +177,14 @@
         /// <summary>
         /// Deletes the specified rows in the specified table.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tablePid">The table identifier.</param>
         /// <param name="primaryKeys">The primary keys.</param>
         /// <returns>The number of remaining rows.</returns>
-        public int DeleteRow(int tableId, string[] primaryKeys)
+        public int DeleteRow(int tablePid, string[] primaryKeys)
         {
             int remainingRows = -1;
 
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return 0;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tablePid);
 
             if (!primaryKeys.Any())
             {
@@ -232,7 +196,7 @@
             foreach (string pk in primaryKeys)
             {
                 int rowIndex = tableModel.KeyToRowIndex[pk];
-                remainingRows = DeleteRow(tableId, rowIndex);
+                remainingRows = DeleteRow(tablePid, rowIndex);
             }
 
             return remainingRows;
@@ -241,17 +205,12 @@
         /// <summary>
         /// Deletes the specified row from the specified table.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tablePid">The table identifier.</param>
         /// <param name="rowIndex">Index of the row.</param>
         /// <returns>The number of remaining rows.</returns>
-        public int DeleteRow(int tableId, int rowIndex)
+        public int DeleteRow(int tablePid, int rowIndex)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return 0;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tablePid);
 
             int existingRows = tableModel.KeyToRowIndex
                 .Select(x => !String.IsNullOrWhiteSpace(x.Key))
@@ -277,12 +236,7 @@
         /// <returns>The number of remaining rows.</returns>
         public int DeleteRow(int tableId, string primaryKey)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return 0;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tableId);
 
             if (!tableModel.KeyToRowIndex.ContainsKey(primaryKey))
             {
@@ -302,17 +256,7 @@
         /// <returns>0 or -1 if the table cache does not contain a table model for the specified table ID.</returns>
         public object ClearAllKeys(int tableId)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return -1;
-            }
-
-            if (IsTableEmpty(tableId))
-            {
-                return 0;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tableId);
 
             var tableKeys = tableModel.KeyToRowIndex.Keys.ToList();
 
@@ -332,12 +276,8 @@
         /// <returns><c>true</c> the table with the specified ID contains a row with the specified primary key; otherwise, <c>false</c>.</returns>
         public bool Exists(int tableId, string primaryKey)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return false;
-            }
+            var tableModel = GetTable(tableId);
 
-            ITableModel tableModel = TablesCacheDict[tableId];
             return tableModel.KeyToRowIndex.ContainsKey(primaryKey);
         }
 
@@ -349,12 +289,7 @@
         /// <returns>The 1-based row position or 0 if the table does not contain a row with the specified primary key.</returns>
         public int GetKeyPosition(int tableId, string primaryKey)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return 0;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tableId);
 
             return tableModel.KeyToRowIndex.ContainsKey(primaryKey)
                 ? tableModel.KeyToRowIndex[primaryKey] + 1
@@ -385,12 +320,7 @@
         /// <returns>The row data.</returns>
         public object GetRow(int tableId, string primaryKey)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return null;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tableId);
 
             if (!tableModel.KeyToRowIndex.ContainsKey(primaryKey))
             {
@@ -410,33 +340,32 @@
         /// </summary>
         /// <param name="tableId">The table identifier.</param>
         /// <param name="rowIndex">Index of the row.</param>
-        /// <param name="rowData">The row data.</param>
+        /// <param name="row">The row data.</param>
         /// <param name="timestamp">The timestamp.</param>
-        /// <param name="enableCellActions">The enable cell actions.</param>
+        /// <param name="useClearAndLeave">The enable cell actions.</param>
         /// <returns>The changes.</returns>
-        public object SetRow(int tableId, int rowIndex, object rowData, DateTime? timestamp = null, bool? enableCellActions = null)
+        public object SetRow(int tableId, int rowIndex, object[] row, DateTime? timestamp = null, bool useClearAndLeave = false)
         {
             // TODO: issue 33 from project internship-2022
-            if (!TablesCacheDict.ContainsKey(tableId))
+            var tableModel = GetTable(tableId);
+
+            if (useClearAndLeave)
             {
-                return null;
+                ConvertProtocolClearAndleaveToActualValuesForRow(rowIndex, row, tableModel);
             }
 
-            ITableModel tableModel = TablesCacheDict[tableId];
-
-            int pid = tableModel.ColumnIndexesToPids[tableModel.KeyColumnIdx];
+            int pid = tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx];
 
             if (tableModel.GetColumnItemCount(pid) < rowIndex + 1)
             {
-                var data = (object[])rowData;
-                var changes = new int[data.Length];
+                var changes = new int[row.Length];
 
-                tableModel.SetRow(data, timestamp);
+                tableModel.SetRow(row, timestamp);
 
                 return changes;
             }
 
-            return tableModel.SetExistingRow((object[])rowData, rowIndex, timestamp);
+            return tableModel.SetExistingRow(row, rowIndex, timestamp);
         }
 
         /// <summary>
@@ -444,30 +373,22 @@
         /// </summary>
         /// <param name="tableId">The table identifier.</param>
         /// <param name="primaryKey">The primary key.</param>
-        /// <param name="rowData">The row data.</param>
+        /// <param name="row">The row data.</param>
         /// <param name="timestamp">The timestamp.</param>
-        /// <param name="enableCellActions">The enable cell actions.</param>
+        /// <param name="useClearAndLeave">The enable cell actions.</param>
         /// <returns>The changes.</returns>
-        public object SetRow(int tableId, string primaryKey, object rowData, DateTime? timestamp = null, bool? enableCellActions = null)
+        public object SetRow(int tableId, string primaryKey, object[] row, DateTime? timestamp = null, bool useClearAndLeave = false)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
+            var tableModel = GetTable(tableId);
+
+            if (useClearAndLeave)
             {
-                return null;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
-
-            if (!tableModel.KeyToRowIndex.ContainsKey(primaryKey))
-            {
-                var data = (object[])rowData;
-                var changes = new int[data.Length];
-
-                return changes;
+                ConvertProtocolClearAndleaveToActualValuesForRow(primaryKey, row, tableModel);
             }
 
             int rowIndex = tableModel.KeyToRowIndex[primaryKey];
 
-            return tableModel.SetExistingRow((object[])rowData, rowIndex, timestamp);
+            return tableModel.SetExistingRow(row, rowIndex, timestamp);
         }
 
         /// <summary>
@@ -480,12 +401,7 @@
         /// <returns><c>true</c></returns>
         public object FillArray(int tableId, List<object[]> rows, NotifyProtocol.SaveOption option, DateTime? timeInfo = null)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return true;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tableId);
 
             if (option == NotifyProtocol.SaveOption.Full)
             {
@@ -500,7 +416,7 @@
             {
                 foreach (var rowData in rows)
                 {
-                    string pk = (string)rowData[tableModel.KeyColumnIdx];
+                    string pk = (string)rowData[tableModel.PrimaryKeyColumnIdx];
 
                     if (tableModel.KeyToRowIndex.ContainsKey(pk))
                     {
@@ -523,47 +439,33 @@
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
         /// <returns><c>true</c></returns>
-        public object FillArray(int tableId, List<object[]> columns, DateTime? timeInfo = null)
+        public void FillArray(int tableId, object[][] columns, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return true;
-            }
+            var tableModel = GetTable(tableId);
 
-            ITableModel tableModel = TablesCacheDict[tableId];
+           var primaryKeyColumn = FindPrimaryKeyColumn(columns, tableModel);
 
-            int primaryKeyIndex = tableModel.KeyColumnIdx;
+            FillArrayNoDelete(tableId, columns, timeInfo, useClearAndLeave);
 
-            var primaryKeyArray = columns[primaryKeyIndex].Cast<string>().ToArray();
+            var primaryKeysInTable = tableModel.KeyToRowIndex.Keys.ToList();
 
-            FillArrayNoDelete(tableId, columns, timeInfo);
-
-            var keys = tableModel.KeyToRowIndex.Keys.ToList();
-
-            var keysToDelete = keys.Where(primaryKey => !primaryKeyArray.Contains(primaryKey)).ToArray();
+            var keysToDelete = primaryKeysInTable.Except(primaryKeyColumn).ToArray();
 
             DeleteRow(tableId, keysToDelete);
-
-            return true;
         }
 
-        /// <summary>
-        /// Sets the content of the table to the provided content.
-        /// </summary>
-        /// <param name="tableId">The table identifier.</param>
-        /// <param name="columns">The columns.</param>
-        /// <param name="timeInfo">The time information.</param>
-        /// <returns><c>true</c></returns>
-        public object FillArray(int tableId, object[] columns, DateTime? timeInfo = null)
+        private static string[] FindPrimaryKeyColumn(object[][] columns, ITableModel tableModel)
         {
-            var listOfCols = new List<object[]>();
+            var primaryKeyColumn = columns[tableModel.PrimaryKeyColumnIdx];
 
-            foreach (var col in columns)
+            var primaryKeyColumnOfStrings = primaryKeyColumn.OfType<string>().ToArray();
+
+            if (primaryKeyColumn.Length != primaryKeyColumnOfStrings.Length)
             {
-                listOfCols.Add((object[])col);
+                throw new ArgumentException("The primary key column should only contain string values.");
             }
 
-            return FillArray(tableId, listOfCols, timeInfo);
+            return primaryKeyColumnOfStrings;
         }
 
         /// <summary>
@@ -573,50 +475,29 @@
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
         /// <returns><c>true</c> or <see langword="null"/> if the table cache does not contain a model for that table with the specified ID.</returns>
-        public object FillArrayNoDelete(int tableId, List<object[]> columns, DateTime? timeInfo = null)
+        public void FillArrayNoDelete(int tableId, object[][] columns, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
+            var tableModel = GetTable(tableId);
+
+            var primaryKeyColumn = FindPrimaryKeyColumn(columns, tableModel);
+
+            for (int index = 0; index < columns.Length; index++)
             {
-                return null;
+                var columnToSet = columns[index];
+
+                if (useClearAndLeave)
+                {
+                    ConvertProtocolClearAndleaveToActualValuesForColumn(primaryKeyColumn, columnToSet, tableModel, index);
+                }
+
+                tableModel.SetColumn(index, primaryKeyColumn, columnToSet, timeInfo);
             }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
-
-            int primaryKeyIndex = tableModel.KeyColumnIdx;
-
-            var primaryKeyArray = columns[primaryKeyIndex].Cast<string>().ToArray();
-
-            for (int index = 0; index < columns.Count; index++)
-            {
-                tableModel.SetColumn(index, primaryKeyArray, columns[index], timeInfo);
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Fills the array no delete.
-        /// </summary>
-        /// <param name="tableId">The table identifier.</param>
-        /// <param name="columns">The columns.</param>
-        /// <param name="timeInfo">The time information.</param>
-        /// <returns><c>true</c> or <see langword="null"/> if the table cache does not contain a model for that table with the specified ID.</returns>
-        public object FillArrayNoDelete(int tableId, object[] columns, DateTime? timeInfo = null)
-        {
-            var listOfCols = new List<object[]>();
-
-            foreach (var col in columns)
-            {
-                listOfCols.Add((object[])col);
-            }
-
-            return FillArrayNoDelete(tableId, listOfCols, timeInfo);
         }
 
         /// <summary>
         /// Sets the specified cells of a column with the provided values.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tablePid">The table identifier.</param>
         /// <param name="columnPid">The column identifier.</param>
         /// <param name="primaryKeys">The primary keys.</param>
         /// <param name="values">The values.</param>
@@ -624,17 +505,14 @@
         /// <param name="useClearAndLeave">A boolean indicating if values uses protocol.Leave and protocol.Clear.</param>
         /// <returns><c>true</c></returns>
         /// <exception cref="ArgumentException">There should be as many primary keys as values or instead only one value.</exception>
-        public void FillArrayWithColumn(int tableId, int columnPid, string[] primaryKeys, object[] values, DateTime? timeInfo = null, bool useClearAndLeave = false)
+        public void FillArrayWithColumn(int tablePid, int columnPid, string[] primaryKeys, object[] values, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
             if (primaryKeys.Length != values.Length && (primaryKeys.Length == values.Length || values.Length != 1))
             {
                 throw new ArgumentException("There should be as many primary keys as values or instead only one value.");
             }
 
-            if (!TablesCacheDict.TryGetValue(tableId, out var tableModel))
-            {
-                throw new ArgumentException($"Table with ID '{tableId}' does not exist.");
-            }
+            var tableModel = GetTable(tablePid);
 
             int columnIndex = GetColumnIndex(tableModel, columnPid);
 
@@ -653,7 +531,7 @@
 
             if (useClearAndLeave)
             {
-                ConvertProtocolClearAndleaveToActualValues(primaryKeys, values, tableModel, columnIndex);
+                ConvertProtocolClearAndleaveToActualValuesForColumn(primaryKeys, values, tableModel, columnIndex);
             }
 
             tableModel.SetColumn(columnIndex, primaryKeys, values, timeInfo);
@@ -673,19 +551,63 @@
             return columnIndex;
         }
 
-        private static void ConvertProtocolClearAndleaveToActualValues(string[] primaryKeys, object[] values, ITableModel tableModel, int columnIndex)
+        private static void ConvertProtocolClearAndleaveToActualValuesForRow(string primaryKey, object[] row, ITableModel tableModel)
         {
-            for (int i = 0; i < values.Length; i++)
+            object[] existingRow = null;
+
+            if (tableModel.KeyToRowIndex.Keys.Contains(primaryKey))
             {
-                if (values[i].IsProtocolClear())
+                existingRow = tableModel.Row(primaryKey);
+            }
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                if (row[i].IsProtocolClear())
                 {
-                    values[i] = null;
+                    row[i] = null;
                 }
-                else if (values[i].IsProtocolLeave() && tableModel.KeyToRowIndex.TryGetValue(primaryKeys[i], out int rowIndex))
+                else if (row[i].IsProtocolLeave() && existingRow != null)
+                {
+                    row[i] = existingRow[i];
+                }
+            }
+        }
+
+        private static void ConvertProtocolClearAndleaveToActualValuesForRow(int rowIndex, object[] row, ITableModel tableModel)
+        {
+            object[] existingRow = null;
+
+            if (tableModel.KeyToRowIndex.Values.Contains(rowIndex))
+            {
+                existingRow = tableModel.Row(rowIndex);
+            }
+
+            for (int i = 0; i < row.Length; i++)
+            {
+                if (row[i].IsProtocolClear())
+                {
+                    row[i] = null;
+                }
+                else if (row[i].IsProtocolLeave() && existingRow != null)
+                {
+                    row[i] = existingRow[i];
+                }
+            }
+        }
+
+        private static void ConvertProtocolClearAndleaveToActualValuesForColumn(string[] primaryKeys, object[] column, ITableModel tableModel, int columnIndex)
+        {
+            for (int i = 0; i < column.Length; i++)
+            {
+                if (column[i].IsProtocolClear())
+                {
+                    column[i] = null;
+                }
+                else if (column[i].IsProtocolLeave() && tableModel.KeyToRowIndex.TryGetValue(primaryKeys[i], out int rowIndex))
                 {
                     var existingRow = tableModel.Row(rowIndex);
                     var existingValue = existingRow[columnIndex];
-                    values[i] = existingValue;
+                    column[i] = existingValue;
                 }
             }
         }
@@ -714,7 +636,7 @@
         /// <returns>A jagged array where each entry represents a column.</returns>
         public object[][] GetTableColumns(int tableId, uint[] columnIndexes)
         {
-            var tableModel = GetTableModel(tableId);
+            var tableModel = GetTable(tableId);
 
             object[][] columns = new object[columnIndexes.Length][];
 
@@ -747,7 +669,7 @@
         /// <returns>The column data.</returns>
         public object[] GetColumn(int tableId, int columnPid)
         {
-            var tableModel = GetTableModel(tableId);
+            var tableModel = GetTable(tableId);
 
             return tableModel.Column(columnPid);
         }
@@ -755,16 +677,11 @@
         /// <summary>
         /// Gets the number of rows present in the specified table.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tablePid">The table identifier.</param>
         /// <returns>The number of rows the table contains. If the table was not found, a value of -1 is returned.</returns>
-        public int RowCount(int tableId)
+        public int RowCount(int tablePid)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return -1;
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tablePid);
 
             return tableModel.KeyToRowIndex.Count;
         }
@@ -772,16 +689,11 @@
         /// <summary>
         /// Gets the primary keys of the specified table.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tablePid">The table identifier.</param>
         /// <returns>The primary keys of the rows present in the table.</returns>
-        public string[] GetKeys(int tableId)
+        public string[] GetKeys(int tablePid)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                return new string[0];
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tablePid);
 
             return tableModel.KeyToRowIndex.Keys.ToArray();
         }
@@ -789,62 +701,76 @@
         /// <summary>
         /// Retrieves the value of a cell in the table specified by the 1-based row and column position.
         /// </summary>
-        /// <param name="iID">The ID of the table parameter.</param>
-        /// <param name="iX">The 1-based position of the row.</param>
-        /// <param name="iY">The 1-based position of the column.</param>
+        /// <param name="tablePid">The ID of the table parameter.</param>
+        /// <param name="oneBasedRowIndex">The 1-based position of the row.</param>
+        /// <param name="oneBasedColumnIndex">The 1-based position of the column.</param>
         /// <returns>The value of the cell.</returns>
-        public object GetParameterIndex(int iID, int iX, int iY)
+        public object GetParameterIndex(int tablePid, int oneBasedRowIndex, int oneBasedColumnIndex)
         {
-            if (!TablesCacheDict.ContainsKey(iID) || iX < 1 || iY < 1)
+            if (oneBasedRowIndex < 1)
             {
-                return null;
+                throw new ArgumentException("Row index must be 1 or higher.", nameof(oneBasedRowIndex));
             }
 
-            ITableModel tableModel = TablesCacheDict[iID];
-
-            int columnsNumber = tableModel.ColumnCount;
-            int rowsNumber = RowCount(iID);
-
-            if (iX > rowsNumber || iY > columnsNumber)
+            if (oneBasedColumnIndex < 1)
             {
-                return null;
+                throw new ArgumentException("Column index must be 1 or higher.", nameof(oneBasedColumnIndex));
             }
 
-            var row = tableModel.Row(iX - 1);
+            var tableModel = GetTable(tablePid);
 
-            return row[iY - 1];
+            if (oneBasedColumnIndex > tableModel.ColumnCount)
+            {
+                throw new ArgumentException("Column index exceeds number of columns.", nameof(oneBasedColumnIndex));
+            }
+
+            if (oneBasedRowIndex > tableModel.RowCount)
+            {
+                throw new ArgumentException("Row index exceeds number of rows", nameof(oneBasedRowIndex));
+            }
+
+            var row = tableModel.Row(oneBasedRowIndex - 1);
+
+            return row[oneBasedColumnIndex - 1];
         }
 
         /// <summary>
         /// Sets the value of a cell in a table, identified by its 1-based row and column position, with the specified value.
         /// </summary>
-        /// <param name="iID">The ID of the table parameter.</param>
-        /// <param name="iX">The 1-based position of the row.</param>
-        /// <param name="iY">The 1-based position of the column.</param>
+        /// <param name="tablePid">The ID of the table parameter.</param>
+        /// <param name="oneBasedRowIndex">The 1-based position of the row.</param>
+        /// <param name="oneBasedColumnIndex">The 1-based position of the column.</param>
         /// <param name="value">The value to set.</param>
         /// <param name="timeInfo">Time stamp.</param>
         /// <returns>Whether the cell value has changed. 'true' indicates change; otherwise, 'false'.</returns>
-        public bool SetParameterIndex(int iID, int iX, int iY, object value, DateTime? timeInfo = null)
+        public bool SetParameterIndex(int tablePid, int oneBasedRowIndex, int oneBasedColumnIndex, object value, DateTime? timeInfo = null)
         {
-            if (!TablesCacheDict.ContainsKey(iID) || iX < 1 || iY < 2) // The primary key can never be updated.
+            if (oneBasedRowIndex < 1)
             {
-                return false;
+                throw new ArgumentException("Row index must be 1 or higher.", nameof(oneBasedRowIndex));
             }
 
-            ITableModel tableModel = TablesCacheDict[iID];
-
-            int columnsNumber = tableModel.ColumnCount;
-            int rowsNumber = RowCount(iID);
-
-            if (iX > rowsNumber || iY > columnsNumber)
+            if (oneBasedColumnIndex < 2)
             {
-                return false;
+                throw new ArgumentException("Column index must be 2 or higher.", nameof(oneBasedColumnIndex));
             }
 
-            var row = tableModel.Row(iX - 1);
-            row[iY - 1] = value;
+            var tableModel = GetTable(tablePid);
 
-            tableModel.SetExistingRow(row, iX - 1, timeInfo);
+            if (oneBasedColumnIndex > tableModel.ColumnCount)
+            {
+                throw new ArgumentException("Column index exceeds number of columns.", nameof(oneBasedColumnIndex));
+            }
+
+            if (oneBasedRowIndex > tableModel.RowCount)
+            {
+                throw new ArgumentException("Row index exceeds number of rows", nameof(oneBasedRowIndex));
+            }
+
+            var row = tableModel.Row(oneBasedRowIndex - 1);
+            row[oneBasedColumnIndex - 1] = value;
+
+            tableModel.SetExistingRow(row, oneBasedRowIndex - 1, timeInfo);
 
             return true;
         }
@@ -896,62 +822,68 @@
         /// <summary>
         /// Retrieves the value of a cell in the table specified by the primary key and 1-based column position.
         /// </summary>
-        /// <param name="iPID">The ID of the table parameter.</param>
-        /// <param name="key">The primary key of the row.</param>
-        /// <param name="iY">The 1-based position of the column.</param>
+        /// <param name="tablePid">The ID of the table parameter.</param>
+        /// <param name="primaryKey">The primary key of the row.</param>
+        /// <param name="oneBasedColumnIndex">The 1-based position of the column.</param>
         /// <returns>The value of the cell.</returns>
-        public object GetParameterIndexByKey(int iPID, string key, int iY)
+        public object GetParameterIndexByKey(int tablePid, string primaryKey, int oneBasedColumnIndex)
         {
-            if (!TablesCacheDict.ContainsKey(iPID) || !Exists(iPID, key) || iY < 1)
+            if (!Exists(tablePid, primaryKey))
             {
-                return null;
+               throw new ArgumentException($"The table with ID '{tablePid}' does not contain a row with primary key '{primaryKey}'", nameof(primaryKey));
             }
 
-            ITableModel tableModel = TablesCacheDict[iPID];
-
-            int columnsNumber = tableModel.ColumnCount;
-
-            if (iY > columnsNumber)
+            if (oneBasedColumnIndex < 1)
             {
-                return null;
+                throw new ArgumentException("Column index must be 1 or higher", nameof(oneBasedColumnIndex));
             }
 
-            var row = tableModel.Row(key);
+            var tableModel = GetTable(tablePid);
 
-            return row[iY - 1];
+            if (oneBasedColumnIndex > tableModel.ColumnCount)
+            {
+                throw new ArgumentException("Column index exceeds number of columns.", nameof(oneBasedColumnIndex));
+            }
+
+            var row = tableModel.Row(primaryKey);
+
+            return row[oneBasedColumnIndex - 1];
         }
 
         /// <summary>
         /// Sets the value of a cell in a table, identified by the primary key of the row and column position, with the specified value.
         /// </summary>
-        /// <param name="iID">The ID of the table parameter.</param>
-        /// <param name="key">The primary key of the row.</param>
-        /// <param name="iY">The 1-based position of the column.</param>
+        /// <param name="tablePid">The ID of the table parameter.</param>
+        /// <param name="primaryKey">The primary key of the row.</param>
+        /// <param name="oneBasedColumnIndex">The 1-based position of the column.</param>
         /// <param name="value">The value to set.</param>
         /// <param name="timeInfo">Time stamp.</param>
         /// <returns>Whether the cell value has changed. 'true' indicates change; otherwise, 'false'.</returns>
-        public bool SetParameterIndexByKey(int iID, string key, int iY, object value, DateTime? timeInfo = null)
+        public bool SetParameterIndexByKey(int tablePid, string primaryKey, int oneBasedColumnIndex, object value, DateTime? timeInfo = null)
         {
-            if (!TablesCacheDict.ContainsKey(iID) || !Exists(iID, key) || iY < 2) // The primary key can never be updated.
+            if (!Exists(tablePid, primaryKey))
             {
-                return false;
+                throw new ArgumentException($"The table with ID '{tablePid}' does not contain a row with primary key '{primaryKey}'", nameof(primaryKey));
             }
 
-            ITableModel tableModel = TablesCacheDict[iID];
-
-            int columnsNumber = tableModel.ColumnCount;
-
-            if (iY > columnsNumber)
+            if (oneBasedColumnIndex < 2)
             {
-                return false;
+                throw new ArgumentException("Column index must be 2 or higher", nameof(oneBasedColumnIndex));
             }
 
-            var row = tableModel.Row(key);
-            row[iY - 1] = value;
+            var tableModel = GetTable(tablePid);
 
-            int iX = tableModel.KeyToRowIndex[key] + 1;
+            if (oneBasedColumnIndex > tableModel.ColumnCount)
+            {
+                throw new ArgumentException("Column index exceeds number of columns.", nameof(oneBasedColumnIndex));
+            }
 
-            tableModel.SetExistingRow(row, iX - 1, timeInfo);
+            var row = tableModel.Row(primaryKey);
+            row[oneBasedColumnIndex - 1] = value;
+
+            int rowIndex = tableModel.KeyToRowIndex[primaryKey];
+
+            tableModel.SetExistingRow(row, rowIndex, timeInfo);
 
             return true;
         }
@@ -1006,14 +938,9 @@
         /// <param name="tableId">The ID of the table parameter.</param>
         /// <param name="names">The names of the columns.</param>
         /// <param name="pids">The pids of the columns.</param>
-        public void GetColumnsNamesAndPids(ProtocolCache cache, int tableId, out string[] names, out int[] pids)
+        public void GetColumnsNamesAndPids(IProtocolCache cache, int tableId, out string[] names, out int[] pids)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
-            {
-                throw new ArgumentException($"Invalid table ID '{tableId}'", nameof(tableId));
-            }
-
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tableId);
 
             int size = tableModel.ColumnCount;
 
@@ -1034,28 +961,9 @@
             names = columnsNames;
         }
 
-        /// <summary>
-        /// Determines whether the table with the specified table identifier is empty.
-        /// </summary>
-        /// <param name="tableId">The table identifier.</param>
-        /// <returns>
-        ///   <c>true</c> if the table with the specified table identifier is empty; otherwise, <c>false</c>.
-        /// </returns>
-        private bool IsTableEmpty(int tableId)
+        private object InternalGetRow(int tablePid, int rowIndex)
         {
-            if (TablesCacheDict.ContainsKey(tableId))
-            {
-                ITableModel tableModel = TablesCacheDict[tableId];
-
-                return tableModel.KeyToRowIndex.Count == 0;
-            }
-
-            return true;
-        }
-
-        private object InternalGetRow(int tableId, int rowIndex)
-        {
-            ITableModel tableModel = TablesCacheDict[tableId];
+            var tableModel = GetTable(tablePid);
 
             int columnsNumber = tableModel.ColumnCount;
 

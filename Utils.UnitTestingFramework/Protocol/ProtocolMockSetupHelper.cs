@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Moq;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
@@ -228,58 +229,98 @@
             {
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>(), It.IsAny<bool>()))
                    .Returns(
-                   (int tableId, int rowIndex, object rowData, DateTime timestamp, bool? enableCellActions) =>
+                   (int tableId, int rowIndex, object rowData, DateTime timestamp, bool useClearAndLeave) =>
                    {
-                       return tablesCache.SetRow(tableId, rowIndex, rowData, timestamp, enableCellActions);
+                       if (!(rowData is object[] row))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, rowIndex, row, timestamp, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>()))
                    .Returns(
                    (int tableId, int rowIndex, object rowData) =>
                    {
-                       return tablesCache.SetRow(tableId, rowIndex, rowData);
+                       if (!(rowData is object[] row))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, rowIndex, row);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<bool>()))
                    .Returns(
-                   (int tableId, int rowIndex, object rowData, bool? enableCellActions) =>
+                   (int tableId, int rowIndex, object rowData, bool useClearAndLeave) =>
                    {
-                       return tablesCache.SetRow(tableId, rowIndex, rowData, null, enableCellActions);
+                       if (!(rowData is object[] row))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, rowIndex, row, null, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
                    .Returns(
                    (int tableId, int rowIndex, object rowData, DateTime timestamp) =>
                    {
-                       return tablesCache.SetRow(tableId, rowIndex, rowData, timestamp);
+                       if (!(rowData is object[] row))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, rowIndex, row, timestamp);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTime>(), It.IsAny<bool>()))
                    .Returns(
-                   (int tableId, string primaryKey, object rowData, DateTime timestamp, bool? enableCellActions) =>
+                   (int tableId, string primaryKey, object rowData, DateTime timestamp, bool enableCellActions) =>
                    {
-                       return tablesCache.SetRow(tableId, primaryKey, rowData, timestamp, enableCellActions);
+                       if (!(rowData is object[] rowValues))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp, enableCellActions);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>()))
                    .Returns(
                    (int tableId, string primaryKey, object rowData) =>
                    {
-                       return tablesCache.SetRow(tableId, primaryKey, rowData);
+                       if (!(rowData is object[] rowValues))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, primaryKey, rowValues);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<bool>()))
                    .Returns(
-                   (int tableId, string primaryKey, object rowData, bool? enableCellActions) =>
+                   (int tableId, string primaryKey, object rowData, bool enableCellActions) =>
                    {
-                       return tablesCache.SetRow(tableId, primaryKey, rowData, null, enableCellActions);
+                       if (!(rowData is object[] rowValues))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, primaryKey, rowValues, null, enableCellActions);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTime>()))
                    .Returns(
                    (int tableId, string primaryKey, object rowData, DateTime timestamp) =>
                    {
-                       return tablesCache.SetRow(tableId, primaryKey, rowData, timestamp);
+                       if (!(rowData is object[] rowValues))
+                       {
+                           throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
+                       }
+
+                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp);
                    });
             }
 
@@ -303,56 +344,85 @@
                     .Returns(
                     (int tableId, List<object[]> columns) =>
                     {
-                        return tablesCache.FillArray(tableId, columns);
+                        tablesCache.FillArray(tableId, columns.ToArray());
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<List<object[]>>(), It.IsAny<DateTime?>()))
                     .Returns(
                     (int tableId, List<object[]> columns, DateTime? timeInfo) =>
                     {
-                        return tablesCache.FillArray(tableId, columns, timeInfo);
+                        tablesCache.FillArray(tableId, columns.ToArray(), timeInfo);
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<object[]>()))
                     .Returns(
                     (int tableId, object[] columns) =>
                     {
-                        return tablesCache.FillArray(tableId, columns);
+                        if (columns.Any(columnValues => !(columnValues is object[])))
+                        {
+                            throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
+                        }
+
+                        tablesCache.FillArray(tableId, columns.Cast<object[]>().ToArray());
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<object[]>(), It.IsAny<DateTime?>()))
                     .Returns(
                     (int tableId, object[] columns, DateTime? timeInfo) =>
                     {
-                        return tablesCache.FillArray(tableId, columns, timeInfo);
+                        if (columns.Any(columnValues => !(columnValues is object[])))
+                        {
+                            throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
+                        }
+
+                        tablesCache.FillArray(tableId, columns.Cast<object[]>().ToArray(), timeInfo);
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArrayNoDelete(It.IsAny<int>(), It.IsAny<List<object[]>>()))
                     .Returns(
                     (int tableId, List<object[]> columns) =>
                     {
-                        return tablesCache.FillArrayNoDelete(tableId, columns);
+                        tablesCache.FillArrayNoDelete(tableId, columns.ToArray());
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArrayNoDelete(It.IsAny<int>(), It.IsAny<List<object[]>>(), It.IsAny<DateTime?>()))
                     .Returns(
                     (int tableId, List<object[]> columns, DateTime? timeInfo) =>
                     {
-                        return tablesCache.FillArrayNoDelete(tableId, columns, timeInfo);
+                        tablesCache.FillArrayNoDelete(tableId, columns.ToArray(), timeInfo);
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArrayNoDelete(It.IsAny<int>(), It.IsAny<object[]>()))
                     .Returns(
                     (int tableId, object[] columns) =>
                     {
-                        return tablesCache.FillArrayNoDelete(tableId, columns);
+                        if (columns.Any(columnValues => !(columnValues is object[])))
+                        {
+                            throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
+                        }
+
+                        tablesCache.FillArrayNoDelete(tableId, columns.Cast<object[]>().ToArray());
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArrayNoDelete(It.IsAny<int>(), It.IsAny<object[]>(), It.IsAny<DateTime?>()))
                     .Returns(
                     (int tableId, object[] columns, DateTime? timeInfo) =>
                     {
-                        return tablesCache.FillArrayNoDelete(tableId, columns, timeInfo);
+                        if (columns.Any(columnValues => !(columnValues is object[])))
+                        {
+                            throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
+                        }
+
+                        tablesCache.FillArrayNoDelete(tableId, columns.Cast<object[]>().ToArray(), timeInfo);
+
+                        return null; // Irrelevant return value.
                     });
 
                 mock.Setup(p => p.FillArrayWithColumn(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object[]>(), It.IsAny<object[]>(), It.IsAny<DateTime?>()))

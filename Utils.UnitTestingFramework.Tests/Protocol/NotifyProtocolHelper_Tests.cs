@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol
 {
     using System;
 
@@ -6,6 +6,8 @@
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -318,7 +320,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_SetRow_IsEqual()
+        public void SetRow_UseClearAndLeave()
         {
             // Arrange
 
@@ -333,23 +335,26 @@
             string col4 = "Row 1 4th Col";
             string col5 = "Row 1 5th Col";
 
-            object[] rowDetails = new object[] { tableID, primaryKey1 };
+            object[] rowDetails = new object[] { tableID, primaryKey1, DateTime.Now, true };
 
-            object[] rowData = new object[] { null, col2, col3, col4, col5 };
+            object[] rowData = new object[] { primaryKey1, col2, col3, col4, col5 };
+
+            var outputAddRow1 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, primaryKey1);
+            mock.Object.NotifyProtocol((int)NotifyType.NT_SET_ROW, rowDetails, rowData);
 
             // Act
-            var outputAddRow1 = mock.Object.NotifyProtocol(149, tableID, primaryKey1); // AddRow
-            var outputSetRow1 = (int[])mock.Object.NotifyProtocol(225, rowDetails, rowData); // SetRow
-            var outputGetRow1 = (object[])mock.Object.NotifyProtocol(215, rowDetails, null); // GetRow
+            rowData[1] = Constants.PROTOCOL_CLEAR;
+            rowData[2] = Constants.PROTOCOL_LEAVE;
+            rowData[3] = "Row 1 4th Col new value";
+
+            mock.Object.NotifyProtocol((int)NotifyType.NT_SET_ROW, rowDetails, rowData);
 
             // Assert
+            var outputGetRow1 = (object[])mock.Object.NotifyProtocol((int)NotifyType.NT_GET_ROW, rowDetails, null);
+
             Assert.AreEqual(1, outputAddRow1);
 
-            int[] setOutputArray = { 0, 1, 1, 1, 1 };
-
-            outputSetRow1.Should().BeEquivalentTo(setOutputArray);
-
-            string[] row = { "Row 1 PK", "Row 1 2nd Col", "Row 1 3rd Col", "Row 1 4th Col", "Row 1 5th Col" };
+            string[] row = { "Row 1 PK", null, "Row 1 3rd Col", "Row 1 4th Col new value", "Row 1 5th Col" };
 
             outputGetRow1.Should().BeEquivalentTo(row);
         }
@@ -405,7 +410,6 @@
         public void NotifyProtocolTest_FillArrayNoDelete_IsEqual()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             int tableID = 900;
@@ -689,7 +693,7 @@
 
             object[] info = new object[] { tableID, 902, new object[] { true } }; // Column 902 (2nd column), with protocol_leave and protocol_clear
             object[] primaryKeys = new object[] { primaryKey1, "Row 2 PK", "Row 3 PK" };
-            object[] columnValues = new object[] { double.PositiveInfinity, "new value 2.1", Constants.Constants.PROTOCOL_CLEAR };
+            object[] columnValues = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.1", Constants.PROTOCOL_CLEAR };
 
             // Act
             mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, info, new object[] { primaryKeys, columnValues });
@@ -717,8 +721,8 @@
 
             object[] info = new object[] { tableID, 902, 904, new object[] { true } }; // Column 902 & 903, with protocol_leave and protocol_clear
             object[] primaryKeys = new object[] { "Row 1 PK", "Row 2 PK", "Row 3 PK" };
-            object[] column1Values = new object[] { double.PositiveInfinity, "new value 2.1",  Constants.Constants.PROTOCOL_CLEAR };
-            object[] column2Values = new object[] { double.PositiveInfinity, "new value 2.3", Constants.Constants.PROTOCOL_CLEAR };
+            object[] column1Values = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.1",  Constants.PROTOCOL_CLEAR };
+            object[] column2Values = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.3", Constants.PROTOCOL_CLEAR };
 
             // Act
             mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, info, new object[] { primaryKeys, column1Values, column2Values });

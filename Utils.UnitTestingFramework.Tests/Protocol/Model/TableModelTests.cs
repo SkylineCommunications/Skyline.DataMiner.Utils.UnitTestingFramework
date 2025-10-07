@@ -3,8 +3,7 @@
     using System;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
     [TestClass]
     public class TableModelTests

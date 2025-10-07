@@ -1,12 +1,12 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Parameter
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation
 {
     using System.Collections.Generic;
 
     using Skyline.DataMiner.CICD.Models.Protocol.Enums;
 
-    internal static class HandlerParameterFactory
+    internal static class ModelCreatorFactory
     {
-        public static IParameterHandler GetHandlerForType(EnumParamType paramType, HashSet<int> excludedPids)
+        public static IParameterHandler Create(EnumParamType paramType, HashSet<int> excludedPids)
         {
             switch (paramType)
             {

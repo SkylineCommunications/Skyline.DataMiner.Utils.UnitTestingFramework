@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestFramework.Tests.Protocol
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol
 {
     using System;
     using System.Collections.Generic;
@@ -145,11 +145,8 @@
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(800, row1);
-
-            // Assert
-            Assert.AreEqual(0, rowsNumber1);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.AddRow(800, row1));
         }
 
         [TestMethod]
@@ -223,11 +220,8 @@
 
             var mock = new SLProtocolMock(path);
 
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(800, "skyline1");
-
-            // Assert
-            Assert.AreEqual(0, rowsNumber1);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.AddRow(800, "skyline1"));
         }
 
         [TestMethod]
@@ -250,23 +244,16 @@
         public void ExistsTest_ValidAddRow_InvalidTableId()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
-            var exists = mock.Object.Exists(800, "skyline1");
-
-            // Assert
-            Assert.AreEqual(1, rowsNumber1);
-            Assert.IsFalse(exists);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.Exists(800, "skyline1"));
         }
 
         [TestMethod]
         public void ExistsTest_ValidAddRow_PKDoesNotExist()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             // Act
@@ -324,11 +311,8 @@
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
-            // Act
-            var primaryKey = mock.Object.AddRowReturnKey(800, row1);
-
-            // Assert
-            Assert.IsNull(primaryKey);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.AddRowReturnKey(800, row1));
         }
 
         [TestMethod]
@@ -568,18 +552,10 @@
         public void DeleteRowTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "one", "one", 3, 4, 5 };
-
-            // Act
-            var pk1 = mock.Object.AddRowReturnKey(900, row1);
-            var deleteRow = mock.Object.DeleteRow(800, 0);
-
-            // Assert
-            Assert.AreEqual("one", pk1);
-            Assert.AreEqual(0, deleteRow);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.DeleteRow(800, 0));
         }
 
         [TestMethod]
@@ -805,18 +781,10 @@
         public void DeleteRowPrimaryKeyTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "one", "one", 3, 4, 5 };
-
-            // Act
-            var pk1 = mock.Object.AddRowReturnKey(900, row1);
-            var deleteRow = mock.Object.DeleteRow(800, "one");
-
-            // Assert
-            Assert.AreEqual("one", pk1);
-            Assert.AreEqual(0, deleteRow);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.DeleteRow(800, "one"));
         }
 
         [TestMethod]
@@ -883,32 +851,12 @@
         public void DeleteRowPKArrayTest_DeleteInexistentTableId_ReturnsZero()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "one", "one", 3, 4, 5 };
-            object[] row2 = new object[] { "two", "two", 6, 7, 8 };
-            object[] row3 = new object[] { "three", "three", 6, 7, 8 };
-            object[] row4 = new object[] { "four", "four", 6, 7, 8 };
             string[] toDelete = new string[] { "one", "two", "seven" };
 
-            // Act
-            mock.Object.ClearAllKeys(900);
-
-            var pk1 = mock.Object.AddRowReturnKey(900, row1);
-            var pk2 = mock.Object.AddRowReturnKey(900, row2);
-            var pk3 = mock.Object.AddRowReturnKey(900, row3);
-            var pk4 = mock.Object.AddRowReturnKey(900, row4);
-
-            var deleteRow1 = mock.Object.DeleteRow(800, toDelete);
-
-            // Assert
-            Assert.AreEqual("one", pk1);
-            Assert.AreEqual("two", pk2);
-            Assert.AreEqual("three", pk3);
-            Assert.AreEqual("four", pk4);
-
-            Assert.AreEqual(0, deleteRow1);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.DeleteRow(800, toDelete));
         }
 
         [TestMethod]
@@ -968,21 +916,10 @@
         public void ClearAllKeysTest_InexistentTableId_ReturnsNegativeOne()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "one", "one", 3, 4, 5 };
-            object[] row2 = new object[] { "two", "two", 6, 7, 8 };
-
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(900, row1);
-            var rowsNumber2 = mock.Object.AddRow(900, row2);
-            var rowsLeft = mock.Object.ClearAllKeys(800);
-
-            // Assert
-            Assert.AreEqual(1, rowsNumber1);
-            Assert.AreEqual(2, rowsNumber2);
-            Assert.AreEqual(-1, rowsLeft);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.ClearAllKeys(800));
         }
 
         [TestMethod]
@@ -1033,51 +970,32 @@
         public void GetKeyPositionTest_InvalidTableId_ReturnsZero()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
-            var keyPosition1 = mock.Object.GetKeyPosition(800, "skyline1");
-
-            // Assert
-            Assert.AreEqual(1, rowsNumber1);
-            Assert.AreEqual(0, keyPosition1);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.GetKeyPosition(800, "skyline1"));
         }
 
         [TestMethod]
         public void GetKeyPositionTest_InexistentKey_ReturnsZero()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
-            var keyPosition1 = mock.Object.GetKeyPosition(800, "skyline2");
-
-            // Assert
-            Assert.AreEqual(1, rowsNumber1);
-            Assert.AreEqual(0, keyPosition1);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.GetKeyPosition(800, "skyline2"));
         }
 
         [TestMethod]
         public void SetRowWithIndexTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
-            var changes = mock.Object.SetRow(800, 0, row);
-            mock.Object.GetRow(900, 0);
-
-            // Assert
-            Assert.AreEqual(1, rowsNumber1);
-            Assert.IsNull(changes);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.SetRow(800, 0, row));
         }
 
         [TestMethod]
@@ -1164,42 +1082,24 @@
         public void SetRowWithPKTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
-            // Act
-            var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
-            var changes = mock.Object.SetRow(800, "skyline1", row);
-            mock.Object.GetRow(900, 0);
-
-            // Assert
-            Assert.AreEqual(1, rowsNumber1);
-            Assert.IsNull(changes);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.SetRow(800, "skyline1", row));
         }
 
         [TestMethod]
         public void SetRowWithPKTest_InexistentRowIndex_ReturnsArrayWithZeros()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
-            // Act
-            mock.Object.ClearAllKeys(900);
-            var rowsNumber1 = mock.Object.AddRow(900, "skyline1");
-            int[] changes = (int[])mock.Object.SetRow(900, "skyline2", row);
-
-            // Assert
-            Assert.AreEqual(1, rowsNumber1);
-            Assert.AreEqual(0, changes[0]);
-            Assert.AreEqual(0, changes[1]);
-            Assert.AreEqual(0, changes[2]);
-            Assert.AreEqual(0, changes[3]);
-            Assert.AreEqual(0, changes[4]);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.SetRow(900, "skyline2", row));
         }
 
         [TestMethod]
@@ -1325,20 +1225,10 @@
         public void GetRowWithPKTest_InexistentTableId_IsNull()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
-            object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
-
-            // Act
-            mock.Object.ClearAllKeys(900);
-            mock.Object.AddRow(900, row1);
-            mock.Object.AddRow(900, row2);
-            object rowOutput = mock.Object.GetRow(800, "skyline1");
-
-            // Assert
-            Assert.IsNull(rowOutput);
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.GetRow(800, "skyline1"));
         }
 
         [TestMethod]
@@ -1600,9 +1490,9 @@
             // Assert
             Assert.AreEqual("skyline1", rowOutput0[0]);
             Assert.AreEqual("2ndColumnSkyline1.2", rowOutput0[1]);
-            Assert.AreEqual(1, rowOutput0[2]);
-            Assert.AreEqual(2, rowOutput0[3]);
-            Assert.AreEqual(3, rowOutput0[4]);
+            Assert.IsNull(rowOutput0[2]);
+            Assert.IsNull(rowOutput0[3]);
+            Assert.IsNull(rowOutput0[4]);
 
             Assert.AreEqual("skyline2", rowOutput1[0]);
             Assert.AreEqual("2ndColumnSkyline2", rowOutput1[1]);

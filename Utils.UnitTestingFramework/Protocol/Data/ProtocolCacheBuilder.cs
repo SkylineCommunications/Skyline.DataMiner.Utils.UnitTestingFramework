@@ -9,7 +9,7 @@
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.CICD.Models.Protocol.Read.Interfaces;
 
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Parameter;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
     internal static class ProtocolCacheBuilder
     {
@@ -37,14 +37,14 @@
                     cache.Parameters.LoadParameterName(parameterName, parameterId);
                 }
 
-                var handler = HandlerParameterFactory.GetHandlerForType(paramType, excludedPids);
-                handler.LoadDefaultForParameter(cache, parameter);
+                var modelCreator = ModelCreatorFactory.Create(paramType, excludedPids);
+                modelCreator.CreateModelAndAddToCache(cache, parameter);
             }
 
             return cache;
         }
 
-        private static IProtocolModel GetProtocolModel(string customPathToProtocolXml)
+        internal static IProtocolModel GetProtocolModel(string customPathToProtocolXml)
         {
             IProtocolModel protocolModel;
             if (customPathToProtocolXml == null)

@@ -1,6 +1,6 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants
 {
-    public static class ObjectExtensions
+    internal static class ObjectExtensions
     {
         public static bool IsProtocolClear(this object argument)
         {

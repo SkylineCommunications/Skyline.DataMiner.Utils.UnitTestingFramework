@@ -1,15 +1,15 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Parameter
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation
 {
     using System.Collections.Generic;
 
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    internal class ReadParameterHandler : GeneralParameterHandler
+    internal class WriteParameterHandler : GeneralParameterHandler
     {
         private readonly HashSet<int> excludedPids;
 
-        public ReadParameterHandler(HashSet<int> excludedPids)
+        public WriteParameterHandler(HashSet<int> excludedPids)
         {
             this.excludedPids = excludedPids;
         }
@@ -23,9 +23,7 @@
                 return;
             }
 
-            string defaultValue = parameter.Interprete.DefaultValue?.Value;
-
-            cache.Parameters.SetParameter(parameterId, defaultValue, null, false);
+            cache.Parameters.SetParameter(parameterId, null, null, false);
         }
 
         public override void ProcessDouble(IProtocolCache cache, IParamsParam parameter)
@@ -37,16 +35,7 @@
                 return;
             }
 
-            string defaultValueString = parameter.Interprete.DefaultValue?.Value;
-
-            if (System.Int32.TryParse(defaultValueString, out int defaultValue))
-            {
-                cache.Parameters.SetParameter(parameterId, defaultValue, null, false);
-            }
-            else
-            {
-                cache.Parameters.SetParameter(parameterId, null, null, false);
-            }
+            cache.Parameters.SetParameter(parameterId, null, null, false);
         }
     }
 }

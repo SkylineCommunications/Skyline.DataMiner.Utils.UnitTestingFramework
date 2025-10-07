@@ -15,7 +15,7 @@
     {
         private readonly Dictionary<string, int> keyToRowIndex;
         private readonly Dictionary<int, int> columnIndexesToPids;
-        private readonly Dictionary<int, IList<IParameterModel>> columnsMapper;
+        private readonly Dictionary<int, IList<IParameterModel>> columnPidToColumnData;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableModel"/> class.
@@ -25,7 +25,7 @@
         {
             TableId = tableId;
 
-            columnsMapper = new Dictionary<int, IList<IParameterModel>>();
+            columnPidToColumnData = new Dictionary<int, IList<IParameterModel>>();
             columnIndexesToPids = new Dictionary<int, int>();
             keyToRowIndex = new Dictionary<string, int>();
         }
@@ -66,7 +66,7 @@
         /// <value>
         /// The index of the key column.
         /// </value>
-        public int KeyColumnIdx { get; private set; }
+        public int PrimaryKeyColumnIdx { get; private set; }
 
         /// <summary>
         /// Gets the column count.
@@ -74,14 +74,16 @@
         /// <value>
         /// The column count.
         /// </value>
-        public int ColumnCount
-        {
-            get { return columnsMapper.Count; }
-        }
+        public int ColumnCount => columnPidToColumnData.Count;
+
+        /// <summary>
+        /// Gets the row count.
+        /// </summary>
+        public int RowCount => KeyToRowIndex.Count;
 
         internal IDictionary<int, IList<IParameterModel>> ColumnsMapper
         {
-            get { return columnsMapper; }
+            get { return columnPidToColumnData; }
         }
 
         /// <summary>
@@ -99,7 +101,7 @@
         /// <returns>The number of items present in the specified column.</returns>
         public int GetColumnItemCount(int pid)
         {
-            return columnsMapper[pid].Count;
+            return columnPidToColumnData[pid].Count;
         }
 
         /// <summary>
@@ -206,25 +208,16 @@
                 {
                     int rowIndex = KeyToRowIndex[keys[i]];
 
-                    ParameterModel parameterModel;
-
-                    if (timeInfo != null)
-                    {
-                        parameterModel = new ParameterModel(values[i], timeInfo.Value);
-                    }
-                    else
-                    {
-                        parameterModel = new ParameterModel(values[i]);
-                    }
-
-                    columnsMapper[columnPid][rowIndex] = parameterModel;
+                    var parameterModel = new ParameterModel(values[i], timeInfo);
+                    
+                    columnPidToColumnData[columnPid][rowIndex] = parameterModel;
 
                     continue;
                 }
 
                 var row = new object[columnsNumber];
 
-                row[KeyColumnIdx] = keys[i];
+                row[PrimaryKeyColumnIdx] = keys[i];
 
                 row[idx] = values[i];
 
@@ -255,23 +248,14 @@
 
                 changes[columnIdx] = data is null ? 0 : 1;
 
-                ParameterModel parameterModel;
-
-                if (timestamp != null)
-                {
-                    parameterModel = new ParameterModel(data, (DateTime)timestamp);
-                }
-                else
-                {
-                    parameterModel = new ParameterModel(data);
-                }
+                var parameterModel = new ParameterModel(data, timestamp);
 
                 ColumnsMapper[ColumnIndexesToPids[columnIdx]].Add(parameterModel);
             }
 
-            var key = Convert.ToString(rowData[KeyColumnIdx]);
+            var key = Convert.ToString(rowData[PrimaryKeyColumnIdx]);
 
-            keyToRowIndex[key] = ColumnsMapper[ColumnIndexesToPids[KeyColumnIdx]].Count - 1;
+            keyToRowIndex[key] = ColumnsMapper[ColumnIndexesToPids[PrimaryKeyColumnIdx]].Count - 1;
 
             return changes;
         }
@@ -296,7 +280,7 @@
                     break;
                 }
 
-                if (columnIdx == KeyColumnIdx)
+                if (columnIdx == PrimaryKeyColumnIdx)
                 {
                     continue;
                 }
@@ -305,24 +289,12 @@
 
                 changes[columnIdx] = data == ColumnsMapper[ColumnIndexesToPids[columnIdx]][rowIndex].Value ? 2 : 1;
 
-                if (data != null)
-                {
-                    ParameterModel parameterModel;
+                var parameterModel = new ParameterModel(data, timestamp);
 
-                    if (timestamp != null)
-                    {
-                        parameterModel = new ParameterModel(data, (DateTime)timestamp);
-                    }
-                    else
-                    {
-                        parameterModel = new ParameterModel(data);
-                    }
-
-                    columnsMapper[ColumnIndexesToPids[columnIdx]][rowIndex] = parameterModel;
-                }
+                columnPidToColumnData[ColumnIndexesToPids[columnIdx]][rowIndex] = parameterModel;
             }
 
-            changes[KeyColumnIdx] = 0;
+            changes[PrimaryKeyColumnIdx] = 0;
 
             return changes;
         }
@@ -339,13 +311,13 @@
 
             int[] pids = ColumnsMapper.Keys.ToArray();
 
-            int pid = ColumnIndexesToPids[KeyColumnIdx];
+            int pid = ColumnIndexesToPids[PrimaryKeyColumnIdx];
 
             for (int index = 0; index < columnsNumber; index++)
             {
-                columnsMapper[pids[index]][rowIndex] = ColumnsMapper[pids[index]][remainingRows - 1];
+                columnPidToColumnData[pids[index]][rowIndex] = ColumnsMapper[pids[index]][remainingRows - 1];
 
-                columnsMapper[pids[index]].RemoveAt(remainingRows - 1);
+                columnPidToColumnData[pids[index]].RemoveAt(remainingRows - 1);
             }
 
             var primaryKey = KeyToRowIndex.FirstOrDefault(x => x.Value == rowIndex).Key;
@@ -363,6 +335,22 @@
         }
 
         /// <summary>
+        /// Gets all rows.
+        /// </summary>
+        /// <returns>a array of rows.</returns>
+        public object[][] AllRows()
+        {
+            var allRows = new object[RowCount][];
+
+            for (int i = 0; i < RowCount; i++)
+            {
+                allRows[i] = Row(i);
+            }
+
+            return allRows;
+        }
+
+        /// <summary>
         /// Adds a column with the specified column ID and index.
         /// </summary>
         /// <param name="columnPid">The column pid.</param>
@@ -373,7 +361,7 @@
         {
             columnIndexesToPids[idx] = columnPid;
 
-            columnsMapper[columnPid] = new List<IParameterModel>();
+            columnPidToColumnData[columnPid] = new List<IParameterModel>();
 
             if (!isKey)
             {
@@ -382,11 +370,11 @@
 
             if (KeyColumnExists)
             {
-                throw new InvalidOperationException($"Column with pid '{ColumnIndexesToPids[KeyColumnIdx]}' is already the primary key column.");
+                throw new InvalidOperationException($"Column with pid '{ColumnIndexesToPids[PrimaryKeyColumnIdx]}' is already the primary key column.");
             }
 
             KeyColumnExists = true;
-            KeyColumnIdx = idx;
+            PrimaryKeyColumnIdx = idx;
         }
     }
 }

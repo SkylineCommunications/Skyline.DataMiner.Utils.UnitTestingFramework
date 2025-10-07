@@ -321,17 +321,8 @@
         /// <remarks>The set will only be executed if either <paramref name="checkIfExists"/> was set to <c>false</c>, or if the cache contains a parameter with the specified ID.</remarks>
         public int SetParameter(int pid, object value, DateTime? timestamp = null, bool checkIfExists = true)
         {
-            ParameterModel parameterModel;
-
-            if (timestamp != null)
-            {
-                parameterModel = new ParameterModel(value, timestamp.Value);
-            }
-            else
-            {
-                parameterModel = new ParameterModel(value);
-            }
-
+            var parameterModel = new ParameterModel(value, timestamp);
+            
             if (!checkIfExists || ParametersToValues.ContainsKey(pid))
             {
                 ParametersToValues[pid] = parameterModel;
@@ -395,21 +386,14 @@
                 return Constants.HRESULT_FAIL_DIFFLEN;
             }
 
+            timestamps = timestamps ?? new DateTime[parameterIDs.Length];
+
             int length = parameterIDs.Length;
             int[] result = new int[length];
 
             for (int index = 0; index < length; index++)
             {
-                ParameterModel parameterModel;
-
-                if (timestamps != null)
-                {
-                    parameterModel = new ParameterModel(values[index], timestamps[index]);
-                }
-                else
-                {
-                    parameterModel = new ParameterModel(values[index]);
-                }
+                var parameterModel = new ParameterModel(values[index], timestamps[index]);
 
                 if (ParametersToValues.ContainsKey(parameterIDs[index]))
                 {

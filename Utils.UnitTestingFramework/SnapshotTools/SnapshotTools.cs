@@ -224,9 +224,9 @@
         /// <param name="cache">The cache with the data.</param>
         /// <param name="tableId">The table id.</param>
         /// <returns>The table in the TableShowcase form, ready to be used with verify.</returns>
-        public static TableShowcase ShowTable(ProtocolCache cache, int tableId)
+        public static TableShowcase ShowTable(IProtocolCache cache, int tableId)
         {
-            ITableModelReader tableModel = cache.Tables.GetTableModel(tableId);
+            ITableModelReader tableModel = cache.Tables.GetTable(tableId);
 
             List<RowShowcase> rows = new List<RowShowcase>();
             string[] keys = cache.Tables.GetKeys(tableId);
@@ -258,7 +258,7 @@
                 });
             }
 
-            int keyColumnIdx = tableModel.KeyColumnIdx;
+            int keyColumnIdx = tableModel.PrimaryKeyColumnIdx;
             int keyColumnPid = tableModel.ColumnIndexesToPids[keyColumnIdx];
 
             cache.Parameters.TryGetParameterNameByPID(tableId, out string tableName);
@@ -288,9 +288,9 @@
         /// <param name="tableId">The table id.</param>
         /// <param name="returnValue">The return value of the method being tested.</param>
         /// <returns>The table in the TableShowcase form, ready to be used with verify.</returns>
-        public static TableShowcase ShowTable(ProtocolCache cache, int tableId, object returnValue)
+        public static TableShowcase ShowTable(IProtocolCache cache, int tableId, object returnValue)
         {
-            ITableModelReader tableModel = cache.Tables.GetTableModel(tableId);
+            ITableModelReader tableModel = cache.Tables.GetTable(tableId);
 
             List<RowShowcase> rows = new List<RowShowcase>();
             string[] keys = cache.Tables.GetKeys(tableId);
@@ -322,7 +322,7 @@
                 });
             }
 
-            int keyColumnIdx = tableModel.KeyColumnIdx;
+            int keyColumnIdx = tableModel.PrimaryKeyColumnIdx;
             int keyColumnPid = tableModel.ColumnIndexesToPids[keyColumnIdx];
 
             cache.Parameters.TryGetParameterNameByPID(tableId, out string tableName);
@@ -352,13 +352,13 @@
         /// <param name="cache">The cache with the data.</param>
         /// <param name="tableIds">The table ids.</param>
         /// <returns>The tables in the TableShowcase form, ready to be used with verify.</returns>
-        public static List<TableShowcase> ShowTables(ProtocolCache cache, int[] tableIds)
+        public static List<TableShowcase> ShowTables(IProtocolCache cache, int[] tableIds)
         {
             List<TableShowcase> tables = new List<TableShowcase>();
 
             foreach (int id in tableIds)
             {
-                ITableModelReader tableModel = cache.Tables.GetTableModel(id);
+                ITableModelReader tableModel = cache.Tables.GetTable(id);
 
                 List<RowShowcase> rows = new List<RowShowcase>();
                 string[] keys = cache.Tables.GetKeys(id);
@@ -390,7 +390,7 @@
                     });
                 }
 
-                int keyColumnIdx = tableModel.KeyColumnIdx;
+                int keyColumnIdx = tableModel.PrimaryKeyColumnIdx;
                 int keyColumnPid = tableModel.ColumnIndexesToPids[keyColumnIdx];
 
                 cache.Parameters.TryGetParameterNameByPID(id, out string tableName);

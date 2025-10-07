@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines constants.
     /// </summary>
-    public static class Constants
+    internal static class Constants
     {
         /// <summary>
         /// The ID does not exist.

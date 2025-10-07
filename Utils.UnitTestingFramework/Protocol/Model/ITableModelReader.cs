@@ -23,7 +23,7 @@
         /// <value>
         /// The index of the key column.
         /// </value>
-        int KeyColumnIdx { get; }
+        int PrimaryKeyColumnIdx { get; }
 
         /// <summary>
         /// Gets the column count.
@@ -32,6 +32,11 @@
         /// The column count.
         /// </value>
         int ColumnCount { get; }
+
+        /// <summary>
+        /// Gets the row count.
+        /// </summary>
+        int RowCount { get; }  
 
         /// <summary>
         /// Gets the primary key to row index dictionary.
@@ -79,6 +84,12 @@
         /// <returns>The row data.</returns>
         /// <exception cref="System.ArgumentException">No row with the specified index exists.</exception>
         object[] Row(int rowIndex);
+
+        /// <summary>
+        /// Gets all rows.
+        /// </summary>
+        /// <returns>a array of rows.</returns>
+        object[][] AllRows();
 
         /// <summary>
         /// Retrieves the row with the specified key.
