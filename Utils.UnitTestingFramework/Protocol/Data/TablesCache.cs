@@ -287,7 +287,7 @@
         /// <param name="tableId">The table identifier.</param>
         /// <param name="primaryKey">The primary key.</param>
         /// <returns>The 1-based row position or 0 if the table does not contain a row with the specified primary key.</returns>
-        public int GetKeyPosition(int tableId, string primaryKey)
+        public int GetOneBasedRowIndex(int tableId, string primaryKey)
         {
             var tableModel = GetTable(tableId);
 

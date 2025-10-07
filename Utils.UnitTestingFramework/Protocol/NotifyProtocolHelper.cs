@@ -2,9 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
-    using System.Runtime.InteropServices.WindowsRuntime;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
@@ -29,18 +27,17 @@
                     { NotifyType.FillArray, FillArray },
                     { NotifyType.FillArrayNoDelete, FillArrayNoDelete },
                     { NotifyType.NT_SET_ROW, SetRow },
-
-                    { NotifyType.NT_ADD_ROW_RETURN_KEY, (value1, value2) => protocolCache.Tables.AddRowReturnKey(Convert.ToInt32(value1), Convert.ToString(value2)) },
-                    { NotifyType.NT_EXISTS_ROW, (value1, value2) => protocolCache.Tables.Exists(Convert.ToInt32(value1), Convert.ToString(value2)) },
-                    { NotifyType.GetKeyPosition, (value1, value2) => protocolCache.Tables.GetKeyPosition(Convert.ToInt32(value1), Convert.ToString(value2)) },
-                    { NotifyType.NT_GET_ROW, (value1, value2) => protocolCache.Tables.GetRow(Convert.ToInt32(((object[])value1)[0]), Convert.ToString(((object[])value1)[1])) },
-                    { NotifyType.ArrayRowCount, (value1, value2) => protocolCache.Tables.RowCount(Convert.ToInt32(value1)) },
-                    { NotifyType.NT_GET_KEYS_SLPROTOCOL, (value1, value2) => protocolCache.Tables.RowCount(Convert.ToInt32(value1)) },
-                    { NotifyType.PutParameterIndex, (value1, value2) => protocolCache.Tables.SetParameterIndex(Convert.ToInt32(((object[])value1)[0]), Convert.ToInt32(((object[])value1)[1]), Convert.ToInt32(((object[])value1)[2]), Convert.ToString(value2)) },
-                    { NotifyType.GetParameter, (value1, value2) => protocolCache.Parameters.GetParameter(Convert.ToInt32(value1)) },
-                    { NotifyType.GetParameterByName, (value1, value2) => protocolCache.Parameters.GetParameterByName(Convert.ToString(value1)) },
-                    { NotifyType.SetParameter, (value1, value2) => protocolCache.Parameters.SetParameter(Convert.ToInt32(((uint[])value1)[2]), value2) },
-                    { NotifyType.SetParameterByName, (value1, value2) => protocolCache.Parameters.SetParameterByName(Convert.ToString(value1), value2) },
+                    { NotifyType.NT_ADD_ROW_RETURN_KEY, AddRowReturnKey },
+                    { NotifyType.NT_EXISTS_ROW, Exists },
+                    { NotifyType.GetKeyPosition, GetKeyPosition },
+                    { NotifyType.ArrayRowCount, RowCount },
+                    { NotifyType.NT_GET_KEYS_SLPROTOCOL, RowCount },
+                    { NotifyType.GetParameter, GetParameter },
+                    { NotifyType.GetParameterByName, GetParameterByName },
+                    { NotifyType.SetParameterByName, SetParameterByName },
+                    { NotifyType.SetParameter, SetParameter },
+                    { NotifyType.NT_GET_ROW, GetRow },
+                    { NotifyType.PutParameterIndex, SetParameterIndex },
                 };
             }
 
@@ -54,8 +51,166 @@
                 }
                 else
                 {
-                    throw new ArgumentException($"Notify type '{castedNotifyType} ({notifyType})' is unavailable.");
+                    throw new ArgumentException($"Notify type '{castedNotifyType} ({notifyType})' is not supported.");
                 }
+            }
+
+            internal object SetParameterIndex(object value1, object value2)
+            {
+                if (!(value1 is object[] value1AsArray))
+                {
+                    throw new ArgumentException($"NotifyType.SetParameterIndex expects first argument to be of type object[], but got {value1?.GetType()} instead.");
+                }
+
+                if (value1AsArray.Length != 3)
+                {
+                    throw new ArgumentException($"NotifyType.SetParameterIndex expects first argument to contain three objects, but got {value1AsArray.Length} objects instead.");
+                }
+
+                if (!(value1AsArray[0] is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.SetParameterIndex expects first argument to contain an int as first object, but got {value1AsArray[0]?.GetType()} instead.");
+                }
+
+                if (!(value1AsArray[1] is int oneBasedRowIndex))
+                {
+                    throw new ArgumentException($"NotifyType.SetParameterIndex expects first argument to contain an int as second object, but got {value1AsArray[1]?.GetType()} instead.");
+                }
+
+                if (!(value1AsArray[2] is int oneBasedColumnIndex))
+                {
+                    throw new ArgumentException($"NotifyType.SetParameterIndex expects first argument to contain an int as third object, but got {value1AsArray[2]?.GetType()} instead.");
+                }
+
+                protocolCache.Tables.SetParameterIndex(tablePid, oneBasedRowIndex, oneBasedColumnIndex, value2);
+                return null; // Irrelevant return value.
+            }
+
+            internal object GetRow(object value1, object value2)
+            {
+                if (!(value1 is object[] rowInfo))
+                {
+                    throw new ArgumentException($"NotifyType.GetRow expects first argument to be of type object[], but got {value1?.GetType()} instead.");
+                }
+
+                if (rowInfo.Length < 2)
+                {
+                    throw new ArgumentException($"NotifyType.GetRow expects first argument to contain at least two objects, but got {rowInfo.Length} objects instead.");
+                }
+
+                if (!(rowInfo[0] is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.GetRow expects first argument to contain an int as first object, but got {rowInfo[0]?.GetType()} instead.");
+                }
+
+                if (!(rowInfo[1] is string primaryKey))
+                {
+                    throw new ArgumentException($"NotifyType.GetRow expects first argument to contain a string as second object, but got {rowInfo[1]?.GetType()} instead.");
+                }
+
+                return protocolCache.Tables.GetRow(tablePid, primaryKey);
+            }
+
+            internal object SetParameter(object value1, object value2)
+            {
+                if (!(value1 is uint[] value1AsArray))
+                {
+                    throw new ArgumentException($"NotifyType.SetParameter expects first argument to be of type uint[], but got {value1?.GetType()} instead.");
+                }
+
+                if (value1AsArray.Length != 3)
+                {
+                    throw new ArgumentException($"NotifyType.SetParameter expects first argument to contain three uint values, but got {value1AsArray.Length} values instead.");
+                }
+
+                protocolCache.Parameters.SetParameter((int)value1AsArray[2], value2);
+                return null; // Irrelevant return value.
+            }
+
+            internal object SetParameterByName(object value1, object value2)
+            {
+                if (!(value1 is string parameterName))
+                {
+                    throw new ArgumentException($"NotifyType.SetParameterByName expects first argument to be of type string, but got {value1?.GetType()} instead.");
+                }
+
+                protocolCache.Parameters.SetParameterByName(parameterName, value2);
+                return null; // Irrelevant return value.
+            }
+
+            internal object GetParameterByName(object value1, object value2)
+            {
+                if (!(value1 is string parameterName))
+                {
+                    throw new ArgumentException($"NotifyType.GetParameterByName expects first argument to be of type string, but got {value1?.GetType()} instead.");
+                }
+
+                return protocolCache.Parameters.GetParameterByName(parameterName);
+            }
+
+            internal object GetParameter(object value1, object value2)
+            {
+                if (!(value1 is int parameterId))
+                {
+                    throw new ArgumentException($"NotifyType.GetParameter expects first argument to be of type int, but got {value1?.GetType()} instead.");
+                }
+
+                return protocolCache.Parameters.GetParameter(parameterId);
+            }
+
+            internal object RowCount(object value1, object value2)
+            {
+                if (!(value1 is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.RowCount expects first argument to be of type int, but got {value1?.GetType()} instead.");
+                }
+
+                return protocolCache.Tables.RowCount(tablePid);
+            }
+
+            internal object GetKeyPosition(object value1, object value2)
+            {
+                if (!(value1 is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.GetKeyPosition expects first argument to be of type int, but got {value1?.GetType()} instead.");
+                }
+
+                if (!(value2 is string primaryKey))
+                {
+                    throw new ArgumentException($"NotifyType.GetKeyPosition expects second argument to be of type string, but got {value2?.GetType()} instead.");
+                }
+
+                return protocolCache.Tables.GetOneBasedRowIndex(tablePid, primaryKey);
+            }
+
+            internal object Exists(object value1, object value2)
+            {
+                if (!(value1 is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.Exists expects first argument to be of type int, but got {value1?.GetType()} instead.");
+                }
+
+                if (!(value2 is string primaryKey))
+                {
+                    throw new ArgumentException($"NotifyType.Exists expects second argument to be of type string, but got {value2?.GetType()} instead.");
+                }
+
+                return protocolCache.Tables.Exists(tablePid, primaryKey);
+            }
+
+            internal string AddRowReturnKey(object value1, object value2)
+            {
+                if (!(value1 is int tablePid))
+                {
+                    throw new ArgumentException($"NotifyType.AddRowReturnKey expects first argument to be of type int, but got {value1?.GetType()} instead.");
+                }
+
+                if (!(value2 is string primaryKey))
+                {
+                    throw new ArgumentException($"NotifyType.AddRowReturnKey expects second argument to be of type string, but got {value2?.GetType()} instead.");
+                }
+
+                return protocolCache.Tables.AddRowReturnKey(tablePid, primaryKey);
             }
 
             internal object SetRow(object value1, object value2)
@@ -192,7 +347,7 @@
                 return arrayOfType;
             }
 
-            internal object GetTableColumns(object value1, object value2)
+            internal object[][] GetTableColumns(object value1, object value2)
             {
                 if (!(value1 is int tablePid))
                 {

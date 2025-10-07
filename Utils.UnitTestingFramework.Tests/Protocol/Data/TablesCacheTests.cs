@@ -883,10 +883,10 @@
             var rowsNumber3 = tablesCache.AddRow(900, "skyline3");
             var rowsNumber4 = tablesCache.AddRow(900, "skyline4");
 
-            var keyPosition1 = tablesCache.GetKeyPosition(900, "skyline1");
-            var keyPosition2 = tablesCache.GetKeyPosition(900, "skyline2");
-            var keyPosition3 = tablesCache.GetKeyPosition(900, "skyline3");
-            var keyPosition4 = tablesCache.GetKeyPosition(900, "skyline4");
+            var keyPosition1 = tablesCache.GetOneBasedRowIndex(900, "skyline1");
+            var keyPosition2 = tablesCache.GetOneBasedRowIndex(900, "skyline2");
+            var keyPosition3 = tablesCache.GetOneBasedRowIndex(900, "skyline3");
+            var keyPosition4 = tablesCache.GetOneBasedRowIndex(900, "skyline4");
 
             // Assert
             Assert.AreEqual(1, rowsNumber1);
@@ -908,7 +908,7 @@
             var tablesCache = protocolCache.Tables;
 
             // Act &  Assert
-            Assert.Throws<Exception>(() => tablesCache.GetKeyPosition(800, "skyline1"));
+            Assert.Throws<Exception>(() => tablesCache.GetOneBasedRowIndex(800, "skyline1"));
         }
 
         [TestMethod]
@@ -919,7 +919,7 @@
             var tablesCache = protocolCache.Tables;
 
             // Act
-            Assert.Throws<Exception>(() => tablesCache.GetKeyPosition(800, "skyline2"));
+            Assert.Throws<Exception>(() => tablesCache.GetOneBasedRowIndex(800, "skyline2"));
         }
 
         [TestMethod]

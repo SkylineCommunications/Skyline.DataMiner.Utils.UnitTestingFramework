@@ -201,7 +201,7 @@
                    .Returns(
                    (int tableId, string primaryKey) =>
                    {
-                       return tablesCache.GetKeyPosition(tableId, primaryKey);
+                       return tablesCache.GetOneBasedRowIndex(tableId, primaryKey);
                    });
 
                 mock.Setup(p => p.GetRow(It.IsAny<int>(), It.IsAny<int>()))
