@@ -111,9 +111,9 @@
         /// <exception cref="ArgumentException">There is no parameter with ID <paramref name="parameterId"/>.</exception>
         public IParameterModel GetParameterModel(int parameterId)
         {
-            if (ParametersToValues.TryGetValue(parameterId, out IParameterModel output))
+            if (ParametersToValues.TryGetValue(parameterId, out var parameterModel))
             {
-                return output;
+                return parameterModel;
             }
 
             throw new ArgumentException($"There is no parameter with ID '{parameterId}'");

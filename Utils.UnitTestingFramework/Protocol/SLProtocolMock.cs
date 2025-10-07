@@ -6,6 +6,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
 {
     using Moq;
     using Skyline.DataMiner.Scripting;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
     /// <summary>
@@ -31,10 +32,10 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
         /// <summary>
         /// Asserts this instance.
         /// </summary>
-        /// <returns><see cref="IAssert"/> interface.</returns>
-        public IAssert Assert()
+        /// <returns><see cref="IAsserter"/> interface.</returns>
+        public IAsserter Assert()
         {
-            return new AssertHandler(protocolCache);
+            return new Asserter(protocolCache);
         }
     }
 }

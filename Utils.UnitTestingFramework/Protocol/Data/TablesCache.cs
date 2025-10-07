@@ -13,10 +13,7 @@
     /// </summary>
     public class TablesCache
     {
-        /// <summary>
-        /// Dictionary containing the table ID to table model map.
-        /// </summary>
-        protected Dictionary<int, ITableModel> TablesCacheDict { get; } = new Dictionary<int, ITableModel>();
+        private readonly Dictionary<int, ITableModel> tablesPerTablePid = new Dictionary<int, ITableModel>();
 
         /// <summary>
         /// Adds the specified model.
@@ -30,7 +27,7 @@
                 throw new ArgumentNullException(nameof(tableModel));
             }
 
-            TablesCacheDict[tableModel.TableId] = tableModel;
+            tablesPerTablePid[tableModel.TableId] = tableModel;
         }
 
         /// <summary>
@@ -41,7 +38,7 @@
         /// <exception cref="ArgumentException">There is no table with ID " + tableId</exception>
         public ITableModel GetTable(int tablePid)
         {
-            if (TablesCacheDict.TryGetValue(tablePid, out var tableModel))
+            if (tablesPerTablePid.TryGetValue(tablePid, out var tableModel))
             {
                 return tableModel;
             }
@@ -304,7 +301,7 @@
         /// <returns>The row data.</returns>
         public object GetRow(int tableId, int rowIndex)
         {
-            if (!TablesCacheDict.ContainsKey(tableId))
+            if (!tablesPerTablePid.ContainsKey(tableId))
             {
                 return null;
             }
@@ -354,9 +351,7 @@
                 ConvertProtocolClearAndleaveToActualValuesForRow(rowIndex, row, tableModel);
             }
 
-            int pid = tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx];
-
-            if (tableModel.GetColumnItemCount(pid) < rowIndex + 1)
+            if (tableModel.ColumnCount < rowIndex + 1)
             {
                 var changes = new int[row.Length];
 
@@ -557,7 +552,7 @@
 
             if (tableModel.KeyToRowIndex.Keys.Contains(primaryKey))
             {
-                existingRow = tableModel.Row(primaryKey);
+                existingRow = tableModel.GetRow(primaryKey);
             }
 
             for (int i = 0; i < row.Length; i++)
@@ -579,7 +574,7 @@
 
             if (tableModel.KeyToRowIndex.Values.Contains(rowIndex))
             {
-                existingRow = tableModel.Row(rowIndex);
+                existingRow = tableModel.GetRow(rowIndex);
             }
 
             for (int i = 0; i < row.Length; i++)
@@ -605,7 +600,7 @@
                 }
                 else if (column[i].IsProtocolLeave() && tableModel.KeyToRowIndex.TryGetValue(primaryKeys[i], out int rowIndex))
                 {
-                    var existingRow = tableModel.Row(rowIndex);
+                    var existingRow = tableModel.GetRow(rowIndex);
                     var existingValue = existingRow[columnIndex];
                     column[i] = existingValue;
                 }
@@ -647,7 +642,7 @@
                 if (tableModel.ColumnIndexesToPids.ContainsKey((int)columnIdx))
                 {
                     int pid = tableModel.ColumnIndexesToPids[(int)columnIdx];
-                    object[] column = tableModel.Column(pid);
+                    object[] column = tableModel.GetColumn(pid);
                     columns[index] = column;
                 }
                 else
@@ -671,7 +666,7 @@
         {
             var tableModel = GetTable(tableId);
 
-            return tableModel.Column(columnPid);
+            return tableModel.GetColumn(columnPid);
         }
 
         /// <summary>
@@ -729,7 +724,7 @@
                 throw new ArgumentException("Row index exceeds number of rows", nameof(oneBasedRowIndex));
             }
 
-            var row = tableModel.Row(oneBasedRowIndex - 1);
+            var row = tableModel.GetRow(oneBasedRowIndex - 1);
 
             return row[oneBasedColumnIndex - 1];
         }
@@ -767,7 +762,7 @@
                 throw new ArgumentException("Row index exceeds number of rows", nameof(oneBasedRowIndex));
             }
 
-            var row = tableModel.Row(oneBasedRowIndex - 1);
+            var row = tableModel.GetRow(oneBasedRowIndex - 1);
             row[oneBasedColumnIndex - 1] = value;
 
             tableModel.SetExistingRow(row, oneBasedRowIndex - 1, timeInfo);
@@ -845,7 +840,7 @@
                 throw new ArgumentException("Column index exceeds number of columns.", nameof(oneBasedColumnIndex));
             }
 
-            var row = tableModel.Row(primaryKey);
+            var row = tableModel.GetRow(primaryKey);
 
             return row[oneBasedColumnIndex - 1];
         }
@@ -878,7 +873,7 @@
                 throw new ArgumentException("Column index exceeds number of columns.", nameof(oneBasedColumnIndex));
             }
 
-            var row = tableModel.Row(primaryKey);
+            var row = tableModel.GetRow(primaryKey);
             row[oneBasedColumnIndex - 1] = value;
 
             int rowIndex = tableModel.KeyToRowIndex[primaryKey];
@@ -971,7 +966,7 @@
 
             try
             {
-                row = tableModel.Row(rowIndex);
+                row = tableModel.GetRow(rowIndex);
             }
             catch (ArgumentException)
             {

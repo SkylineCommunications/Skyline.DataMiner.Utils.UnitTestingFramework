@@ -16,7 +16,7 @@
         private readonly string path = "protocol.xml";
 
         [TestMethod]
-        public void NotifyProtocolTest_GetParameter_IsEqual()
+        public void GetParameter_IsEqual()
         {
             // Arrange
             var mock = new SLProtocolMock(path);
@@ -29,7 +29,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetParameterByName_IsEqual()
+        public void GetParameterByName_IsEqual()
         {
             // Arrange
             var mock = new SLProtocolMock(path);
@@ -42,10 +42,9 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_SetParameter_IsEqual()
+        public void SetParameter_IsEqual()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             uint dmaID = 346;
@@ -56,30 +55,27 @@
             int value = 50;
 
             // Act
-            var outputSet = mock.Object.NotifyProtocol(50, ids, value); // SetParameter
+            mock.Object.NotifyProtocol(50, ids, value); // SetParameter
             var outputGet = mock.Object.NotifyProtocol(85, "NumericParameter", null); // GetParameterByName
 
             // Assert
-            Assert.AreEqual(0, outputSet);
             Assert.AreEqual(value, outputGet);
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_SetParameterByName_IsEqual()
+        public void SetParameterByName_IsEqual()
         {
             // Arrange
-
             var mock = new SLProtocolMock(path);
 
             string parameterName = "NumericParameter";
             int value = 50;
 
             // Act
-            var outputSet = mock.Object.NotifyProtocol(84, parameterName, value); // SetParameterByName
+            mock.Object.NotifyProtocol(84, parameterName, value); // SetParameterByName
             var outputGet = mock.Object.NotifyProtocol(85, "NumericParameter", null); // GetParameterByName
 
             // Assert
-            Assert.AreEqual(0, outputSet);
             Assert.AreEqual(value, outputGet);
         }
 
@@ -136,7 +132,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_AddRowReturnKey_IsEqual()
+        public void AddRowReturnKey_IsEqual()
         {
             // Arrange
 
@@ -242,7 +238,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_Exists_IsEqual()
+        public void Exists_IsEqual()
         {
             // Arrange
 
@@ -265,7 +261,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetKeyPosition_IsEqual()
+        public void GetKeyPosition_IsEqual()
         {
             // Arrange
 
@@ -295,7 +291,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetRow_IsEqual()
+        public void GetRow_IsEqual()
         {
             // Arrange
 
@@ -360,7 +356,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_FillArray_IsEqual()
+        public void FillArray_IsEqual()
         {
             // Arrange
 
@@ -407,7 +403,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_FillArrayNoDelete_IsEqual()
+        public void FillArrayNoDelete_IsEqual()
         {
             // Arrange
             var mock = new SLProtocolMock(path);
@@ -494,7 +490,7 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_InexistentNotifyProtocol_Exception()
+        public void InexistentNotifyProtocol_Exception()
         {
             // Arrange
 

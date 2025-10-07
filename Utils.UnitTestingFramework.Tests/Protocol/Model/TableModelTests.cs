@@ -23,11 +23,11 @@
             tableModel.SetRow(row);
 
             // Act
-            object[] rowOutput1 = tableModel.Row("skyline1");
+            object[] rowOutput1 = tableModel.GetRow("skyline1");
             rowOutput1[1] = "modifiedValue";
 
             // Assert
-            object[] rowOutput2 = tableModel.Row("skyline1");
+            object[] rowOutput2 = tableModel.GetRow("skyline1");
             Assert.AreEqual("skyline1", rowOutput2[0]);
             Assert.AreEqual("value2", rowOutput2[1]);
         }
@@ -48,7 +48,7 @@
             tableModel.SetRow(row);
 
             // Assert
-            object[] rowOutput = tableModel.Row("skyline1");
+            object[] rowOutput = tableModel.GetRow("skyline1");
 
             Assert.AreEqual("skyline1", rowOutput[0]);
             Assert.AreEqual("value2", rowOutput[1]);
@@ -73,8 +73,8 @@
             tableModel.SetRow(row1);
 
             // Assert
-            object[] row0Output = tableModel.Row(0);
-            object[] row1Output = tableModel.Row(1);
+            object[] row0Output = tableModel.GetRow(0);
+            object[] row1Output = tableModel.GetRow(1);
 
             Assert.AreEqual("skyline2", row0Output[0]);
             Assert.AreEqual("value2", row0Output[1]);
@@ -103,8 +103,8 @@
             tableModel.SetRow(row0);
             tableModel.SetRow(row1);
             tableModel.SetColumn(1, keys, values);
-            object[] row0Output = tableModel.Row(0);
-            object[] row1Output = tableModel.Row(1);
+            object[] row0Output = tableModel.GetRow(0);
+            object[] row1Output = tableModel.GetRow(1);
 
             // Assert
             Assert.AreEqual("skyline4", row0Output[0]);
@@ -156,9 +156,9 @@
             tableModel.SetRow(row0);
             tableModel.SetRow(row1);
             tableModel.SetColumn(2, keys, values);
-            object[] row0Output = tableModel.Row(0);
-            object[] row1Output = tableModel.Row(1);
-            object[] row2Output = tableModel.Row(2);
+            object[] row0Output = tableModel.GetRow(0);
+            object[] row1Output = tableModel.GetRow(1);
+            object[] row2Output = tableModel.GetRow(2);
 
             // Assert
             Assert.AreEqual("skyline6", row0Output[0]);
@@ -189,7 +189,7 @@
             // Act
             tableModel.SetColumn(1, keys, values2nd);
             tableModel.SetColumn(2, keys, values3rd);
-            object[] columnOutput = tableModel.Column(1203);
+            object[] columnOutput = tableModel.GetColumn(1203);
 
             // Assert
             Assert.AreEqual("3ndColumn9", columnOutput[0]);
@@ -197,7 +197,7 @@
         }
 
         [TestMethod]
-        public void ColumnWithInvalidPid_NullValueReturned()
+        public void GetColumn_InvalidColumnPid_Throws()
         {
             // Arrange
             string[] keys = { "skyline9", "value10" };
@@ -210,13 +210,11 @@
             tableModelBuilder.AddColumn(1203, 2, false);
             var tableModel = tableModelBuilder.Build();
 
-            // Act
             tableModel.SetColumn(1, keys, values2nd);
             tableModel.SetColumn(2, keys, values3rd);
-            var columnOutput = tableModel.Column(1204);
 
-            // Assert
-            Assert.IsNull(columnOutput);
+            // Act & Assert
+            Assert.Throws<Exception>(() => tableModel.GetColumn(1204));
         }
 
         [TestMethod]
@@ -250,7 +248,7 @@
 
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
-                () => tableModel.Row("skyline2"));
+                () => tableModel.GetRow("skyline2"));
         }
 
         [TestMethod]
@@ -269,7 +267,7 @@
 
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
-                () => tableModel.Row(1));
+                () => tableModel.GetRow(1));
         }
     }
 }

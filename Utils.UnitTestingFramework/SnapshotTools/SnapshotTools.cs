@@ -226,7 +226,7 @@
         /// <returns>The table in the TableShowcase form, ready to be used with verify.</returns>
         public static TableShowcase ShowTable(IProtocolCache cache, int tableId)
         {
-            ITableModelReader tableModel = cache.Tables.GetTable(tableId);
+            var tableModel = cache.Tables.GetTable(tableId);
 
             List<RowShowcase> rows = new List<RowShowcase>();
             string[] keys = cache.Tables.GetKeys(tableId);
@@ -290,7 +290,7 @@
         /// <returns>The table in the TableShowcase form, ready to be used with verify.</returns>
         public static TableShowcase ShowTable(IProtocolCache cache, int tableId, object returnValue)
         {
-            ITableModelReader tableModel = cache.Tables.GetTable(tableId);
+            var tableModel = cache.Tables.GetTable(tableId);
 
             List<RowShowcase> rows = new List<RowShowcase>();
             string[] keys = cache.Tables.GetKeys(tableId);
@@ -358,7 +358,7 @@
 
             foreach (int id in tableIds)
             {
-                ITableModelReader tableModel = cache.Tables.GetTable(id);
+                var tableModel = cache.Tables.GetTable(id);
 
                 List<RowShowcase> rows = new List<RowShowcase>();
                 string[] keys = cache.Tables.GetKeys(id);

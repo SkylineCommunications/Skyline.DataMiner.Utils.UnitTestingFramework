@@ -95,21 +95,11 @@
         private bool KeyColumnExists { get; set; }
 
         /// <summary>
-        /// Gets the number of items present in the specified column.
-        /// </summary>
-        /// <param name="pid">The column pid.</param>
-        /// <returns>The number of items present in the specified column.</returns>
-        public int GetColumnItemCount(int pid)
-        {
-            return columnPidToColumnData[pid].Count;
-        }
-
-        /// <summary>
         /// Retrieves the column data of the column with the specified pid.
         /// </summary>
         /// <param name="pid">The pid.</param>
         /// <returns>The column data or <see langword="null"/> if there is no column with the specified ID.</returns>
-        public object[] Column(int pid)
+        public object[] GetColumn(int pid)
         {
             if (!ColumnsMapper.TryGetValue(pid, out IList<IParameterModel> columnEntries))
             {
@@ -133,14 +123,14 @@
         /// <returns>The row data.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">No row with key the specified key exists.</exception>
-        public object[] Row(string key)
+        public object[] GetRow(string key)
         {
             if (!KeyToRowIndex.TryGetValue(key, out int rowIndex))
             {
                 throw new ArgumentException($"No row with key '{key}' exists.");
             }
 
-            return Row(rowIndex);
+            return GetRow(rowIndex);
         }
 
         /// <summary>
@@ -149,7 +139,7 @@
         /// <param name="rowIndex">Index of the row.</param>
         /// <returns>The row data.</returns>
         /// <exception cref="ArgumentException">No row with the specified index exists.</exception>
-        public object[] Row(int rowIndex)
+        public object[] GetRow(int rowIndex)
         {
             if (!keyToRowIndex.ContainsValue(rowIndex))
             {
@@ -165,9 +155,9 @@
         /// <typeparam name="TRow">The type of the row.</typeparam>
         /// <param name="key">The key.</param>
         /// <returns>The row.</returns>
-        public TRow Row<TRow>(string key) where TRow : QActionTableRow
+        public TRow GetRow<TRow>(string key) where TRow : QActionTableRow
         {
-            var row = Row(key);
+            var row = GetRow(key);
             return (TRow)Activator.CreateInstance(typeof(TRow), row);
         }
 
@@ -177,9 +167,9 @@
         /// <typeparam name="TRow">The type of the row.</typeparam>
         /// <param name="index">The index.</param>
         /// <returns>The row.</returns>
-        public TRow Row<TRow>(int index) where TRow : QActionTableRow
+        public TRow GetRow<TRow>(int index) where TRow : QActionTableRow
         {
-            var row = Row(index);
+            var row = GetRow(index);
             return (TRow)Activator.CreateInstance(typeof(TRow), row);
         }
 
@@ -338,13 +328,13 @@
         /// Gets all rows.
         /// </summary>
         /// <returns>a array of rows.</returns>
-        public object[][] AllRows()
+        public object[][] GetAllRows()
         {
             var allRows = new object[RowCount][];
 
             for (int i = 0; i < RowCount; i++)
             {
-                allRows[i] = Row(i);
+                allRows[i] = GetRow(i);
             }
 
             return allRows;

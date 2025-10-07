@@ -1,6 +1,5 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol
 {
-    using System;
     using System.Collections.Generic;
 
     using FluentAssertions;
@@ -8,7 +7,6 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -17,7 +15,7 @@
         private readonly string path = "protocol.xml";
 
         [TestMethod]
-        public void ParametersMockAssertTest_ValidInput_SetParameter()
+        public void ParameterAssertion_ValidInput_SetParameter()
         {
             // Arrange
 
@@ -31,7 +29,7 @@
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_ValidInput_SetParameterByName()
+        public void ParameterAssertion_ValidInput_SetParameterByName()
         {
             // Arrange
 
@@ -45,7 +43,7 @@
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_InvalidInput_SetParameter()
+        public void ParameterAssertion_InvalidInput_SetParameter()
         {
             // Arrange
 
@@ -55,12 +53,11 @@
             mock.Object.SetParameter(100, 20);
 
             // Assert
-            Action act = () => mock.Assert().Parameter(10);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Parameter(10).Should().BeNull();
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_InvalidInput_SetParameters()
+        public void ParameterAssertion_InvalidInput_SetParameters()
         {
             // Arrange
 
@@ -72,12 +69,11 @@
             mock.Object.SetParameters(parameterIds, values);
 
             // Assert
-            Action act = () => mock.Assert().Parameter(7);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Parameter(7).Should().BeNull();
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_ValidInput_GetAndSetParameters()
+        public void ParameterAssertion_ValidInput_GetAndSetParameters()
         {
             // Arrange
 
@@ -100,7 +96,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_EqualRow()
+        public void TableAssertionAddRow_EqualRow()
         {
             // Arrange
 
@@ -119,7 +115,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_InexistentRow()
+        public void TableAssertionAddRow_InexistentRow()
         {
             // Arrange
 
@@ -133,12 +129,11 @@
             mock.Object.AddRow(900, row2);
 
             // Assert
-            Action act = () => mock.Assert().Table(900).Row(2).Length.Should().Be(5);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Table(900).Row(2).Should().BeNull();
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArray_EqualRow()
+        public void TableAssertionFillArray_EqualRow()
         {
             // Arrange
 
@@ -162,7 +157,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRowReturnKey_EqualRow()
+        public void TableAssertionAddRowReturnKey_EqualRow()
         {
             // Arrange
 
@@ -183,7 +178,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_DeleteRowPK_EqualRow()
+        public void TableAssertionDeleteRowPK_EqualRow()
         {
             // Arrange
 
@@ -212,7 +207,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_DeleteRowIndex_EqualRow()
+        public void TableAssertionDeleteRowIndex_EqualRow()
         {
             // Arrange
 
@@ -241,7 +236,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_DeleteRowsPK_EqualRow()
+        public void TableAssertionDeleteRowsPK_EqualRow()
         {
             // Arrange
 
@@ -270,7 +265,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_ClearAllKeys_EqualRow()
+        public void TableAssertionClearAllKeys_EqualRow()
         {
             // Arrange
 
@@ -292,12 +287,11 @@
             mock.Object.ClearAllKeys(900);
 
             // Assert
-            Action act = () => mock.Assert().Table(900).Row(0).Length.Should().Be(0);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Table(900).Row(0).Should().BeNull();
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_EqualColumn()
+        public void TableAssertionAddRow_EqualColumn()
         {
             // Arrange
 
@@ -319,7 +313,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_InexistentColumn()
+        public void TableAssertionAddRow_InexistentColumn()
         {
             // Arrange
 
@@ -337,7 +331,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayNoDelete_EqualColumns()
+        public void TableAssertionFillArrayNoDelete_EqualColumns()
         {
             // Arrange
 
@@ -382,7 +376,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayWithDeleteAfterAddRow_EqualColumns()
+        public void TableAssertionFillArrayWithDeleteAfterAddRow_EqualColumns()
         {
             // Arrange
 
@@ -426,7 +420,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayWithDelete_EqualColumns()
+        public void TableAssertionFillArrayWithDelete_EqualColumns()
         {
             // Arrange
 
@@ -459,7 +453,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayWithColumn_EqualColumns()
+        public void TableAssertionFillArrayWithColumn_EqualColumns()
         {
             // Arrange
 
@@ -477,7 +471,7 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_NotConsecutiveRows_GetCorrectRows()
+        public void TableAssertionNotConsecutiveRows_GetCorrectRows()
         {
             // Arrange
 
