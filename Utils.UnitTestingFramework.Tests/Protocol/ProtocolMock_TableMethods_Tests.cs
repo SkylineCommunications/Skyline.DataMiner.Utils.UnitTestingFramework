@@ -2120,39 +2120,6 @@
         }
 
         [TestMethod]
-        public void FillArrayWithColumnColumnsTest_FillArrayWithSameUniqueValue_GetCorrectRows()
-        {
-            // Arrange
-
-            var mock = new SLProtocolMock(path);
-
-            object[] pk = new object[] { "skyline1", "skyline2" };
-
-            object[] values = new object[] { "value1" };
-
-            // Act
-            mock.Object.ClearAllKeys(900);
-
-            mock.Object.FillArrayWithColumn(900, 902, pk, values);
-
-            object[] rowOutput0 = (object[])mock.Object.GetRow(900, "skyline1");
-            object[] rowOutput1 = (object[])mock.Object.GetRow(900, "skyline2");
-
-            // Assert
-            Assert.AreEqual("skyline1", rowOutput0[0]);
-            Assert.AreEqual("value1", rowOutput0[1]);
-            Assert.IsNull(rowOutput0[2]);
-            Assert.IsNull(rowOutput0[3]);
-            Assert.IsNull(rowOutput0[4]);
-
-            Assert.AreEqual("skyline2", rowOutput1[0]);
-            Assert.AreEqual("value1", rowOutput1[1]);
-            Assert.IsNull(rowOutput1[2]);
-            Assert.IsNull(rowOutput1[3]);
-            Assert.IsNull(rowOutput1[4]);
-        }
-
-        [TestMethod]
         public void FillArrayWithColumnColumnsTest_FillArraysWithDifferentLengths_Exception()
         {
             // Arrange

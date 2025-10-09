@@ -480,22 +480,13 @@
                         }
                     }
                 }
+        
+                var columnPids = Array.ConvertAll(columnInfo.Skip(1).Take(columnsToSetCount).ToArray(), Convert.ToInt32);
 
-                if (columnsToSetCount == 1)
-                {
-                    int columnPid = Convert.ToInt32(columnInfo[1]);
+                var columnPidsToValues = columnPids.ToDictionary(pid => pid, pid => columnValues[Array.IndexOf(columnPids, pid)]);
 
-                    protocolCache.Tables.FillArrayWithColumn(tablePid, columnPid, primaryKeys, columnValues.Single(), timestamp, useClearAndLeave);
-                }
-                else
-                {
-                    var columnPids = Array.ConvertAll(columnInfo.Skip(1).Take(columnsToSetCount).ToArray(), Convert.ToInt32);
-
-                    var columnPidsToValues = columnPids.ToDictionary(pid => pid, pid => columnValues[Array.IndexOf(columnPids, pid)]);
-
-                    protocolCache.Tables.FillArrayWithColumns(tablePid, primaryKeys, columnPidsToValues, timestamp, useClearAndLeave);
-                }
-
+                protocolCache.Tables.FillArrayWithColumns(tablePid, primaryKeys, columnPidsToValues, timestamp, useClearAndLeave);
+                
                 return null; // Irrelevant return value.
             }
 

@@ -51,6 +51,7 @@
         /// </summary>
         /// <param name="tablePid">The ID of the table parameter.</param>
         /// <param name="row">The row data.</param>
+        /// <param name="timestamp">An optional timestamp.</param>
         /// <returns>The 1-based row number or 0 if the cache does not contain a table model for the specified table ID.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="row"/> is <see langword="null"/>.</exception>
         public int AddRow(int tablePid, object[] row, DateTime? timestamp = null)
@@ -433,6 +434,7 @@
         /// <param name="tableId">The table identifier.</param>
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
+        /// <param name="useClearAndLeave">A boolean indicating if protocol.Clear and protocol.Leave should be taken into account.</param>
         /// <returns><c>true</c></returns>
         public void FillArray(int tableId, object[][] columns, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
@@ -469,6 +471,7 @@
         /// <param name="tableId">The table identifier.</param>
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
+        /// <param name="useClearAndLeave">A boolean indicating if protocol.Clear and protocol.Leave should be taken into account.</param>
         /// <returns><c>true</c> or <see langword="null"/> if the table cache does not contain a model for that table with the specified ID.</returns>
         public void FillArrayNoDelete(int tableId, object[][] columns, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
@@ -502,27 +505,14 @@
         /// <exception cref="ArgumentException">There should be as many primary keys as values or instead only one value.</exception>
         public void FillArrayWithColumn(int tablePid, int columnPid, string[] primaryKeys, object[] values, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
-            if (primaryKeys.Length != values.Length && (primaryKeys.Length == values.Length || values.Length != 1))
+            if (primaryKeys.Length != values.Length)
             {
-                throw new ArgumentException("There should be as many primary keys as values or instead only one value.");
+                throw new ArgumentException("There should be as many primary keys as values.");
             }
 
             var tableModel = GetTable(tablePid);
 
             int columnIndex = GetColumnIndex(tableModel, columnPid);
-
-            if (values.Length == 1)
-            {
-                var newValues = new object[primaryKeys.Length];
-
-                for (int i = 0; i < newValues.Length; i++)
-                {
-                    newValues[i] = values[0];
-                }
-
-                tableModel.SetColumn(columnIndex, primaryKeys, newValues, timeInfo);
-                return;
-            }
 
             if (useClearAndLeave)
             {
