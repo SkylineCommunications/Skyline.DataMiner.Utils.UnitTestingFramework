@@ -579,6 +579,10 @@
                 {
                     convertedRow[i] = existingRow[i];
                 }
+                else
+                {
+                    convertedRow[i] = rowToConvert[i];
+                }
             }
 
             return convertedRow;
@@ -611,6 +615,10 @@
                     var existingRow = tableModel.GetRow(rowIndex);
                     var existingValue = existingRow[columnIndex];
                     convertedColumn[i] = existingValue;
+                }
+                else
+                {
+                    convertedColumn[i] = column[i];
                 }
             }
 
