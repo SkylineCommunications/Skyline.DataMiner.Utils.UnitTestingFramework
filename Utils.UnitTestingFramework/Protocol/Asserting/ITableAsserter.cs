@@ -1,6 +1,5 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
 {
-    using System.Collections.Generic;
     using Skyline.DataMiner.Scripting;
 
     /// <summary>
@@ -43,6 +42,12 @@
         object[] Row(int rowIndex);
 
         /// <summary>
+        /// Gets all rows.
+        /// </summary>
+        /// <returns>a array of rows.</returns>
+        object[][] AllRows();
+
+        /// <summary>
         /// Retrieves the row with the specified key.
         /// </summary>
         /// <typeparam name="TRow">The type of the row.</typeparam>
@@ -57,11 +62,5 @@
         /// <param name="index">The index.</param>
         /// <returns>The row data or <see langword="null"/> if there is no row with the specified index.</returns>
         TRow Row<TRow>(int index) where TRow : QActionTableRow;
-
-        /// <summary>
-        /// Gets all rows.
-        /// </summary>
-        /// <returns>a array of rows.</returns>
-        IDictionary<string, object[]> AllRows();
     }
 }

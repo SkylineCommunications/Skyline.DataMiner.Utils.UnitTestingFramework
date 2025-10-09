@@ -2,8 +2,6 @@
 namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
@@ -20,7 +18,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
 
         public int RowCount => tableModel?.RowCount ?? 0;
 
-        public IDictionary<string, object[]> AllRows()
+        public object[][] AllRows()
         {
             return tableModel?.GetAllRows();
         }

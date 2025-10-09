@@ -328,14 +328,13 @@
         /// Gets all rows.
         /// </summary>
         /// <returns>a array of rows.</returns>
-        public IDictionary<string, object[]> GetAllRows()
+        public object[][] GetAllRows()
         {
-            var allRows = new Dictionary<string, object[]>();
+            var allRows = new object[RowCount][];
 
             for (int i = 0; i < RowCount; i++)
             {
-                var row = GetRow(i);
-                allRows[Convert.ToString(row[PrimaryKeyColumnIdx])] = GetRow(i);
+                allRows[i] = GetRow(i);
             }
 
             return allRows;

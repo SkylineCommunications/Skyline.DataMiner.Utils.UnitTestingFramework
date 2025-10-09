@@ -2133,6 +2133,39 @@
         }
 
         [TestMethod]
+        public void FillArrayWithColumn_FillArrayWithSameUniqueValue_GetCorrectRows()
+        {
+            // Arrange
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var tablesCache = protocolCache.Tables;
+
+            var primaryKeys = new[] { "skyline1", "skyline2" };
+
+            object[] values = new object[] { "value1" };
+
+            // Act
+            tablesCache.ClearAllKeys(900);
+
+            tablesCache.FillArrayWithColumn(900, 902, primaryKeys, values);
+
+            object[] rowOutput0 = (object[])tablesCache.GetRow(900, "skyline1");
+            object[] rowOutput1 = (object[])tablesCache.GetRow(900, "skyline2");
+
+            // Assert
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("value1", rowOutput0[1]);
+            Assert.IsNull(rowOutput0[2]);
+            Assert.IsNull(rowOutput0[3]);
+            Assert.IsNull(rowOutput0[4]);
+
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("value1", rowOutput1[1]);
+            Assert.IsNull(rowOutput1[2]);
+            Assert.IsNull(rowOutput1[3]);
+            Assert.IsNull(rowOutput1[4]);
+        }
+
+        [TestMethod]
         public void FillArrayWithColumn_FillArraysWithDifferentLengths_Exception()
         {
             // Arrange

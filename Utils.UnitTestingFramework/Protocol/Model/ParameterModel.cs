@@ -16,7 +16,7 @@
         public ParameterModel(object value, DateTime? timestamp = null)
         {
             Value = value;
-            Timestamp = timestamp ?? DateTime.Now;
+            Timestamp = timestamp.HasValue ? timestamp.Value : DateTime.Now;
         }
 
         /// <summary>

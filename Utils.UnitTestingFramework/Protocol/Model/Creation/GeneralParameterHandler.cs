@@ -8,7 +8,9 @@
     {
         public void CreateModelAndAddToCache(IProtocolCache cache, IParamsParam parameter)
         {
-            if (parameter?.Interprete?.Type?.Value == null)
+            if (parameter.Interprete == null
+                || parameter.Interprete.Type == null
+                || parameter.Interprete.Type.Value == null)
             {
                 return;
             }
