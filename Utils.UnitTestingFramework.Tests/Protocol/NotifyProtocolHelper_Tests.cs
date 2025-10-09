@@ -1,26 +1,25 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol
 {
     using System;
 
     using FluentAssertions;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
-    public class NotifyProtocolTests
+    public class NotifyProtocolHelper_Tests
     {
         private readonly string path = "protocol.xml";
 
         [TestMethod]
-        public void NotifyProtocolTest_GetParameter_IsEqual()
+        public void GetParameter_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             // Act
             var output = mock.Object.NotifyProtocol(73, 1000, null); // GetParameter
@@ -30,11 +29,10 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetParameterByName_IsEqual()
+        public void GetParameterByName_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             // Act
             var output = mock.Object.NotifyProtocol(85, "NumericParameter", null); // GetParameterByName
@@ -44,11 +42,10 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_SetParameter_IsEqual()
+        public void SetParameter_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             uint dmaID = 346;
             uint elementID = 801;
@@ -58,91 +55,88 @@
             int value = 50;
 
             // Act
-            var outputSet = mock.Object.NotifyProtocol(50, ids, value); // SetParameter
+            mock.Object.NotifyProtocol(50, ids, value); // SetParameter
             var outputGet = mock.Object.NotifyProtocol(85, "NumericParameter", null); // GetParameterByName
 
             // Assert
-            Assert.AreEqual(0, outputSet);
             Assert.AreEqual(value, outputGet);
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_SetParameterByName_IsEqual()
+        public void SetParameterByName_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             string parameterName = "NumericParameter";
             int value = 50;
 
             // Act
-            var outputSet = mock.Object.NotifyProtocol(84, parameterName, value); // SetParameterByName
+            mock.Object.NotifyProtocol(84, parameterName, value); // SetParameterByName
             var outputGet = mock.Object.NotifyProtocol(85, "NumericParameter", null); // GetParameterByName
 
             // Assert
-            Assert.AreEqual(0, outputSet);
             Assert.AreEqual(value, outputGet);
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_AddRow_IsEqual()
+        [DataRow(null)]
+        [DataRow("900")]
+        [DataRow(new[] { 900 })]
+        public void AddRow_InvalidSecondArgument_ThrowsException(object notifyProtocolSecondArgument)
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
-            int tableID = 900;
-            string primaryKey1 = "Row 1 PK";
-            string primaryKey2 = "Row 2 PK";
-            string primaryKey3 = "Row 3 PK";
-            string primaryKey4 = "Row 4 PK";
-
-            // Act
-            var outputAddRow1 = mock.Object.NotifyProtocol(149, tableID, primaryKey1); // AddRow
-            var outputAddRow2 = mock.Object.NotifyProtocol(149, tableID, primaryKey2); // AddRow
-            var outputAddRow3 = mock.Object.NotifyProtocol(149, tableID, primaryKey3); // AddRow
-            var outputAddRow4 = mock.Object.NotifyProtocol(149, tableID, primaryKey4); // AddRow
-
-            // Assert
-            Assert.AreEqual(1, outputAddRow1);
-            Assert.AreEqual(2, outputAddRow2);
-            Assert.AreEqual(3, outputAddRow3);
-            Assert.AreEqual(4, outputAddRow4);
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => mock.Object.NotifyProtocol((int)NotifyType.AddRow, notifyProtocolSecondArgument, "Row 1 PK"));
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_AddRepeatedRow_IsEqual()
+        [DataRow(null)]
+        [DataRow(1)]
+        public void AddRow_InvalidThirdArgument_ThrowsException(object notifyProtocolThirdArgument)
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
-            int tableID = 900;
-            string primaryKey1 = "Row 1 PK";
-            string primaryKey2 = "Row 2 PK";
-            string primaryKey3 = "Row 3 PK";
-            string primaryKey4 = "Row 1 PK";
-
-            // Act
-            var outputAddRow1 = mock.Object.NotifyProtocol(149, tableID, primaryKey1); // AddRow
-            var outputAddRow2 = mock.Object.NotifyProtocol(149, tableID, primaryKey2); // AddRow
-            var outputAddRow3 = mock.Object.NotifyProtocol(149, tableID, primaryKey3); // AddRow
-            var outputAddRow4 = mock.Object.NotifyProtocol(149, tableID, primaryKey4); // AddRow
-
-            // Assert
-            Assert.AreEqual(1, outputAddRow1);
-            Assert.AreEqual(2, outputAddRow2);
-            Assert.AreEqual(3, outputAddRow3);
-            Assert.AreEqual(1, outputAddRow4);
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => mock.Object.NotifyProtocol((int)NotifyType.AddRow, 900, notifyProtocolThirdArgument));
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_AddRowReturnKey_IsEqual()
+        [DataRow(new[] {"PK1", "PK2", "PK3", "PK4"}, new[] {1, 2, 3, 4})]
+        [DataRow(new[] {"PK1", "PK1", "PK3", "PK4"}, new[] {1, 1, 2, 3})]
+        [DataRow(new[] {"PK1", "PK2", "PK3", "PK1"}, new[] {1, 2, 3, 1})]
+        [DataRow(new object[] { new[] { "PK1" }, new[] { "PK2" }, new[] { "PK3" }, new[] { "PK4" } }, new[] { 1, 2, 3, 4 })]
+        [DataRow(new object[] { new[] { "PK1" }, new[] { "PK1" }, new[] { "PK3" }, new[] { "PK4" } }, new[] { 1, 1, 2, 3 })]
+        [DataRow(new object[] { new[] { "PK1" }, new[] { "PK2" }, new[] { "PK3" }, new[] { "PK1" } }, new[] { 1, 2, 3, 1 })]
+        public void AddRow_IsEqual(object[] notifyProtocolThirdArguments, int[] expectedRowIndexes)
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            // Act
+            var outputAddRow1 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[0]);
+            var outputAddRow2 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[1]);
+            var outputAddRow3 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[2]);
+            var outputAddRow4 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, notifyProtocolThirdArguments[3]);
+
+            // Assert
+            Assert.AreEqual(expectedRowIndexes[0], outputAddRow1);
+            Assert.AreEqual(expectedRowIndexes[1], outputAddRow2);
+            Assert.AreEqual(expectedRowIndexes[2], outputAddRow3);
+            Assert.AreEqual(expectedRowIndexes[3], outputAddRow4);
+        }
+
+        [TestMethod]
+        public void AddRowReturnKey_IsEqual()
+        {
+            // Arrange
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
             string primaryKey1 = "Row 1 PK";
@@ -169,31 +163,86 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_DeleteRow_IsEqual()
+        [DataRow("1")]
+        [DataRow(1.1)]
+        [DataRow(true)]
+        [DataRow(new[] {1 , 2, 3})]
+        [DataRow((object)new object[] {1 , "2", 3})]
+        public void DeleteRow_InvalidSecondArgument_ThrowsException(object notifyProtocolSecondArgument)
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
             string primaryKey1 = "Row 1 PK";
 
-            // Act
-            var outputAddRow1 = mock.Object.NotifyProtocol(149, tableID, primaryKey1); // AddRow
-            var outputDeleteRow1 = mock.Object.NotifyProtocol(156, tableID, primaryKey1); // DeleteRow
+            mock.Object.AddRow(tableID, primaryKey1);
+            mock.Object.AddRow(tableID, "Row 2 PK");
+            mock.Object.AddRow(tableID, "Row 3 PK");
 
-            // Assert
-            Assert.AreEqual(1, outputAddRow1);
-            Assert.AreEqual(0, outputDeleteRow1);
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => mock.Object.NotifyProtocol((int)NotifyType.DeleteRow, notifyProtocolSecondArgument, null));
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_Exists_IsEqual()
+        [DataRow(1)]
+        [DataRow(1.1)]
+        [DataRow(true)]
+        [DataRow(new[] { 1, 2, 3 })]
+        [DataRow((object)new object[] { 1, "2", 3 })]
+        public void DeleteRow_InvalidThirdArgument_ThrowsException(object notifyProtocolThirdArgument)
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            string primaryKey1 = "Row 1 PK";
+
+            mock.Object.AddRow(tableID, primaryKey1);
+            mock.Object.AddRow(tableID, "Row 2 PK");
+            mock.Object.AddRow(tableID, "Row 3 PK");
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => mock.Object.NotifyProtocol((int)NotifyType.DeleteRow, tableID, notifyProtocolThirdArgument));
+        }
+
+        [TestMethod]
+        [DataRow("Row 1 PK", 2)]
+        [DataRow("Row 2 PK", 2)]
+        [DataRow("Row 3 PK", 2)]
+        [DataRow(new[] { "Row 1 PK" }, 2)]
+        [DataRow(new[] { "Row 2 PK" }, 2)]
+        [DataRow(new[] { "Row 3 PK" }, 2)]
+        [DataRow(new[] { "Row 1 PK", "Row 2 PK" }, 1)]
+        [DataRow(new[] { "Row 2 PK", "Row 3 PK" }, 1)]
+        [DataRow(new[] { "Row 1 PK", "Row 3 PK" }, 1)]
+        [DataRow(new[] { "Row 1 PK", "Row 2 PK", "Row 3 PK" }, 0)]
+        public void DeleteRow_DeleteExistingRows(object primaryKeysToRemove, int expectedRemainingRows)
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            mock.Object.AddRow(tableID, "Row 1 PK");
+            mock.Object.AddRow(tableID, "Row 2 PK");
+            mock.Object.AddRow(tableID, "Row 3 PK");
+
+            // Act
+            int remainingRows = (int)mock.Object.NotifyProtocol((int)NotifyType.DeleteRow, tableID, primaryKeysToRemove);
+
+            // Assert
+            Assert.AreEqual(expectedRemainingRows, remainingRows);
+        }
+
+        [TestMethod]
+        public void Exists_IsEqual()
+        {
+            // Arrange
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -212,11 +261,11 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetKeyPosition_IsEqual()
+        public void GetKeyPosition_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -242,11 +291,11 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetRow_IsEqual()
+        public void GetRow_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -267,11 +316,11 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_SetRow_IsEqual()
+        public void SetRow_UseClearAndLeave()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -282,33 +331,36 @@
             string col4 = "Row 1 4th Col";
             string col5 = "Row 1 5th Col";
 
-            object[] rowDetails = new object[] { tableID, primaryKey1 };
+            object[] rowDetails = new object[] { tableID, primaryKey1, DateTime.Now, true };
 
-            object[] rowData = new object[] { null, col2, col3, col4, col5 };
+            object[] rowData = new object[] { primaryKey1, col2, col3, col4, col5 };
+
+            var outputAddRow1 = mock.Object.NotifyProtocol((int)NotifyType.AddRow, tableID, primaryKey1);
+            mock.Object.NotifyProtocol((int)NotifyType.NT_SET_ROW, rowDetails, rowData);
 
             // Act
-            var outputAddRow1 = mock.Object.NotifyProtocol(149, tableID, primaryKey1); // AddRow
-            var outputSetRow1 = (int[])mock.Object.NotifyProtocol(225, rowDetails, rowData); // SetRow
-            var outputGetRow1 = (object[])mock.Object.NotifyProtocol(215, rowDetails, null); // GetRow
+            rowData[1] = Constants.PROTOCOL_CLEAR;
+            rowData[2] = Constants.PROTOCOL_LEAVE;
+            rowData[3] = "Row 1 4th Col new value";
+
+            mock.Object.NotifyProtocol((int)NotifyType.NT_SET_ROW, rowDetails, rowData);
 
             // Assert
+            var outputGetRow1 = (object[])mock.Object.NotifyProtocol((int)NotifyType.NT_GET_ROW, rowDetails, null);
+
             Assert.AreEqual(1, outputAddRow1);
 
-            int[] setOutputArray = { 0, 1, 1, 1, 1 };
-
-            outputSetRow1.Should().BeEquivalentTo(setOutputArray);
-
-            string[] row = { "Row 1 PK", "Row 1 2nd Col", "Row 1 3rd Col", "Row 1 4th Col", "Row 1 5th Col" };
+            string[] row = { "Row 1 PK", null, "Row 1 3rd Col", "Row 1 4th Col new value", "Row 1 5th Col" };
 
             outputGetRow1.Should().BeEquivalentTo(row);
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_FillArray_IsEqual()
+        public void FillArray_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -351,11 +403,10 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_FillArrayNoDelete_IsEqual()
+        public void FillArrayNoDelete_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -397,11 +448,10 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_FillArrayWithColumn_IsEqual()
+        public void FillArrayWithColumn_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -426,8 +476,8 @@
             var values2 = new object[] { primaryKeys, columnValues2 };
 
             // Act
-            mock.Object.NotifyProtocol(220, columnInfo1, values1); // FillArrayWithColumn
-            mock.Object.NotifyProtocol(220, columnInfo2, values2); // FillArrayWithColumn
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, columnInfo1, values1);
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, columnInfo2, values2);
             var outputGetRow1 = (object[])mock.Object.NotifyProtocol(215, rowDetails1, null); // GetRow
             var outputGetRow2 = (object[])mock.Object.NotifyProtocol(215, rowDetails2, null); // GetRow
 
@@ -440,11 +490,11 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_InexistentNotifyProtocol_Exception()
+        public void InexistentNotifyProtocol_Exception()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int viewID = 10045;
 
@@ -454,11 +504,11 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetTableColumns_IsEqual()
+        public void GetTableColumns_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -501,11 +551,11 @@
         }
 
         [TestMethod]
-        public void NotifyProtocolTest_GetTableColumnsInexistentIdx_IsEqual()
+        public void GetTableColumns_InexistentIdx_IsEqual()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             int tableID = 900;
 
@@ -544,6 +594,147 @@
             object[] expectedColumns = { col1, null };
 
             columns.Should().BeEquivalentTo(expectedColumns);
+        }
+
+        [TestMethod]
+        [DataRow(null)] // Not an array
+        [DataRow(1)] // Not an array
+        [DataRow("1")] // Not an array
+        [DataRow(new[] { 1 })] // Incorrect array length
+        [DataRow(new[] { 1, 2 })] // Incorrect array length
+        [DataRow(new[] { 1, 2, 3, 4 })] // Incorrect array length
+        [DataRow((object)new object[] { "1", 2, 3 })] // First item not int
+        [DataRow((object)new object[] { 1, 2, "3" })] // Third item not int
+        public void GetParameterIndex_InvalidSecondArgument_ThrowsException(object notifyProtocolSecondArgument)
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            string primaryKey1 = "Row 1 PK";
+
+            mock.Object.AddRow(tableID, primaryKey1);
+            mock.Object.AddRow(tableID, "Row 2 PK");
+            mock.Object.AddRow(tableID, "Row 3 PK");
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => mock.Object.NotifyProtocol((int)NotifyType.GetParameterIndex, notifyProtocolSecondArgument, null));
+        }
+
+        [TestMethod]
+        [DataRow(1, 1, "Row 1 PK")]
+        [DataRow(1, 2, "value 1.1")]
+        [DataRow(1, 3, "value 1.2")]
+        [DataRow(1, 4, "value 1.3")]
+        [DataRow(1, 5, "value 1.4")]
+        [DataRow(2, 1, "Row 2 PK")]
+        [DataRow(2, 2, "value 2.1")]
+        [DataRow(2, 3, "value 2.2")]
+        [DataRow(2, 4, "value 2.3")]
+        [DataRow(2, 5, "value 2.4")]
+        [DataRow(3, 1, "Row 3 PK")]
+        [DataRow(3, 2, "value 3.1")]
+        [DataRow(3, 3, "value 3.2")]
+        [DataRow(3, 4, "value 3.3")]
+        [DataRow(3, 5, "value 3.4")]
+        [DataRow("Row 1 PK", 1, "Row 1 PK")]
+        [DataRow("Row 1 PK", 2, "value 1.1")]
+        [DataRow("Row 1 PK", 3, "value 1.2")]
+        [DataRow("Row 1 PK", 4, "value 1.3")]
+        [DataRow("Row 1 PK", 5, "value 1.4")]
+        [DataRow("Row 2 PK", 1, "Row 2 PK")]
+        [DataRow("Row 2 PK", 2, "value 2.1")]
+        [DataRow("Row 2 PK", 3, "value 2.2")]
+        [DataRow("Row 2 PK", 4, "value 2.3")]
+        [DataRow("Row 2 PK", 5, "value 2.4")]
+        [DataRow("Row 3 PK", 1, "Row 3 PK")]
+        [DataRow("Row 3 PK", 2, "value 3.1")]
+        [DataRow("Row 3 PK", 3, "value 3.2")]
+        [DataRow("Row 3 PK", 4, "value 3.3")]
+        [DataRow("Row 3 PK", 5, "value 3.4")]
+        public void GetParameterIndex(object rowIndicator, int oneBasedColumnIndex, string expectedCellValue)
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            string primaryKey1 = "Row 1 PK";
+
+            mock.Object.AddRow(tableID, new[] { primaryKey1, "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+
+            // Act & Assert
+            var cellValue = mock.Object.NotifyProtocol((int)NotifyType.GetParameterIndex, new[] { tableID, rowIndicator, oneBasedColumnIndex }, null);
+
+            // Assert
+            Assert.AreEqual(expectedCellValue, cellValue);
+        }
+
+        [TestMethod]
+        public void FillArrayWithColumn_SingleColumn_UseProtocolLeaveAndClear()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            string primaryKey1 = "Row 1 PK";
+
+            mock.Object.AddRow(tableID, new[] { primaryKey1, "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+
+            object[] info = new object[] { tableID, 902, new object[] { true } }; // Column 902 (2nd column), with protocol_leave and protocol_clear
+            object[] primaryKeys = new object[] { primaryKey1, "Row 2 PK", "Row 3 PK" };
+            object[] columnValues = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.1", Constants.PROTOCOL_CLEAR };
+
+            // Act
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, info, new object[] { primaryKeys, columnValues });
+
+            // Assert
+            var firstColumn = mock.Assert().Table(tableID).Column(902);
+
+            Assert.AreEqual("value 1.1", firstColumn[0]); // Not changed because of protocol_leave
+            Assert.AreEqual("new value 2.1", firstColumn[1]); // Changed
+            Assert.AreEqual(null, firstColumn[2]); // Cleared because of protocol_clear
+        }
+
+
+        [TestMethod]
+        public void FillArrayWithColumn_MultipleColumns_UseProtocolLeaveAndClear()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            int tableID = 900;
+
+            mock.Object.AddRow(tableID, new[] { "Row 1 PK", "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
+            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+
+            object[] info = new object[] { tableID, 902, 904, new object[] { true } }; // Column 902 & 903, with protocol_leave and protocol_clear
+            object[] primaryKeys = new object[] { "Row 1 PK", "Row 2 PK", "Row 3 PK" };
+            object[] column1Values = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.1",  Constants.PROTOCOL_CLEAR };
+            object[] column2Values = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.3", Constants.PROTOCOL_CLEAR };
+
+            // Act
+            mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, info, new object[] { primaryKeys, column1Values, column2Values });
+
+            // Assert
+            var firstColumn = mock.Assert().Table(tableID).Column(902);
+            var secondColumn = mock.Assert().Table(tableID).Column(904);
+
+            Assert.AreEqual("value 1.1", firstColumn[0]); // Not changed because of protocol_leave
+            Assert.AreEqual("new value 2.1", firstColumn[1]); // Changed
+            Assert.AreEqual(null, firstColumn[2]); // Cleared because of protocol_clear
+
+
+            Assert.AreEqual("value 1.3", secondColumn[0]); // Not changed because of protocol_leave
+            Assert.AreEqual("new value 2.3", secondColumn[1]); // Changed
+            Assert.AreEqual(null, secondColumn[2]); // Cleared because of protocol_clear
         }
     }
 }

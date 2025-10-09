@@ -111,9 +111,9 @@
         /// <exception cref="ArgumentException">There is no parameter with ID <paramref name="parameterId"/>.</exception>
         public IParameterModel GetParameterModel(int parameterId)
         {
-            if (ParametersToValues.TryGetValue(parameterId, out IParameterModel output))
+            if (ParametersToValues.TryGetValue(parameterId, out var parameterModel))
             {
-                return output;
+                return parameterModel;
             }
 
             throw new ArgumentException($"There is no parameter with ID '{parameterId}'");
@@ -321,17 +321,8 @@
         /// <remarks>The set will only be executed if either <paramref name="checkIfExists"/> was set to <c>false</c>, or if the cache contains a parameter with the specified ID.</remarks>
         public int SetParameter(int pid, object value, DateTime? timestamp = null, bool checkIfExists = true)
         {
-            ParameterModel parameterModel;
-
-            if (timestamp != null)
-            {
-                parameterModel = new ParameterModel(value, timestamp.Value);
-            }
-            else
-            {
-                parameterModel = new ParameterModel(value);
-            }
-
+            var parameterModel = new ParameterModel(value, timestamp);
+            
             if (!checkIfExists || ParametersToValues.ContainsKey(pid))
             {
                 ParametersToValues[pid] = parameterModel;
@@ -395,21 +386,14 @@
                 return Constants.HRESULT_FAIL_DIFFLEN;
             }
 
+            timestamps = timestamps ?? new DateTime[parameterIDs.Length];
+
             int length = parameterIDs.Length;
             int[] result = new int[length];
 
             for (int index = 0; index < length; index++)
             {
-                ParameterModel parameterModel;
-
-                if (timestamps != null)
-                {
-                    parameterModel = new ParameterModel(values[index], timestamps[index]);
-                }
-                else
-                {
-                    parameterModel = new ParameterModel(values[index]);
-                }
+                var parameterModel = new ParameterModel(values[index], timestamps[index]);
 
                 if (ParametersToValues.ContainsKey(parameterIDs[index]))
                 {
@@ -448,97 +432,6 @@
 
             mock.Object.Log($"NT_GET_DATA for '{iID}' failed. 0x80040239");
             return true;
-        }
-
-        internal void LoadSetups(Mock<SLProtocol> mock)
-        {
-            LoadGetSetups(mock);
-            LoadSetSetups(mock);
-        }
-
-        private void LoadGetSetups(Mock<SLProtocol> mock)
-        {
-            mock.Setup(p => p.GetParameter(It.IsAny<int>()))
-                .Returns(
-                (int pid) =>
-                {
-                    TryGetParameter(pid, out object value);
-                    return value;
-                });
-
-            mock.Setup(p => p.GetParameterByName(It.IsAny<string>()))
-                .Returns(
-                (string parameterName) =>
-                {
-                    TryGetParameterByName(parameterName, out object value);
-                    return value;
-                });
-
-            mock.Setup(p => p.GetParameters(It.IsAny<object>()))
-                .Returns(
-                (uint[] parameters) =>
-                {
-                    if (parameters.GetType() == typeof(uint[]))
-                    {
-                        return GetParameters(parameters);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Argument should be of type uint[]");
-                    }
-                });
-
-            mock.Setup(p => p.IsEmpty(It.IsAny<int>()))
-                .Returns(
-                (int pid) =>
-                {
-                    return IsEmpty(pid, mock);
-                });
-        }
-
-        private void LoadSetSetups(Mock<SLProtocol> mock)
-        {
-            mock.Setup(p => p.SetParameter(It.IsAny<int>(), It.IsAny<object>()))
-                .Returns(
-                (int pid, object value) =>
-                {
-                    return SetParameter(pid, value);
-                });
-
-            mock.Setup(p => p.SetParameter(It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
-                .Returns(
-                (int pid, object value, DateTime timestamp) =>
-                {
-                    return SetParameter(pid, value, timestamp);
-                });
-
-            mock.Setup(p => p.SetParameterByName(It.IsAny<string>(), It.IsAny<object>()))
-                .Returns(
-                (string name, object value) =>
-                {
-                    return SetParameterByName(name, value);
-                });
-
-            mock.Setup(p => p.SetParametersByName(It.IsAny<string[]>(), It.IsAny<object[]>()))
-                .Returns(
-                (string[] names, object[] values) =>
-                {
-                    return SetParametersByName(names, values);
-                });
-
-            mock.Setup(p => p.SetParameters(It.IsAny<int[]>(), It.IsAny<object[]>()))
-                .Returns(
-                (int[] parameterIDs, object[] values) =>
-                {
-                    return SetParameters(parameterIDs, values);
-                });
-
-            mock.Setup(p => p.SetParameters(It.IsAny<int[]>(), It.IsAny<object[]>(), It.IsAny<DateTime[]>()))
-                .Returns(
-                (int[] parameterIDs, object[] values, DateTime[] timestamp) =>
-                {
-                    return SetParameters(parameterIDs, values, timestamp);
-                });
         }
     }
 }

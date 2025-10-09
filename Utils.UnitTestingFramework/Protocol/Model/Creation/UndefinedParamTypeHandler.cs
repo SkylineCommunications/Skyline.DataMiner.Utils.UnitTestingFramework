@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Parameter
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation
 {
     using System.Collections.Generic;
 
@@ -14,7 +14,7 @@
             this.excludedPids = excludedPids;
         }
 
-        public void LoadDefaultForParameter(IProtocolCache cache, IParamsParam parameter)
+        public void CreateModelAndAddToCache(IProtocolCache cache, IParamsParam parameter)
         {
         }
     }

@@ -1,7 +1,8 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation
 {
     using System;
     using System.Collections.Generic;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     /// <summary>
     /// Table model builder.

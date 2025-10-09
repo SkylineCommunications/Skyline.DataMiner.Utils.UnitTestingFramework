@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Parameter
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation
 {
     using Skyline.DataMiner.CICD.Models.Protocol.Enums;
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
@@ -6,11 +6,9 @@
 
     internal abstract class GeneralParameterHandler : ISingleParameterHandler
     {
-        public void LoadDefaultForParameter(IProtocolCache cache, IParamsParam parameter)
+        public void CreateModelAndAddToCache(IProtocolCache cache, IParamsParam parameter)
         {
-            if (parameter.Interprete == null
-                || parameter.Interprete.Type == null
-                || parameter.Interprete.Type.Value == null)
+            if (parameter.Interprete?.Type?.Value == null)
             {
                 return;
             }

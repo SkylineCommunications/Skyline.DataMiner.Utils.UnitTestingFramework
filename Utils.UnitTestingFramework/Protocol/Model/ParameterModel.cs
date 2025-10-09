@@ -13,19 +13,10 @@
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="timestamp">The timestamp.</param>
-        public ParameterModel(object value, DateTime timestamp)
+        public ParameterModel(object value, DateTime? timestamp = null)
         {
             Value = value;
-            Timestamp = timestamp;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParameterModel"/> class.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        public ParameterModel(object value)
-        {
-            Value = value;
+            Timestamp = timestamp ?? DateTime.Now;
         }
 
         /// <summary>

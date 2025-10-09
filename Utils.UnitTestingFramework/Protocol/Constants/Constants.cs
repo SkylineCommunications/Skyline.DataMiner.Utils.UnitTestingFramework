@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines constants.
     /// </summary>
-    public static class Constants
+    internal static class Constants
     {
         /// <summary>
         /// The ID does not exist.
@@ -19,5 +19,9 @@
         /// Success
         /// </summary>
         public const uint HRESULT_SUCCESS = 0;
+
+        public const double PROTOCOL_CLEAR = double.NegativeInfinity;
+
+        public const double PROTOCOL_LEAVE = double.PositiveInfinity;
     }
 }

@@ -1,6 +1,5 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol
 {
-    using System;
     using System.Collections.Generic;
 
     using FluentAssertions;
@@ -8,7 +7,6 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -17,11 +15,11 @@
         private readonly string path = "protocol.xml";
 
         [TestMethod]
-        public void ParametersMockAssertTest_ValidInput_SetParameter()
+        public void ParameterAssertion_ValidInput_SetParameter()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             mock.Object.SetParameter(100, 20);
@@ -31,11 +29,11 @@
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_ValidInput_SetParameterByName()
+        public void ParameterAssertion_ValidInput_SetParameterByName()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             mock.Object.SetParameterByName("NumericParameter", 20);
@@ -45,26 +43,25 @@
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_InvalidInput_SetParameter()
+        public void ParameterAssertion_InvalidInput_SetParameter()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             mock.Object.SetParameter(100, 20);
 
             // Assert
-            Action act = () => mock.Assert().Parameter(10);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Parameter(10).Should().BeNull();
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_InvalidInput_SetParameters()
+        public void ParameterAssertion_InvalidInput_SetParameters()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             int[] parameterIds = { 4, 5, 6 };
             object[] values = { 40, 50, 60 };
 
@@ -72,16 +69,15 @@
             mock.Object.SetParameters(parameterIds, values);
 
             // Assert
-            Action act = () => mock.Assert().Parameter(7);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Parameter(7).Should().BeNull();
         }
 
         [TestMethod]
-        public void ParametersMockAssertTest_ValidInput_GetAndSetParameters()
+        public void ParameterAssertion_ValidInput_GetAndSetParameters()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
             int[] parameterIds = { 1000, 1001, 1002 };
             object[] values = { 40, 50, 60 };
             uint[] uintParameterIds = { 1000, 1001, 1002 };
@@ -100,11 +96,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_EqualRow()
+        public void TableAssertionAddRow_EqualRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndone", 3, 4, 5 };
             object[] row2 = new object[] { "two", "2ndtwo", 6, 7, 8 };
@@ -119,11 +115,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_InexistentRow()
+        public void TableAssertionAddRow_InexistentRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -133,16 +129,15 @@
             mock.Object.AddRow(900, row2);
 
             // Assert
-            Action act = () => mock.Assert().Table(900).Row(2).Length.Should().Be(5);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Table(900).Row(2).Should().BeNull();
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArray_EqualRow()
+        public void TableAssertionFillArray_EqualRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndone", 3, 4, 5 };
             object[] row2 = new object[] { "two", "2ndtwo", 6, 7, 8 };
@@ -162,11 +157,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRowReturnKey_EqualRow()
+        public void TableAssertionAddRowReturnKey_EqualRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "one", "2ndone", 3, 4, 5 };
             object[] row2 = new object[] { "two", "2ndtwo", 6, 7, 8 };
@@ -183,11 +178,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_DeleteRowPK_EqualRow()
+        public void TableAssertionDeleteRowPK_EqualRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -212,11 +207,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_DeleteRowIndex_EqualRow()
+        public void TableAssertionDeleteRowIndex_EqualRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -241,11 +236,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_DeleteRowsPK_EqualRow()
+        public void TableAssertionDeleteRowsPK_EqualRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -270,11 +265,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_ClearAllKeys_EqualRow()
+        public void TableAssertionClearAllKeys_EqualRow()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -292,16 +287,15 @@
             mock.Object.ClearAllKeys(900);
 
             // Assert
-            Action act = () => mock.Assert().Table(900).Row(0).Length.Should().Be(0);
-            act.Should().Throw<ArgumentException>();
+            mock.Assert().Table(900).Row(0).Should().BeNull();
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_EqualColumn()
+        public void TableAssertionAddRow_EqualColumn()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -319,11 +313,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_AddRow_InexistentColumn()
+        public void TableAssertionAddRow_InexistentColumn()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -337,11 +331,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayNoDelete_EqualColumns()
+        public void TableAssertionFillArrayNoDelete_EqualColumns()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", "4", "5", "6" };
@@ -382,11 +376,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayWithDeleteAfterAddRow_EqualColumns()
+        public void TableAssertionFillArrayWithDeleteAfterAddRow_EqualColumns()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", "10", "11", "12" };
@@ -426,11 +420,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayWithDelete_EqualColumns()
+        public void TableAssertionFillArrayWithDelete_EqualColumns()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] col1 = new object[] { "skyline3", "skyline4" };
             object[] col2 = new object[] { "2ndSkyline3", "2ndSkyline4" };
@@ -459,11 +453,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_FillArrayWithColumn_EqualColumns()
+        public void TableAssertionFillArrayWithColumn_EqualColumns()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             object[] pk = new object[] { "skyline1", "skyline2", "skyline3", "skyline4", "skyline5" };
             object[] values = new object[] { "value1", "value2", "value3", "value4", "value5" };
@@ -477,37 +471,11 @@
         }
 
         [TestMethod]
-        public void TablesMockAssertTest_InexistentColumnPid_EmptyTable()
+        public void TableAssertionNotConsecutiveRows_GetCorrectRows()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
 
-            object[] pk = new object[] { "skyline1", "skyline2" };
-            object[] values = new object[] { "3rdColValue1", "3rdColValue2" };
-
-            // Act
-            mock.Object.ClearAllKeys(900);
-
-            mock.Object.FillArrayWithColumn(900, 906, pk, values);
-
-            mock.Object.GetRow(900, "skyline1");
-            mock.Object.GetRow(900, "skyline2");
-
-            // Assert
-            mock.Assert().Table(900).Column(901).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(902).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(903).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(904).Length.Should().Be(0);
-            mock.Assert().Table(900).Column(905).Length.Should().Be(0);
-        }
-
-        [TestMethod]
-        public void TablesMockAssertTest_NotConsecutiveRows_GetCorrectRows()
-        {
-            // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             object[] pk = new object[] { "skyline1", "skyline2" };
             object[] values = new object[] { "3rdColValue1", "3rdColValue2" };

@@ -3,14 +3,37 @@
     using System;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
     [TestClass]
     public class TableModelTests
     {
         [TestMethod]
-        public void TableModelTest_ValidSetRow_ValidRowWithKey()
+        public void Row_ModifyingDoesNotModifyTable()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "skyline1", "value2" };
+            tableModel.SetRow(row);
+
+            // Act
+            object[] rowOutput1 = tableModel.GetRow("skyline1");
+            rowOutput1[1] = "modifiedValue";
+
+            // Assert
+            object[] rowOutput2 = tableModel.GetRow("skyline1");
+            Assert.AreEqual("skyline1", rowOutput2[0]);
+            Assert.AreEqual("value2", rowOutput2[1]);
+        }
+
+        [TestMethod]
+        public void SetRow_ValidRowWithKey()
         {
             // Arrange
             var tableModelBuilder = new TableModelBuilder(900);
@@ -23,15 +46,16 @@
 
             // Act
             tableModel.SetRow(row);
-            object[] rowOutput = tableModel.Row("skyline1");
 
             // Assert
+            object[] rowOutput = tableModel.GetRow("skyline1");
+
             Assert.AreEqual("skyline1", rowOutput[0]);
             Assert.AreEqual("value2", rowOutput[1]);
         }
 
         [TestMethod]
-        public void TableModelTest_ValidSetRow_ValidRowWithIndex()
+        public void SetRow_ValidRowWithIndex()
         {
             // Arrange
             var tableModelBuilder = new TableModelBuilder(900);
@@ -47,10 +71,11 @@
             // Act
             tableModel.SetRow(row0);
             tableModel.SetRow(row1);
-            object[] row0Output = tableModel.Row(0);
-            object[] row1Output = tableModel.Row(1);
 
             // Assert
+            object[] row0Output = tableModel.GetRow(0);
+            object[] row1Output = tableModel.GetRow(1);
+
             Assert.AreEqual("skyline2", row0Output[0]);
             Assert.AreEqual("value2", row0Output[1]);
             Assert.AreEqual("skyline3", row1Output[0]);
@@ -58,7 +83,7 @@
         }
 
         [TestMethod]
-        public void TableModelTest_ValidSetColumn_ValidRowWithKey()
+        public void ValidSetColumn_ValidRowWithKey()
         {
             // Arrange
             object[] row0 = { "skyline4", "value4" };
@@ -78,8 +103,8 @@
             tableModel.SetRow(row0);
             tableModel.SetRow(row1);
             tableModel.SetColumn(1, keys, values);
-            object[] row0Output = tableModel.Row(0);
-            object[] row1Output = tableModel.Row(1);
+            object[] row0Output = tableModel.GetRow(0);
+            object[] row1Output = tableModel.GetRow(1);
 
             // Assert
             Assert.AreEqual("skyline4", row0Output[0]);
@@ -89,7 +114,7 @@
         }
 
         [TestMethod]
-        public void TableModelTest_InvalidPidSetColumn_Exception()
+        public void InvalidPidSetColumn_Exception()
         {
             // Arrange
             object[] row0 = { "skyline4", "value4" };
@@ -113,7 +138,7 @@
         }
 
         [TestMethod]
-        public void TableModelTest_ValidSetColumnNewKey_ValidRowWithKey()
+        public void ValidSetColumnNewKey_ValidRowWithKey()
         {
             // Arrange
             object[] row0 = { "skyline6", "value6", "anotherValue6" };
@@ -131,9 +156,9 @@
             tableModel.SetRow(row0);
             tableModel.SetRow(row1);
             tableModel.SetColumn(2, keys, values);
-            object[] row0Output = tableModel.Row(0);
-            object[] row1Output = tableModel.Row(1);
-            object[] row2Output = tableModel.Row(2);
+            object[] row0Output = tableModel.GetRow(0);
+            object[] row1Output = tableModel.GetRow(1);
+            object[] row2Output = tableModel.GetRow(2);
 
             // Assert
             Assert.AreEqual("skyline6", row0Output[0]);
@@ -148,7 +173,7 @@
         }
 
         [TestMethod]
-        public void TableModelTest_ValidSetColumn_ValidColumn()
+        public void ValidSetColumn_ValidColumn()
         {
             // Arrange
             string[] keys = { "skyline9", "value10" };
@@ -164,7 +189,7 @@
             // Act
             tableModel.SetColumn(1, keys, values2nd);
             tableModel.SetColumn(2, keys, values3rd);
-            object[] columnOutput = tableModel.Column(1203);
+            object[] columnOutput = tableModel.GetColumn(1203);
 
             // Assert
             Assert.AreEqual("3ndColumn9", columnOutput[0]);
@@ -172,7 +197,7 @@
         }
 
         [TestMethod]
-        public void TableModelTest_ColumnWithInvalidPid_NullValueReturned()
+        public void GetColumn_InvalidColumnPid_Throws()
         {
             // Arrange
             string[] keys = { "skyline9", "value10" };
@@ -185,17 +210,15 @@
             tableModelBuilder.AddColumn(1203, 2, false);
             var tableModel = tableModelBuilder.Build();
 
-            // Act
             tableModel.SetColumn(1, keys, values2nd);
             tableModel.SetColumn(2, keys, values3rd);
-            var columnOutput = tableModel.Column(1204);
 
-            // Assert
-            Assert.IsNull(columnOutput);
+            // Act & Assert
+            Assert.Throws<Exception>(() => tableModel.GetColumn(1204));
         }
 
         [TestMethod]
-        public void TableModelTest_TryAddingTwoKeyColumns_InvalidOperationException()
+        public void TryAddingTwoKeyColumns_InvalidOperationException()
         {
             // Arrange
             var tableModelBuilder = new TableModelBuilder(900);
@@ -209,7 +232,7 @@
         }
 
         [TestMethod]
-        public void TableModelTest_InexistentKeyRow_ArgumentException()
+        public void InexistentKeyRow_ArgumentException()
         {
             // Arrange
             object[] row = { "skyline1", "value2" };
@@ -225,11 +248,11 @@
 
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
-                () => tableModel.Row("skyline2"));
+                () => tableModel.GetRow("skyline2"));
         }
 
         [TestMethod]
-        public void TableModelTest_InexistentIndexRow_ArgumentException()
+        public void InexistentIndexRow_ArgumentException()
         {
             // Arrange
             object[] row = { "skyline1", "value2" };
@@ -244,7 +267,7 @@
 
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
-                () => tableModel.Row(1));
+                () => tableModel.GetRow(1));
         }
     }
 }

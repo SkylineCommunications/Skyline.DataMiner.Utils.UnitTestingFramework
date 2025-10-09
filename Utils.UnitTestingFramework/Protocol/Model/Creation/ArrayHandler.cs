@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Parameter
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    public class ArrayHandler : IParameterHandler
+    internal class ArrayHandler : IParameterHandler
     {
         private readonly HashSet<int> excludedPids;
 
@@ -15,11 +15,11 @@
             this.excludedPids = excludedPids;
         }
 
-        public void LoadDefaultForParameter(IProtocolCache cache, IParamsParam parameter)
+        public void CreateModelAndAddToCache(IProtocolCache cache, IParamsParam parameter)
         {
             var tableModel = CreateTableModelFromArrayOptions(parameter);
 
-            cache.Tables.AddModel(tableModel);
+            cache.Tables.AddTable(tableModel);
         }
 
         public ITableModel CreateTableModelFromArrayOptions(IParamsParam parameter)

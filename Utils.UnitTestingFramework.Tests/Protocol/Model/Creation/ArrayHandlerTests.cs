@@ -1,13 +1,14 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model.Parameter
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model.Creation
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+    using Skyline.DataMiner.CICD.Models.Protocol.Read;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Parameter;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
     [TestClass]
     public class ArrayHandlerTests
@@ -18,8 +19,8 @@
         {
             // Arrange
             var path = @"protocol.xml";
-            var protocolModel = new ProtocolModelExt(path);
-            var parameter = protocolModel.ProtocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 900);
+            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 900);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();
 
@@ -36,8 +37,8 @@
             Assert.AreEqual(905, tableModel.ColumnIndexesToPids[4]);
             Assert.AreEqual(5, tableModel.ColumnCount);
             Assert.AreEqual(900, tableModel.TableId);
-            Assert.AreEqual(0, tableModel.KeyColumnIdx);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.KeyColumnIdx]);
+            Assert.AreEqual(0, tableModel.PrimaryKeyColumnIdx);
+            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx]);
         }
 
         [TestMethod]
@@ -46,8 +47,8 @@
         {
             // Arrange
             var path = @"protocol_With_Failures.xml";
-            var protocolModel = new ProtocolModelExt(path);
-            var parameter = protocolModel.ProtocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 910);
+            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 910);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();
 
@@ -61,8 +62,8 @@
             Assert.AreEqual(901, tableModel.ColumnIndexesToPids[2]);
             Assert.AreEqual(1, tableModel.ColumnCount);
             Assert.AreEqual(910, tableModel.TableId);
-            Assert.AreEqual(1, tableModel.KeyColumnIdx);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.KeyColumnIdx]);
+            Assert.AreEqual(1, tableModel.PrimaryKeyColumnIdx);
+            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx]);
         }
 
         [TestMethod]
@@ -71,8 +72,8 @@
         {
             // Arrange
             var path = @"protocol_With_Failures.xml";
-            var protocolModel = new ProtocolModelExt(path);
-            var parameter = protocolModel.ProtocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 920);
+            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 920);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();
 
@@ -90,8 +91,8 @@
         {
             // Arrange
             var path = @"protocol_With_Failures.xml";
-            var protocolModel = new ProtocolModelExt(path);
-            var parameter = protocolModel.ProtocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 930);
+            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 930);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();
 

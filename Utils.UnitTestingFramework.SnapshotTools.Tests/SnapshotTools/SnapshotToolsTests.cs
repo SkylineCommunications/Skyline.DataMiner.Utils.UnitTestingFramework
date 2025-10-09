@@ -5,7 +5,6 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.SnapshotTools;
 
     using VerifyMSTest;
@@ -20,11 +19,7 @@
         public Task SnapTest_CorrectOutput()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
-
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
@@ -42,11 +37,7 @@
         public Task SnapTest_EmptyCell()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
-
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", null, 3, 4, 5 };
@@ -64,9 +55,7 @@
         public Task SnapTest_EmptyTable()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
 
             // Act
 
@@ -78,9 +67,7 @@
         public Task SnapTest_MultipleTables()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
@@ -100,9 +87,7 @@
         public Task SnapTest_MultipleEmptyTables()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
 
             // Act
 
@@ -114,9 +99,7 @@
         public Task SnapTest_MultipleTables_EmptyCells()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var protocolCache = new ProtocolCache();
-            protocolModel.LoadParameterValues(protocolCache);
+            var protocolCache = ProtocolCacheBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "two", 3, 4 };

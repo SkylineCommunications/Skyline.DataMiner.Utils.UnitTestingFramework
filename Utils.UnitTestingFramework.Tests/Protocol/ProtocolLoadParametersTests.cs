@@ -5,6 +5,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
@@ -17,8 +18,7 @@
         public void SLProtocolMockLoadParametersTest_ValidInput_DefaultAndFixedValues()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+            var mock = new SLProtocolMock(path);
 
             // Act
             var value1 = mock.Object.GetParameter(1000);
@@ -37,8 +37,8 @@
         public void SLProtocolMockLoadParametersTest_InvalidInput_DefaultAndFixedValues()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var value1 = mock.Object.GetParameter(1100);
@@ -55,15 +55,15 @@
 
             // Act & Assert
             Assert.ThrowsExactly<DirectoryNotFoundException>(
-                () => new ProtocolModelExt(missingDirectoryPath));
+                () => ProtocolCacheBuilder.Build(missingDirectoryPath));
         }
 
         [TestMethod]
         public void SLProtocolMockLoadParametersTest_ValidInput_LoadParameterNamesNumericValues()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var value1 = mock.Object.GetParameterByName("NumericParameter");
@@ -78,8 +78,8 @@
         public void SLProtocolMockLoadParametersTest_InvalidInput_LoadParameterNamesNumericValues()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var value1 = mock.Object.GetParameterByName("NumericParameterInexistent");
@@ -92,8 +92,8 @@
         public void SLProtocolMockLoadParametersTest_ValidInput_LoadParameterNamesStringValues()
         {
             // Arrange
-            var protocolModel = new ProtocolModelExt(path);
-            var mock = new SLProtocolMock(protocolModel);
+
+            var mock = new SLProtocolMock(path);
 
             // Act
             var value1 = mock.Object.GetParameterByName("StringParameter");
