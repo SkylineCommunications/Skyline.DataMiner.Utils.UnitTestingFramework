@@ -346,21 +346,23 @@
             // TODO: issue 33 from project internship-2022
             var tableModel = GetTable(tableId);
 
+            var rowToSet = row.ToArray(); // Make a copy to avoid modifying the original array
+
             if (useClearAndLeave)
             {
-                ConvertProtocolClearAndleaveToActualValuesForRow(rowIndex, row, tableModel);
+                rowToSet = ConvertProtocolClearAndleaveToActualValuesForRow(rowIndex, rowToSet, tableModel);
             }
 
             if (tableModel.ColumnCount < rowIndex + 1)
             {
-                var changes = new int[row.Length];
+                var changes = new int[rowToSet.Length];
 
-                tableModel.SetRow(row, timestamp);
+                tableModel.SetRow(rowToSet, timestamp);
 
                 return changes;
             }
 
-            return tableModel.SetExistingRow(row, rowIndex, timestamp);
+            return tableModel.SetExistingRow(rowToSet, rowIndex, timestamp);
         }
 
         /// <summary>
@@ -376,14 +378,16 @@
         {
             var tableModel = GetTable(tableId);
 
+            var rowToSet = row.ToArray(); // Make a copy to avoid modifying the original array
+
             if (useClearAndLeave)
             {
-                ConvertProtocolClearAndleaveToActualValuesForRow(primaryKey, row, tableModel);
+                rowToSet = ConvertProtocolClearAndleaveToActualValuesForRow(primaryKey, rowToSet, tableModel);
             }
 
             int rowIndex = tableModel.KeyToRowIndex[primaryKey];
 
-            return tableModel.SetExistingRow(row, rowIndex, timestamp);
+            return tableModel.SetExistingRow(rowToSet, rowIndex, timestamp);
         }
 
         /// <summary>
@@ -433,6 +437,7 @@
         /// <param name="tableId">The table identifier.</param>
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
+        /// <param name="useClearAndLeave"></param>
         /// <returns><c>true</c></returns>
         public void FillArray(int tableId, object[][] columns, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
@@ -469,6 +474,7 @@
         /// <param name="tableId">The table identifier.</param>
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
+        /// <param name="useClearAndLeave"></param>
         /// <returns><c>true</c> or <see langword="null"/> if the table cache does not contain a model for that table with the specified ID.</returns>
         public void FillArrayNoDelete(int tableId, object[][] columns, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
@@ -478,11 +484,11 @@
 
             for (int index = 0; index < columns.Length; index++)
             {
-                var columnToSet = columns[index];
+                var columnToSet = columns[index].ToArray(); // Make a copy to avoid modifying the original array
 
                 if (useClearAndLeave)
                 {
-                    ConvertProtocolClearAndleaveToActualValuesForColumn(primaryKeyColumn, columnToSet, tableModel, index);
+                    columnToSet = ConvertProtocolClearAndleaveToActualValuesForColumn(primaryKeyColumn, columnToSet, tableModel, index);
                 }
 
                 tableModel.SetColumn(index, primaryKeyColumn, columnToSet, timeInfo);
@@ -495,14 +501,14 @@
         /// <param name="tablePid">The table identifier.</param>
         /// <param name="columnPid">The column identifier.</param>
         /// <param name="primaryKeys">The primary keys.</param>
-        /// <param name="values">The values.</param>
+        /// <param name="columnValues">The values.</param>
         /// <param name="timeInfo">The time information.</param>
         /// <param name="useClearAndLeave">A boolean indicating if values uses protocol.Leave and protocol.Clear.</param>
         /// <returns><c>true</c></returns>
         /// <exception cref="ArgumentException">There should be as many primary keys as values or instead only one value.</exception>
-        public void FillArrayWithColumn(int tablePid, int columnPid, string[] primaryKeys, object[] values, DateTime? timeInfo = null, bool useClearAndLeave = false)
+        public void FillArrayWithColumn(int tablePid, int columnPid, string[] primaryKeys, object[] columnValues, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
-            if (primaryKeys.Length != values.Length && (primaryKeys.Length == values.Length || values.Length != 1))
+            if (primaryKeys.Length != columnValues.Length && (primaryKeys.Length == columnValues.Length || columnValues.Length != 1))
             {
                 throw new ArgumentException("There should be as many primary keys as values or instead only one value.");
             }
@@ -511,25 +517,26 @@
 
             int columnIndex = GetColumnIndex(tableModel, columnPid);
 
-            if (values.Length == 1)
+            var columnValuesToSet = columnValues.ToArray(); // Make a copy to avoid modifying the original array
+
+            if (columnValuesToSet.Length == 1)
             {
                 var newValues = new object[primaryKeys.Length];
 
                 for (int i = 0; i < newValues.Length; i++)
                 {
-                    newValues[i] = values[0];
+                    newValues[i] = columnValuesToSet[0];
                 }
 
-                tableModel.SetColumn(columnIndex, primaryKeys, newValues, timeInfo);
-                return;
+                columnValuesToSet = newValues;
             }
 
             if (useClearAndLeave)
             {
-                ConvertProtocolClearAndleaveToActualValuesForColumn(primaryKeys, values, tableModel, columnIndex);
+                columnValuesToSet = ConvertProtocolClearAndleaveToActualValuesForColumn(primaryKeys, columnValuesToSet, tableModel, columnIndex);
             }
 
-            tableModel.SetColumn(columnIndex, primaryKeys, values, timeInfo);
+            tableModel.SetColumn(columnIndex, primaryKeys, columnValuesToSet, timeInfo);
         }
 
         private static int GetColumnIndex(ITableModel tableModel, int columnPid)
@@ -546,7 +553,7 @@
             return columnIndex;
         }
 
-        private static void ConvertProtocolClearAndleaveToActualValuesForRow(string primaryKey, object[] row, ITableModel tableModel)
+        private static object[] ConvertProtocolClearAndleaveToActualValuesForRow(string primaryKey, object[] row, ITableModel tableModel)
         {
             object[] existingRow = null;
 
@@ -555,20 +562,29 @@
                 existingRow = tableModel.GetRow(primaryKey);
             }
 
-            for (int i = 0; i < row.Length; i++)
-            {
-                if (row[i].IsProtocolClear())
-                {
-                    row[i] = null;
-                }
-                else if (row[i].IsProtocolLeave() && existingRow != null)
-                {
-                    row[i] = existingRow[i];
-                }
-            }
+            return ConvertProtocolClearAndleaveToActualValuesForRow(row, existingRow);
         }
 
-        private static void ConvertProtocolClearAndleaveToActualValuesForRow(int rowIndex, object[] row, ITableModel tableModel)
+        private static object[] ConvertProtocolClearAndleaveToActualValuesForRow(object[] rowToConvert, object[] existingRow)
+        {
+            var convertedRow = new object[rowToConvert.Length];
+
+            for (int i = 0; i < rowToConvert.Length; i++)
+            {
+                if (rowToConvert[i].IsProtocolClear())
+                {
+                    convertedRow[i] = null;
+                }
+                else if (rowToConvert[i].IsProtocolLeave() && existingRow != null)
+                {
+                    convertedRow[i] = existingRow[i];
+                }
+            }
+
+            return convertedRow;
+        }
+
+        private static object[] ConvertProtocolClearAndleaveToActualValuesForRow(int rowIndex, object[] row, ITableModel tableModel)
         {
             object[] existingRow = null;
 
@@ -577,34 +593,28 @@
                 existingRow = tableModel.GetRow(rowIndex);
             }
 
-            for (int i = 0; i < row.Length; i++)
-            {
-                if (row[i].IsProtocolClear())
-                {
-                    row[i] = null;
-                }
-                else if (row[i].IsProtocolLeave() && existingRow != null)
-                {
-                    row[i] = existingRow[i];
-                }
-            }
+            return ConvertProtocolClearAndleaveToActualValuesForRow(row, existingRow);
         }
 
-        private static void ConvertProtocolClearAndleaveToActualValuesForColumn(string[] primaryKeys, object[] column, ITableModel tableModel, int columnIndex)
+        private static object[] ConvertProtocolClearAndleaveToActualValuesForColumn(string[] primaryKeys, object[] column, ITableModel tableModel, int columnIndex)
         {
+            var convertedColumn = new object[column.Length];
+
             for (int i = 0; i < column.Length; i++)
             {
                 if (column[i].IsProtocolClear())
                 {
-                    column[i] = null;
+                    convertedColumn[i] = null;
                 }
                 else if (column[i].IsProtocolLeave() && tableModel.KeyToRowIndex.TryGetValue(primaryKeys[i], out int rowIndex))
                 {
                     var existingRow = tableModel.GetRow(rowIndex);
                     var existingValue = existingRow[columnIndex];
-                    column[i] = existingValue;
+                    convertedColumn[i] = existingValue;
                 }
             }
+
+            return convertedColumn;
         }
 
         /// <summary>

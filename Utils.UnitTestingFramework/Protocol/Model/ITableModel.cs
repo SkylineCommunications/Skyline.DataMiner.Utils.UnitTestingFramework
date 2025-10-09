@@ -79,12 +79,6 @@
         object[] GetRow(int rowIndex);
 
         /// <summary>
-        /// Gets all rows.
-        /// </summary>
-        /// <returns>a array of rows.</returns>
-        object[][] GetAllRows();
-
-        /// <summary>
         /// Retrieves the row with the specified key.
         /// </summary>
         /// <typeparam name="TRow">The type of the row.</typeparam>
@@ -99,6 +93,12 @@
         /// <param name="index">The index.</param>
         /// <returns>The row.</returns>
         TRow GetRow<TRow>(int index) where TRow : QActionTableRow;
+
+        /// <summary>
+        /// Gets all rows.
+        /// </summary>
+        /// <returns>a array of rows.</returns>
+        IDictionary<string, object[]> GetAllRows();
 
         /// <summary>
         /// Sets the column with the specified index.
