@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Utils.UnitTestingFramework\Utils.UnitTestingFramework.csproj" />
+    <ProjectReference Include="..\Utils.UnitTestingFramework\Utils.UnitTestingFramework.Protocol.csproj" />
   </ItemGroup>
 
   <ItemGroup>

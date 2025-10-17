@@ -20,6 +20,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
         /// <summary>
         /// Initializes a new instance of the <see cref="SLProtocolMock"/> class.
         /// </summary>
+        /// <param name="customPathToProtocolXml">An optional path to the protocol.xml file. If not defined, the protocol.xml file in the root of the solution will be used.</param>
         public SLProtocolMock(string customPathToProtocolXml = null)
         {
             this.protocolCache = ProtocolCacheBuilder.Build(customPathToProtocolXml);
