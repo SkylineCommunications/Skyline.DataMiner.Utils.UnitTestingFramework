@@ -3,7 +3,7 @@
     <TargetFrameworks>net48</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>$(ProjectName)</AssemblyName>
+    <AssemblyName>Skyline.DataMiner.Utils.UnitTestingFramework.Protocol</AssemblyName>
     <RootNamespace>Skyline.DataMiner.Utils.UnitTestingFramework.Protocol</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
     <Version>1.0.1</Version>
