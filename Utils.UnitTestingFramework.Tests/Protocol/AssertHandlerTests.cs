@@ -5,7 +5,7 @@
     using FluentAssertions;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+    using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
 
     [TestClass]
@@ -154,6 +154,30 @@
             // Assert
             mock.Assert().Table(900).Row("one").Should().Equal(row1);
             mock.Assert().Table(900).Row("two").Should().Equal(row2);
+        }
+
+        [TestMethod]
+        public void TableAssertionFillArray_EqualRowWithQActionRow()
+        {
+            // Arrange
+
+            var mock = new SLProtocolMock(path);
+
+            object[] row1 = new object[] { "one", "2ndone", 3, 4, 5 };
+            object[] row2 = new object[] { "two", "2ndtwo", 6, 7, 8 };
+
+            List<object[]> listOfRows = new List<object[]>
+            {
+                row1,
+                row2,
+            };
+
+            // Act
+            mock.Object.FillArray(900, listOfRows, Skyline.DataMiner.Scripting.NotifyProtocol.SaveOption.Partial);
+
+            // Assert
+            mock.Assert().Table(900).Row<QActionTableRow>("one").ToObjectArray().Should().Equal(row1);
+            mock.Assert().Table(900).Row<QActionTableRow>("two").ToObjectArray().Should().Equal(row2);
         }
 
         [TestMethod]

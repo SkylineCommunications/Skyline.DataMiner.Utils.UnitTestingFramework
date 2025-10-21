@@ -157,8 +157,7 @@
         /// <returns>The row.</returns>
         public TRow GetRow<TRow>(string key) where TRow : QActionTableRow
         {
-            var row = GetRow(key);
-            return (TRow)Activator.CreateInstance(typeof(TRow), row);
+            return GetRow<TRow>(KeyToRowIndex[key]);
         }
 
         /// <summary>
@@ -170,7 +169,9 @@
         public TRow GetRow<TRow>(int index) where TRow : QActionTableRow
         {
             var row = GetRow(index);
-            return (TRow)Activator.CreateInstance(typeof(TRow), row);
+
+            // QActionTableRow constructor arguments: (int index, int columnCount, object[] oRow)
+            return (TRow)Activator.CreateInstance(typeof(TRow), index, row.Length, row) ?? throw new InvalidOperationException($"Unable to create a {typeof(TRow).Name} of row {index}");
         }
 
         /// <summary>
