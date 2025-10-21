@@ -1,7 +1,7 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
 {
     using System;
-
+    using global::Utils.UnitTestingFramework.Tests.Protocol;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
@@ -30,6 +30,29 @@
             object[] rowOutput2 = tableModel.GetRow("skyline1");
             Assert.AreEqual("skyline1", rowOutput2[0]);
             Assert.AreEqual("value2", rowOutput2[1]);
+        }
+
+        [TestMethod]
+        public void QActionTableRow_ValidRowWithKey()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            object[] row = { "skyline1", "value2" };
+
+            tableModelBuilder.AddColumn(1201, 0, isKey: true);
+            tableModelBuilder.AddColumn(1202, 1, isKey: false);
+
+            var tableModel = tableModelBuilder.Build();
+
+            // Act
+            tableModel.SetRow(row);
+
+            // Assert
+            object[] rowOutput = tableModel.GetRow<PollingConfigurationQActionTableRow>("skyline1");
+
+            Assert.IsNotNull(rowOutput);
+            Assert.AreEqual("skyline1", rowOutput[0]);
+            Assert.AreEqual("value2", rowOutput[1]);
         }
 
         [TestMethod]

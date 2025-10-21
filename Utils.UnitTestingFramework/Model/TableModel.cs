@@ -170,8 +170,9 @@
         {
             var row = GetRow(index);
 
-            // QActionTableRow constructor arguments: (int index, int columnCount, object[] oRow)
-            return (TRow)Activator.CreateInstance(typeof(TRow), index, row.Length, row) ?? throw new InvalidOperationException($"Unable to create a {typeof(TRow).Name} of row {index}");
+            var rowAsConstructorArgument = new object[] { row };
+
+            return (TRow)Activator.CreateInstance(typeof(TRow), rowAsConstructorArgument) ?? throw new InvalidOperationException($"Unable to create a {typeof(TRow).Name} of row {index}");
         }
 
         /// <summary>
