@@ -3,7 +3,7 @@
     <TargetFrameworks>net48</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>Skyline.DataMiner.Utils.UnitTestingFramework.Protocol</AssemblyName>
+    <AssemblyName>$(ProjectName)</AssemblyName>
     <RootNamespace>Skyline.DataMiner.Utils.UnitTestingFramework.Protocol</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
     <Version>1.0.1</Version>
@@ -21,7 +21,7 @@
     <OutputType>Library</OutputType>
     <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Utils.UnitTestingFramework</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageId>$(ProjectName)</PackageId>
+    <PackageId>Skyline.DataMiner.Utils.UnitTestingFramework.Protocol</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
