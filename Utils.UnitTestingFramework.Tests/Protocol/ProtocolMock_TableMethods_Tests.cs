@@ -2,12 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -1125,6 +1123,35 @@
             Assert.AreEqual("skyline1", rowOutput[0]);
             Assert.AreEqual("2ndColumnSkyline1", rowOutput[1]);
             Assert.AreEqual(10, rowOutput[2]);
+            Assert.AreEqual(2, rowOutput[3]);
+            Assert.AreEqual(3, rowOutput[4]);
+        }
+
+        [TestMethod]
+        public void SetRowWithPrimaryKey_EntireRowWithProtocolLeave_IsEqual()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            var row = new object[5] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+
+            mock.Object.AddRow(900, row);
+
+            // Act
+            mock.Object.SetRow(900, "skyline1", new object[5]
+            {
+                mock.Object.Leave,
+                mock.Object.Leave,
+                mock.Object.Leave,
+                mock.Object.Leave,
+                mock.Object.Leave,
+            }, bOverrideBehaviour: true);
+
+            // Assert
+            object[] rowOutput = (object[])mock.Object.GetRow(900, 0);
+            Assert.AreEqual("skyline1", rowOutput[0]);
+            Assert.AreEqual("2ndColumnSkyline1", rowOutput[1]);
+            Assert.AreEqual(1, rowOutput[2]);
             Assert.AreEqual(2, rowOutput[3]);
             Assert.AreEqual(3, rowOutput[4]);
         }

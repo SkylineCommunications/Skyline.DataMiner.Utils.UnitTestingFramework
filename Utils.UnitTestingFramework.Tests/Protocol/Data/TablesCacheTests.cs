@@ -1064,6 +1064,30 @@
         }
 
         [TestMethod]
+        public void SetRowWithPrimaryKey_UseClearAndLeave_IsEqual()
+        {
+            // Arrange
+            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var tablesCache = protocolCache.Tables;
+            var row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+
+            tablesCache.AddRow(900 , row1);
+
+            // Act
+            tablesCache.SetRow(900, "skyline1", new object[5] { Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE }, useClearAndLeave: true);
+
+            // Assert
+
+            var rowOutput = (object[])tablesCache.GetRow(900, 0);
+
+            Assert.AreEqual("skyline1", rowOutput[0]);
+            Assert.AreEqual("2ndColumnSkyline1", rowOutput[1]);
+            Assert.AreEqual(1, rowOutput[2]);
+            Assert.AreEqual(2, rowOutput[3]);
+            Assert.AreEqual(3, rowOutput[4]);
+        }
+
+        [TestMethod]
         public void GetRowWithIndexTest_InexistentRowIndex_IsNull()
         {
             // Arrange

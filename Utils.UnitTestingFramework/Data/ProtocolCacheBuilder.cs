@@ -2,23 +2,31 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
 
     using Skyline.DataMiner.CICD.Models.Protocol.Enums;
-    using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.CICD.Models.Protocol.Read.Interfaces;
 
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
     internal static class ProtocolCacheBuilder
     {
+        public static ProtocolCache Build(string customPathToProtocolXml)
+        {
+            var protocolModel = ProtocolModelBuilder.Build(customPathToProtocolXml);
+
+            return Build(protocolModel);
+        }
+
         /// <summary>
         /// Loads the parameter values of the parameters defined in the protocol.xml file in the cache.
         /// </summary>
-        public static ProtocolCache Build(string customPathToProtocolXml = null)
+        public static ProtocolCache Build(IProtocolModel protocolModel)
         {
-            var protocolModel = GetProtocolModel(customPathToProtocolXml);
+            if (protocolModel is null)
+            {
+                throw new ArgumentNullException(nameof(protocolModel));
+            }
 
             var cache = new ProtocolCache();
 
@@ -42,36 +50,6 @@
             }
 
             return cache;
-        }
-
-        internal static IProtocolModel GetProtocolModel(string customPathToProtocolXml)
-        {
-            IProtocolModel protocolModel;
-            if (customPathToProtocolXml == null)
-            {
-                var solutionDirectory = GetSolutionDirectory();
-                string protocolPath = solutionDirectory.FullName + "\\protocol.xml";
-
-                protocolModel = new ProtocolModel(File.ReadAllText(protocolPath));
-            }
-            else
-            {
-                protocolModel = new ProtocolModel(File.ReadAllText(customPathToProtocolXml));
-            }
-
-            return protocolModel;
-        }
-
-        private static DirectoryInfo GetSolutionDirectory(string currentPath = null)
-        {
-            var directory = new DirectoryInfo(currentPath ?? Directory.GetCurrentDirectory());
-
-            while (directory != null && !directory.GetFiles("*.sln").Any())
-            {
-                directory = directory.Parent;
-            }
-
-            return directory;
         }
     }
 }

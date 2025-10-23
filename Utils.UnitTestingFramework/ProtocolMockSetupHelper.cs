@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Moq;
+    using Skyline.DataMiner.CICD.Models.Protocol.Read.Interfaces;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
     using static Skyline.DataMiner.Scripting.NotifyProtocol;
@@ -12,8 +13,10 @@
     {
         internal static class ProtocolMockSetupHelper
         {
-            public static void Setup(SLProtocolMock mock)
+            public static void Setup(SLProtocolMock mock, IProtocolModel protocolModel)
             {
+                SetupProperties(mock, protocolModel);
+
                 SetupParameterGets(mock, mock.protocolCache);
                 SetupParameterSets(mock, mock.protocolCache);
 
@@ -32,6 +35,14 @@
                     {
                         return mock.notifyProtocolHelper.Execute(notifyType, value1, value2);
                     });
+            }
+
+            private static void SetupProperties(Mock<SLProtocol> mock, IProtocolModel protocolModel)
+            {
+                mock.SetupGet(p => p.ProtocolName).Returns(protocolModel.Protocol.Name.Value);
+                mock.SetupGet(p => p.ProtocolVersion).Returns(protocolModel.Protocol.Version.Value);
+                mock.SetupGet(p => p.Leave).Returns(Constants.Constants.PROTOCOL_LEAVE);
+                mock.SetupGet(p => p.Clear).Returns(Constants.Constants.PROTOCOL_CLEAR);
             }
 
             private static void SetupParameterGets(Mock<SLProtocol> mock, ProtocolCache protocolCache)
@@ -260,7 +271,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, rowIndex, row, null, useClearAndLeave);
+                       return tablesCache.SetRow(tableId, rowIndex, row, timestamp: null, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
@@ -277,14 +288,14 @@
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTime>(), It.IsAny<bool>()))
                    .Returns(
-                   (int tableId, string primaryKey, object rowData, DateTime timestamp, bool enableCellActions) =>
+                   (int tableId, string primaryKey, object rowData, DateTime timestamp, bool useClearAndLeave) =>
                    {
                        if (!(rowData is object[] rowValues))
                        {
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp, enableCellActions);
+                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>()))
@@ -301,14 +312,14 @@
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<bool>()))
                    .Returns(
-                   (int tableId, string primaryKey, object rowData, bool enableCellActions) =>
+                   (int tableId, string primaryKey, object rowData, bool useClearAndLeave) =>
                    {
                        if (!(rowData is object[] rowValues))
                        {
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, primaryKey, rowValues, null, enableCellActions);
+                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp: null, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTime>()))

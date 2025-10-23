@@ -5,9 +5,7 @@
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Skyline.DataMiner.CICD.Models.Protocol.Read;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
     [TestClass]
@@ -19,7 +17,7 @@
         {
             // Arrange
             var path = @"protocol.xml";
-            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var protocolModel = ProtocolModelBuilder.Build(path);
             var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 900);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();
@@ -47,7 +45,7 @@
         {
             // Arrange
             var path = @"protocol_With_Failures.xml";
-            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var protocolModel = ProtocolModelBuilder.Build(path);
             var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 910);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();
@@ -72,7 +70,7 @@
         {
             // Arrange
             var path = @"protocol_With_Failures.xml";
-            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var protocolModel = ProtocolModelBuilder.Build(path);
             var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 920);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();
@@ -91,7 +89,7 @@
         {
             // Arrange
             var path = @"protocol_With_Failures.xml";
-            var protocolModel = ProtocolCacheBuilder.GetProtocolModel(path);
+            var protocolModel = ProtocolModelBuilder.Build(path);
             var parameter = protocolModel.Protocol.Params.FirstOrDefault(x => x.Id.Value == 930);
             Assert.IsNotNull(parameter);
             HashSet<int> excludedPids = new HashSet<int>();

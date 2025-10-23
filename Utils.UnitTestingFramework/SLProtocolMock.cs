@@ -23,11 +23,13 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
         /// <param name="customPathToProtocolXml">An optional path to the protocol.xml file. If not defined, the protocol.xml file in the root of the solution will be used.</param>
         public SLProtocolMock(string customPathToProtocolXml = null)
         {
-            this.protocolCache = ProtocolCacheBuilder.Build(customPathToProtocolXml);
+            var protocolModel = ProtocolModelBuilder.Build(customPathToProtocolXml);
+
+            this.protocolCache = ProtocolCacheBuilder.Build(protocolModel);
 
             this.notifyProtocolHelper = new NotifyProtocolHelper(protocolCache);
 
-            ProtocolMockSetupHelper.Setup(this);
+            ProtocolMockSetupHelper.Setup(this, protocolModel);
         }
 
         /// <summary>

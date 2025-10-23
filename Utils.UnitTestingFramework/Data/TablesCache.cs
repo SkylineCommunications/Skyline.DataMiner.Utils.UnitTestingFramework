@@ -382,7 +382,7 @@
 
             if (useClearAndLeave)
             {
-                rowToSet = ConvertProtocolClearAndleaveToActualValuesForRow(primaryKey, rowToSet, tableModel);
+                rowToSet = ConvertProtocolClearAndLeaveToActualValuesForRow(primaryKey, rowToSet, tableModel);
             }
 
             int rowIndex = tableModel.KeyToRowIndex[primaryKey];
@@ -553,7 +553,7 @@
             return columnIndex;
         }
 
-        private static object[] ConvertProtocolClearAndleaveToActualValuesForRow(string primaryKey, object[] row, ITableModel tableModel)
+        private static object[] ConvertProtocolClearAndLeaveToActualValuesForRow(string primaryKey, object[] row, ITableModel tableModel)
         {
             object[] existingRow = null;
 
