@@ -11,9 +11,9 @@
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="7.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="Moq" Version="4.5.0" />
     <PackageReference Include="MSTest" Version="3.8.3" />
-    <PackageReference Include="Skyline.DataMiner.CICD.Models.Protocol" Version="1.0.14" />
+    <PackageReference Include="Skyline.DataMiner.CICD.Models.Protocol" Version="1.1.0" />
     <PackageReference Include="Skyline.DataMiner.Dev.Protocol" Version="10.3.0" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.0.1">
       <PrivateAssets>all</PrivateAssets>
