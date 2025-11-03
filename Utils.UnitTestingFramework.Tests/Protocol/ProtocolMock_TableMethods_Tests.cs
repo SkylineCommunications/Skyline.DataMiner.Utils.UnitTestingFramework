@@ -1415,6 +1415,18 @@
         }
 
         [TestMethod]
+        public void FillArray_NoRows_PartialSave_ThrowsException()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            var rows = new List<object[]>(); // Empty list
+
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.FillArray(900, rows, NotifyProtocol.SaveOption.Partial));
+        }
+
+        [TestMethod]
         public void FillArrayPartialTest_FillArrayAfterAddRow_IsEqual()
         {
             // Arrange

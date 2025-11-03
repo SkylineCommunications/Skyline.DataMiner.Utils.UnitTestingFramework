@@ -413,6 +413,11 @@
             }
             else
             {
+                if (rows.Count <= 0)
+                {
+                    throw new IndexOutOfRangeException(); // Mimic ConcreteSLProtocol behavior: it throws IndexOutOfRangeException when no rows are provided and SaveOption is Partial.
+                }
+
                 foreach (var rowData in rows)
                 {
                     string pk = (string)rowData[tableModel.PrimaryKeyColumnIdx];
