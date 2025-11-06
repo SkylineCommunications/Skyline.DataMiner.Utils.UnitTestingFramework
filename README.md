@@ -42,19 +42,16 @@ public void ResponseParserTest()
     // Assert
     var expectedRows = new List<object[]>
     {
-        new MediainstancesusagetableQActionRow
+        new StreamsQActionRow
         {
-            Mediainstancesusagetableid_2401 = "test",
-            Mediainstancesusagetablemedianame_2402 = "Media Name",
-            Mediainstancesusagetablemediatype_2403 = "Media Type",
-            Mediainstancesusagetablemediasetname_2404 = "Set Name",
-            Mediainstancesusagetableavailability_2405 = 100,
-            Mediainstancesusagetableearliestusagelist_2406 = "Usage List",
-            Mediainstancesusagetableearliestusagelistuid_2407 = "1234",
-            Mediainstancesusagetableearliestusagetime_2408 = 0.0d
+            Streamsid_1001 = "PK1",
+            Streamsname_1002 = "Stream Name",
+            Streamsaddress_1003 = "10.12.80.124",
+            Streamsport_1004 = "8080",
         }.ToObjectArray(),
     };
-    protocolMock.Verify(p => p.FillArray(Parameter.Mediainstancesusagetable.tablePid, expectedRows, NotifyProtocol.SaveOption.Full));
+
+    protocolMock.Verify(p => p.FillArray(1000, expectedRows, NotifyProtocol.SaveOption.Full));
 }
 ```
 
@@ -74,6 +71,7 @@ public void ResponseParserTest()
 {
     // Arrange
     var protocolMock = new SLProtocolMock();    
+
     string responseContent = File.ReadAllText("response_content.xml");
 
     // Act
@@ -81,10 +79,10 @@ public void ResponseParserTest()
     
     // Assert
     protocolMock.Assert()
-        .Table(Parameter.Mediainstancesusagetable.tablePid)
-        .Column(Parameter.Mediainstancesusagetable.Pid.mediainstancesusagetableid_2401)
+        .Table(1000)
+        .Column(1001)
         .Should()
-        .Contain("test");
+        .Contain("PK1");
 }
 ```
 
@@ -110,20 +108,19 @@ public void TestMethod()
     // Arrange
     var protocolMock = new SLProtocolMock();    
 
-    protocolMock.Object.SetParameter(1000, 30);
+    protocolMock.Object.SetParameter(150, 30);
 
-    object[] row = new object[] { "one", "two", "three", "four", "five" };
-    protocolMock.Object.AddRow(2000, row);
+    var firstRow = new object[] { "PK1", "First Stream Name", "10.12.80.124", "8080" };
+    protocolMock.Object.AddRow(1000, row);
 
-    var eventRow = new EventstableQActionRow
+    var secondRow = new StreamsQActionRow
 	{
         // Only values for the columns that are relevant for the test need to be set
-		Eventstableid_2101 = "15007.123",
-		Eventstableplaylistid_2103 = "15007",
-		Eventstablereconcilekey_2110 = "1835695279327",
+		Streamsid_1001 = "PK2",
+		Streamsname_1002 = "Second Stream Name",
 	};
 
-	protocolMock.Object.AddRow(3000, eventRow.ToObjectArray());
+	protocolMock.Object.AddRow(1000, eventRow.ToObjectArray());
 
     // Act
     ... some code that uses protocolMock.Object ...
@@ -153,8 +150,9 @@ public void TestMethod()
     ... some code that uses protocolMock.Object ...
     
     // Assert
-    Assert.AreEqual(30, protocolMock.Object.GetParameter(1000));
-    Assert.AreEqual("expected cell value", protocolMock.Object.GetRow(2000, "primary key")[0]);
+    Assert.AreEqual(30, protocolMock.Object.GetParameter(150));
+
+    Assert.AreEqual("Stream Name", protocolMock.Object.GetRow(1000, "PK1")[1]);
 }
 ```
 
@@ -180,18 +178,20 @@ public void TestMethod()
     ... some code that uses protocolMock.Object ...
     
     // Assert
-    Assert.AreEqual(30, protocolMock.Assert().Parameter(1000).Value);
+    Assert.AreEqual(30, protocolMock.Assert().Parameter(150).Value);
 
-    Assert.AreEqual("expected cell value", protocolMock.Assert().Table(2000).Row("primary key")[0]);
-    Assert.AreEqual("expected cell value", protocolMock.Assert().Table(2000).Row<QActionTableRow>("primary key").TableId_2001);
+    Assert.IsTrue(protocolMock.Assert().Table(1000).AllRows().ContainsKey("PK1");
 
-    Assert.IsTrue(protocolMock.Assert().Table(2000).AllRows().Any(r => r[0].ToString() == "expected cell value"));
+    Assert.AreEqual("Stream Name", protocolMock.Assert().Table(1000).Row("PK1")[1]);
+
+    Assert.AreEqual("10.12.80.124", protocolMock.Assert().Table(2000).Row<StreamsQActionRow>("PK1").Streamsaddress_1003);
 }
 ```
 
 The `IAsserter` interface has been designed with [Fluent Assertions](https://www.nuget.org/packages/FluentAssertions) in mind, making it easy to write readable assertions.
 
 Below is an example of how to assert data using the `IAsserter` interface combined with Fluent Assertions.
+
 ```csharp
 [TestMethod]
 public void TestMethod()
@@ -203,24 +203,20 @@ public void TestMethod()
     ... some code that uses protocolMock.Object ...
     
     // Assert
-    var expectedLiveStreamOrderRow = new LivestreamordersQActionRow
+    var expectedStreamRow = new StreamsQActionRow
     {
         // Only values for the columns that are relevant for the test need to be set
-        Livestreamordersareenaid_1001 = "1-62831376",
-        Livestreamordersdescriptionmainfin_1002 = "Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. Tällä matkitaan hirviliveä. Liveen liitetään 2 chattia: fin ja swe. Live on liitetty myös sarjaan. Livelle on laitettu myös suomenkielinen herovideo. / 16.6.-22",
-        Livestreamordersdescriptionmainswe_1003 = "Robot Framework -test på svenska: Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. / 16.6.-22",
-        Livestreamordersdescriptionshortfin_1004 = "-1",
+        Streamsid_1001 = "PK1",
+        Streamsname_1002 = "Stream Name",
     };
 
-    protocolMock.Assert().Table(1000).RowCount.Should().Be(2);
+    protocolMock.Assert().Table(1000).RowCount.Should().Be(1);
 
-    protocolMock.Assert().Table(1000).Row<LivestreamordersQActionRow>("1-62831376").Should().BeEquivalentTo(expectedLiveStreamOrderRow, options => options
-        .ExcludeMissingMembers()                                          // Exclude properties that are not set in expectedLiveStreamOrderRow
-        .Excluding(row => row.Livestreamorderslastupdatedtimestamp)       // Exclude non-deterministic values (e.g.: timestamps set to DateTime.Now)
-        .Excluding(row => row.Livestreamorderslastupdatedtimestamp_1091)  // Exclude non-deterministic values
+    protocolMock.Assert().Table(1000).AllRows().Should().ContainKeys("PK1");
+
+    protocolMock.Assert().Table(1000).Row<StreamsQActionRow>("PK1").Should().BeEquivalentTo(expectedStreamRow, options => options
+        .ExcludeMissingMembers()                                          // Exclude properties that are not set in expectedStreamRow
         .Excluding(row => row.Columns));                                  // Exclude irrelevant properties
-
-    protocolMock.Assert().Table(1000).AllRows().Should().ContainKeys("1-62831376_1", "1-62831376_2");
 }
 ```
 
