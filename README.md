@@ -97,7 +97,7 @@ Compared to the previous approach, this new approach has the following advantage
 ### Arranging Data
 
 The `SLProtocolMock` class exposes an instance of `SLProtocol` through its `Object` property.
-This means that any method available in the `SLProtocol` interface can all be called using `SLProtocolMock.Object`.
+This means that methods available in the `SLProtocol` interface can all be called using `SLProtocolMock.Object`.
 
 Below is an example of how to arrange data using the `SLProtocolMock` class.
 
@@ -214,9 +214,10 @@ public void TestMethod()
 
     protocolMock.Assert().Table(1000).AllRows().Should().ContainKeys("PK1");
 
-    protocolMock.Assert().Table(1000).Row<StreamsQActionRow>("PK1").Should().BeEquivalentTo(expectedStreamRow, options => options
-        .ExcludeMissingMembers()                                          // Exclude properties that are not set in expectedStreamRow
-        .Excluding(row => row.Columns));                                  // Exclude irrelevant properties
+    protocolMock.Assert()
+        .Table(1000).Row<StreamsQActionRow>("PK1").Should().BeEquivalentTo(expectedStreamRow, options => options
+            .ExcludeMissingMembers()         // Exclude properties that are not set in expectedStreamRow
+            .Excluding(row => row.Columns)); // Exclude irrelevant properties
 }
 ```
 
