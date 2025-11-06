@@ -215,10 +215,10 @@ public void TestMethod()
     protocolMock.Assert().Table(1000).RowCount.Should().Be(2);
 
     protocolMock.Assert().Table(1000).Row<LivestreamordersQActionRow>("1-62831376").Should().BeEquivalentTo(expectedLiveStreamOrderRow, options => options
-    .ExcludeMissingMembers()                                          // Exclude properties that are not set in expectedLiveStreamOrderRow
-    .Excluding(row => row.Livestreamorderslastupdatedtimestamp)       // Exclude non-deterministic values (e.g.: timestamps set to DateTime.Now)
-    .Excluding(row => row.Livestreamorderslastupdatedtimestamp_1091)  // Exclude non-deterministic values
-    .Excluding(row => row.Columns));                                  // Exclude irrelevant properties
+        .ExcludeMissingMembers()                                          // Exclude properties that are not set in expectedLiveStreamOrderRow
+        .Excluding(row => row.Livestreamorderslastupdatedtimestamp)       // Exclude non-deterministic values (e.g.: timestamps set to DateTime.Now)
+        .Excluding(row => row.Livestreamorderslastupdatedtimestamp_1091)  // Exclude non-deterministic values
+        .Excluding(row => row.Columns));                                  // Exclude irrelevant properties
 
     protocolMock.Assert().Table(1000).AllRows().Should().ContainKeys("1-62831376_1", "1-62831376_2");
 }
