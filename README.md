@@ -1,31 +1,33 @@
 
-# UnitTestingFramework
+# Protocol Unit Testing Framework
 
-The Unit Testing Framework was developed to simplify how Unit Tests are made when developing Connectors.
-The purpose is to allow developers to focus on actual tests without being tied to the code implementation of the method that's being tested.
+The Unit Testing Framework aims to simplify writing unit tests when developing a protocol.
+This is achieved by allowing
+1. Easier arranging of data needed for testing SLProtocol calls.
+1. Enabling assertion on the result of SLProtocol calls instead of verifying if specific SLProtocol calls were made with specific arguments.
 
-## Unit Tests
-A Unit test is a way of testing a unit. Each test can be divided in 3 steps:
+## SLProtocolMock Class
 
-* Arrange: Prepare test logic and inputs;
-* Act: run targeted unit;
-* Assert: check if output matches expected result.
+The framework provides the `SLProtocolMock` class, which extends the `Mock<SLProtocol>` class from the [Moq library](https://www.nuget.org/packages/Moq).
 
-Ideally, units should be self-contained and for a set of inputs, it provides a set of outputs:
-![Unit Test simplified](./Docs/Images/unit_test.png)
+An instance of `SLProtocolMock` exposes an instance of `SLProtocol` through its `Object` property.
+It will store any data set using SLProtocol calls such as `SetParameter`, `AddRow`, and others, in internal storage structures.
+As a result, it is possible to
 
-However, developers are also presented with legacy code or complex routines that force our Unit to be complex to a point where inter-process communication (calls to SLProtocol) are part of it.
-This forces developers to mock the SLProtocol process to be able to run the target Unit.
-Consider the example below, where we wish to test if when we run Unit *Callback.Run(SLProtocol protocol, HttpResponse response)*, the data is successfully set on a Table:
+1. Arrange data by using SLProtocol calls
+1. Assert on that stored data instead of verifying if specific SLProtocol calls were made with specific arguments.
 
-![Unit Test Callback](./Docs/Images/unit_test_callback.png)
+Initializing an instance of the `SLProtocolMock` class is as simple as calling its parameterless constructor.
+This constructor will find the protocol.xml file, parse it and create internal storage for standalone parameters and tables.
 
-Translating the graph into code using our normal approach, it will look similar to the following:
+Consider the following use case, where we want to unit test the `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` method.
+As the method name indicates, it will parse the string and store the parsed values in a table.
+
+Below is an example of how this unit test could be written without using the Unit Testing Framework:
 
 ```csharp
-[TestMethod()]
-[DeploymentItem(@"TestFiles\response_content.xml")]
-public void TestCallback()
+[TestMethod]
+public void ResponseParserTest()
 {
     // Arrange
     var expectedRows = new List<object[]>
@@ -43,13 +45,11 @@ public void TestCallback()
         }.ToObjectArray(),
     };
 
-    string responseContent = File.ReadAllText("response_content.xml");
-    var response = new HttpResponse("uri", "HTTP1.1 200 OK", responseContent);
-    var protocolMock = new Mock<SLProtocolExt>();
-    var callback = new GetMediaUsageByUtRangeResponse();
+    string response = File.ReadAllText("response_content.xml");
+    var protocolMock = new Mock<SLProtocol>();
 
     // Act
-    callback.Run(protocolMock.Object, response);
+    ResponseParser.ParseAndStoreInTable(protocolMock.Object, response);
     
     // Assert
     protocolMock.Verify(p => p.FillArray(Parameter.Mediainstancesusagetable.tablePid, expectedRows, NotifyProtocol.SaveOption.Full));
@@ -58,30 +58,28 @@ public void TestCallback()
 
 By using this approach we can see multiple problems:
 
-1. If in the future the method `callback.Run(SLProtocol protocol, HttpResponse response)` executes a protocol.NotifyProtocol instead of a protocol.FillaArray call, the unit test will break;
-2. The format of the arguments used in the FillArray of the Verify need to be exactly the same as the format of the arguments of the FillArray call inside the method `callback.Run(SLProtocol protocol, HttpResponse response)`.
-3. If the developer wishes to just check the row key or the table row length, the Verify will require the developer to build exactly the same arguments, forcing the developer to spend way more time than needed.
+1. If in the future the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` uses a different way if populating the table instead of a `FillArray` call, the unit test will fail.
+2. The format of the arguments used in the `FillArray` of the `Verify` need to be exactly the same as the format of the arguments of the `FillArray` call inside the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)`.
+3. If the developer wishes to just check the row key or the table row length, the `Verify` will require the developer to build exactly the same arguments, forcing the developer to spend way more time than needed.
 
-By using the Unit Testing Framework, we can achieve the same goal but just simply doing the following:
+Basically, the unit test is tightly coupled to the implementation of the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` and the assertion is not very flexible.
+
+By using the `SLProtocolMock` class from the Unit Testing Framework, we can achieve the same goal but just simply doing the following:
 
 ```csharp
-[TestMethod()]
-[DeploymentItem(@"TestFiles\response_content.xml")]
-public void TestCallback()
+[TestMethod]
+public void ResponseParserTest()
 {
     // Arrange
-    var protocolModel = new ProtocolModelExt(path);
-    var protocolMock = new SLProtocolMock(protocolModel);    
+    var protocolMock = new SLProtocolMock();    
 
     string responseContent = File.ReadAllText("response_content.xml");
-    var response = new HttpResponse("uri", "HTTP1.1 200 OK", responseContent);
-    var callback = new GetMediaUsageByUtRangeResponse();
 
     // Act
-    callback.Run(protocolMock.Object, response);
+    ResponseParser.ParseAndStoreInTable(protocolMock.Object, response);
     
     // Assert
-    mock.Assert()
+    protocolMock.Assert()
         .Table(Parameter.Mediainstancesusagetable.tablePid)
         .Column(Parameter.Mediainstancesusagetable.Pid.mediainstancesusagetableid_2401)
         .Should()
@@ -89,170 +87,139 @@ public void TestCallback()
 }
 ```
 
-For this particular example, the change appears to be minimal, but the fact is that the Assert step is not tied to any specific SLProtocol call. This means that if one day, the developer wishes to refactor the method `callback.Run(SLProtocol protocol, HttpResponse response)`, the unit test will remain valid and will be a tool to validate whether the refactoring kept the same functionality as before or not.
-Additionally, if the developer wishes to test the logic with a larger response that will result in hundreds of rows in a table, he/she will be able to validate the row length and target specific rows without having to build the hundreds of QActionRow objects and feed it into the Verify method.
+Note the difference in the Assert step. Instead of verifying that a specific SLProtocol call was made with specific arguments, we're now asserting on the content of the table.
 
-Of course, this is a simple use case, but the Unit Testing Framework was made to link any Parameter and Table related calls to a cache, where all data is saved  and can be accessed during the test execution.
-The main components of this framework are:
-- The [SLProtocolMock](./Docs/SLProtocolMock.md) class;
-- A [ProtocolCache](./Docs/ProtocolCache.md) where information about the parameters and tables is kept;
-- A model for protocols ([ProtocolModelExt](./Docs/ProtocolModelExt.md)) to load their parameters and tables to the cache;
-- A handler for Unit Tests assertions ([AssertionHandler](./Docs/AssertHandler.md));
+Compared to the previous approach, this new approach has the following advantages:
+1. The unit test is not tightly coupled to the implementation of the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)`. If the implementation changes but the end result is the same, the unit test will still pass.
+1. Assertion is more flexible, it can check only the parts of the data that are relevant for the unit test.
 
-Below we explain a bit more how we can access that cached values during the test execution and how we can use them to execute assertions on parameters and tables.
+## How To Use The Framework
 
-## How to Assert a Parameter
-To get started, you need to load an instance of the ProtocolModelExt containing the protocol.xml data.
-You can choose whether you provide a path to the protocol.xml or not  (these two options are explained in more detail in [ProtocolModelExt](./Docs/ProtocolModelExt.md)).
+### Arranging Data
 
-Afterwards, you are required to create an instance of the `SLProtocolMock`. This will behave as an extended `Mock<SLProtocol>` instance and it can then be used to invoke the methods. The following example requires the ProtocolModel to have a Parameter with ID 1000.
+The `SLProtocolMock` class exposes an instance of `SLProtocol` through its `Object` property. This means that any method available in the `SLProtocol` interface can be called using the `SLProtocolMock.Object` instance.
 
-To check in Unit Tests if data is changing according to the expected, the Assertion mechanism can be used.
-In the example below, we are testing if calling `mock.Object.SetParameter(1000, 30)` has actually resulted in changing the parameter with ID 1000 to value 30:
+Below is an example of how to arrange data using the `SLProtocolMock` class.
 
 ```csharp
-# SetParameter
-// Create a new Protocol Model
-var protocolModel = new ProtocolModelExt(path);
+[TestMethod]
+public void ParameterChangeTest()
+{
+    // Arrange
+    var protocolMock = new SLProtocolMock();    
 
-// Create a new SLProtocolMock and pass it the Protocol Model 
-var mock = new SLProtocolMock(protocolModel);    
+    protocolMock.Object.SetParameter(1000, 30);
 
-// Make a call using the mock object, here in this example we are changing the value of Parameter with ID 1000 to 30
-mock.Object.SetParameter(1000, 30);
+    object[] row = new object[] { "one", "two", "three", "four", "five" };
+    protocolMock.Object.AddRow(2000, row);
 
-// Invoke the mock assert method, select the ID of the Parameter to check and its current value, 
-// comparing it with the expected value which should be passed in the Be call
-mock.Assert().Parameter(1000).Value.Should().Be(30);
+    var eventRow = new EventstableQActionRow
+	{
+        // Only values for the columns that are relevant for the test need to be set
+		Eventstableid_2101 = "15007.123",
+		Eventstableplaylistid_2103 = "15007",
+		Eventstablereconcilekey_2110 = "1835695279327",
+	};
+
+	protocolMock.Object.AddRow(3000, eventRow.ToObjectArray());
+
+    // Act
+    ... some code that uses protocolMock.Object ...
+    
+    // Assert
+    ... some assertions ...
+}
 ```
 
-When calling `mock.Assert().Parameter(1000)` we're targeting our assert action to Parameter with ID 1000 by fetching its
-current cached value. Using [Fluent Assertions](https://fluentassertions.com/), we're able to validate whether the
-parameter value is 30 or not. Instead, if the following call was also made before the assertion, the test should fail:
+### Asserting Data
+
+There are two ways of asserting on the data stored in the internal storage structures of the `SLProtocolMock` instance:
+
+As SLProtocolMock exposes exposes an instance of `SLProtocol` through its `Object` property, it is possible to retrieve the data using SLProtocol calls and then assert on that data.
+Below is an example of how to assert data using the `SLProtocol` methods.
 
 ```csharp
-mock.Object.SetParameter(1000, 40);
+[TestMethod]
+public void ParameterChangeTest()
+{
+    // Arrange
+    var protocolMock = new SLProtocolMock();    
+
+    // Act
+    ... some code that uses protocolMock.Object ...
+    
+    // Assert
+    Assert.AreEqual(30, protocolMock.Object.GetParameter(1000));
+
+    Assert.AreEqual("expected cell value", protocolMock.Object.GetRow(2000, "primary key")[0]);
+}
 ```
 
-Instead of asserting the Parameter based on its ID, we can use its name, [SetParameterByName](./Docs/ParametersCache.md). The following example requires the ProtocolModel to have a Parameter with name "NumericParameter":
+#### IAsserter Interface
+
+Alternatively, the `SLProtocolMock` class exposes an `Assert()` method that returns an instance of the `IAsserter` interface. This class provides more flexible methods to assert on the stored data.
+
+Useful features of this interface are
+
+1. Getting all rows in a table using `SLProtocolMock.Assert().Table([tableId]).AllRows()`
+1. Getting a specific row in a table as `QActionTableRow` by using `SLProtocolMock.Assert().Table([tableId]).Row<[QActionTableRowType]>()`
+
+Below is an example of how to assert data using the `AssertHandler` class.
 
 ```csharp
-# SetParameterByName
-// Create a new Protocol Model
-var protocolModel = new ProtocolModelExt(path);
+[TestMethod]
+public void TestMethod()
+{
+    // Arrange
+    var protocolMock = new SLProtocolMock();    
 
-// Create a new SLProtocolMock and pass it the Protocol Model 
-var mock = new SLProtocolMock(protocolModel);    
+    // Act
+    ... some code that uses protocolMock.Object ...
+    
+    // Assert
+    Assert.AreEqual(30, protocolMock.Assert().Parameter(1000).Value);
 
-// Make a call using the mock object, here in this example we are changing the value of Parameter with name "NumericParameter" to 30
-mock.Object.SetParameterByName("NumericParameter", 30);
+    Assert.AreEqual("expected cell value", protocolMock.Assert().Table(2000).Row("primary key")[0]);
+    Assert.AreEqual("expected cell value", protocolMock.Assert().Table(2000).Row<QActionTableRow>("primary key").TableId_2001);
 
-// Invoke the mock assert method, select the name of the Parameter to check and its current value, comparing it with the expected value which should be passed in the Be call
-mock.Assert().Parameter("NumericParameter").Value.Should().Be(30);
+    Assert.IsTrue(protocolMock.Assert().Table(2000).AllRows().Any(r => r[0].ToString() == "expected cell value"));
+}
 ```
 
-If there are many Parameters to be set, we can use the following method to set multiple Parameters, [SetParameters](./Docs/ParametersCache.md). The  example requires the ProtocolModel to have Parameters with ID 1000 and 1001:
+The `IAsserter` interface has been designed with [Fluent Assertions](https://www.nuget.org/packages/FluentAssertions) in mind, making it easy to write readable assertions.
 
+Below is an example of how to assert data using the `IAsserter` interface combined with Fluent Assertions.
 ```csharp
-# SetParameters
-// Create a new Protocol Model
-var protocolModel = new ProtocolModelExt(path);
+[TestMethod]
+public void TestMethod()
+{
+    // Arrange
+    var protocolMock = new SLProtocolMock();    
 
-// Create a new SLProtocolMock and pass it the Protocol Model 
-var mock = new SLProtocolMock(protocolModel);    
+    // Act
+    ... some code that uses protocolMock.Object ...
+    
+    // Assert
+    var expectedLiveStreamOrderRow = new LivestreamordersQActionRow
+    {
+        // Only values for the columns that are relevant for the test need to be set
+        Livestreamordersareenaid_1001 = "1-62831376",
+        Livestreamordersdescriptionmainfin_1002 = "Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. Tällä matkitaan hirviliveä. Liveen liitetään 2 chattia: fin ja swe. Live on liitetty myös sarjaan. Livelle on laitettu myös suomenkielinen herovideo. / 16.6.-22",
+        Livestreamordersdescriptionmainswe_1003 = "Robot Framework -test på svenska: Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. / 16.6.-22",
+        Livestreamordersdescriptionshortfin_1004 = "-1",
+    };
 
-// The IDs of the Parameters to be set
-int[] parametersIDs = { 1000, 1001 };
+    protocolMock.Assert().Table(1000).RowCount.Should().Be(2);
 
-// The values to be set
-object[] values = { 30, "newValue" };
+    protocolMock.Assert().Table(1000).Row<LivestreamordersQActionRow>("1-62831376").Should().BeEquivalentTo(expectedLiveStreamOrderRow, options => options
+    .ExcludeMissingMembers() // Exclude properties that are not set in expectedLiveStreamOrderRow
+    .Excluding(row => row.Livestreamorderslastupdatedtimestamp) // Exclude non-deterministic values (e.g.: timestamps set to DateTime.Now)
+    .Excluding(row => row.Livestreamorderslastupdatedtimestamp_1091) // Exclude non-deterministic values
+    .Excluding(row => row.Columns)); // Exclude irrelevant properties
 
-// Make a call using the mock object, here in this example we are changing the values of Parameter with IDs 1000 and 1001 to 30 and "newValue", respectively
-mock.Object.SetParameters(parametersIDs, values);
-
-// Invoke the mock assert method, select the ID of the Parameter to check and its current value, comparing it with the expected value which should be passed in the Be call
-mock.Assert().Parameter(1000).Value.Should().Be(30);
-mock.Assert().Parameter(1001).Value.Should().Be("newValue");
-```
-The SLProtocol methods available are described in [ParametersCache](./Docs/ParametersCache.md) and [TablesCache](./Docs/TablesCache.md). The [Reference Sheet](./Docs/ReferenceSheet.md) contains examples of how to use the framework in Unit Tests.
-
-## How to Assert a Table
-The approach to Table assertions is similar to Parameter assertions: both require a Protocol Model to initialize the SLProtocolMock class, which contains the parameters and tables to be tested. 
-
-After having the SLProtocolMock class instantiated, it can then be used to invoke the Table related methods, [Row](./Docs/ITableModelReader.md) and [Column](./Docs/ITableModelReader.md). The following example requires the ProtocolModel to have a Table with ID 900 and five columns, with the first column having the primary keys.
-
-```csharp
-# AddRow
-// Create a new Protocol Model
-var protocolModel = new ProtocolModelExt(path);
-
-// Create a new SLProtocolMock and pass it the Protocol Model 
-var mock = new SLProtocolMock(protocolModel);    
-
-// The row to be set
-object[] row = new object[] { "one", "two", "three", "four", "five" };
-
-// Make a call using the mock object, here in this example we are adding the row to the table with ID 900
-mock.Object.AddRow(900, row);
-
-// Invoke the mock assert method, select the ID of the Table and the row (it can be selected by the primary key or the row index, both options return the same row), and then compare it with the expected row using one of the following options
-mock.Assert().Table(900).Row("one").Should().Equal(row);
-mock.Assert().Table(900).Row(0).Should().Equal(row);
-mock.Assert().Table(900).Row("one").Should().Contain("one").And.Contain("two").And.Contain("three").And.Contain("four").And.Contain("five");
+    protocolMock.Assert().Table(1000).AllRows().Should().ContainKeys("1-62831376_1", "1-62831376_2");
+}
 ```
 
-There is also the possibility of checking an entire column, not only a row. To do that we can select the column to be asserted by its Column ID. In the following example, we assume the Protocol Model has 5 columns with IDs 901, 902, 903, 904 and 905:
-
-```csharp
-# AddRow
-// Create a new Protocol Model
-var protocolModel = new ProtocolModelExt(path);
-
-// Create a new SLProtocolMock and pass it the Protocol Model 
-var mock = new SLProtocolMock(protocolModel);    
-
-// The row to be set
-object[] row1 = new object[] { "one.1", "two.1", "three.1", "four.1", "five.1" };
-object[] row2 = new object[] { "one.2", "two.2", "three.2", "four.2", "five.2" };
-
-// Make a call using the mock object, here in this example we are adding two rows, row1 and row2, to the table with ID 900
-mock.Object.AddRow(900, row1);
-mock.Object.AddRow(900, row2);
-
-// Define the expected column values
-string[] expectedColumn1 = { "one.1", "one.2" };
-string[] expectedColumn2 = { "two.1", "two.2" };
-string[] expectedColumn3 = { "three.1", "three.2" };
-string[] expectedColumn4 = { "four.1", "four.2" };
-string[] expectedColumn5 = { "five.1", "five.2" };
-
-// Invoke the mock assert method, select the ID of the Table and the column to check, and then compare it with the expected column
-mock.Assert().Table(900).Column(901).Should().Equal(expectedColumn1);
-mock.Assert().Table(900).Column(901).Should().Equal(expectedColumn2);
-mock.Assert().Table(900).Column(901).Should().Equal(expectedColumn3);
-mock.Assert().Table(900).Column(901).Should().Equal(expectedColumn4);
-mock.Assert().Table(900).Column(901).Should().Equal(expectedColumn5);
-```
-
-If we only want to assert the value of a Table cell, not an entire row or column, we can test it as follows:
-
-```csharp
-# AddRow
-// Create a new Protocol Model
-var protocolModel = new ProtocolModelExt(path);
-
-// Create a new SLProtocolMock and pass it the Protocol Model 
-var mock = new SLProtocolMock(protocolModel);    
-
-// The row to be set
-object[] row = new object[] { "one", "two", "three", "four", "five" };
-
-// Make a call using the mock object, here in this example we are adding the row to the table with ID 900
-mock.Object.AddRow(900, row);
-
-// Invoke the mock assert method, select the ID of the Table and the row (it can be selected by the primary key or the row index, both options return the same row), specify the row index, and then compare it with the expected row using one of the following options
-mock.Assert().Table(900).Row("one")[1].Should().BeEquivalentTo("two");
-mock.Assert().Table(900).Row(0)[1].Should().BeEquivalentTo("two");
-```
-
-More examples of the assertion mechanism are available in [AssertHandler](./Docs/AssertHandler.md).
+> WARNING
+As of version 8.0.0, using the Fluent Assertions library requires a license for commercial use. Use version 7.2.0 or earlier for free commercial use.
