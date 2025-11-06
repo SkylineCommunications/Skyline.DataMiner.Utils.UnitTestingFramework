@@ -1,7 +1,7 @@
 
 # Protocol Unit Testing Framework
 
-The Unit Testing Framework aims to simplify writing unit tests when developing a protocol.
+The Protocol Unit Testing Framework aims to simplify writing unit tests when developing a protocol.
 This is achieved by allowing
 1. Easier arranging of data needed for testing SLProtocol calls.
 1. Enabling assertion on the result of SLProtocol calls instead of verifying if specific SLProtocol calls were made with specific arguments.
@@ -20,10 +20,10 @@ As a result, it is possible to
 Initializing an instance of the `SLProtocolMock` class is as simple as calling its parameterless constructor.
 This constructor will find the protocol.xml file, parse it and create internal storage for standalone parameters and tables.
 
-Consider the following use case, where we want to unit test the `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` method.
+Consider the following use case, where we want to unit test a `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` method.
 As the method name indicates, it will parse the string and store the parsed values in a table.
 
-Below is an example of how this unit test could be written without using the Unit Testing Framework:
+Below is an example of how this unit test would be written **without** using the Unit Testing Framework:
 
 ```csharp
 [TestMethod]
@@ -97,13 +97,14 @@ Compared to the previous approach, this new approach has the following advantage
 
 ### Arranging Data
 
-The `SLProtocolMock` class exposes an instance of `SLProtocol` through its `Object` property. This means that any method available in the `SLProtocol` interface can be called using the `SLProtocolMock.Object` instance.
+The `SLProtocolMock` class exposes an instance of `SLProtocol` through its `Object` property.
+This means that any method available in the `SLProtocol` interface can be called using `SLProtocolMock.Object`.
 
 Below is an example of how to arrange data using the `SLProtocolMock` class.
 
 ```csharp
 [TestMethod]
-public void ParameterChangeTest()
+public void TestMethod()
 {
     // Arrange
     var protocolMock = new SLProtocolMock();    
@@ -133,14 +134,16 @@ public void ParameterChangeTest()
 
 ### Asserting Data
 
-There are two ways of asserting on the data stored in the internal storage structures of the `SLProtocolMock` instance:
+There are two ways of asserting on the data stored in the internal storage structures of the `SLProtocolMock` instance.
+
+#### SLProtocol Interface
 
 As SLProtocolMock exposes exposes an instance of `SLProtocol` through its `Object` property, it is possible to retrieve the data using SLProtocol calls and then assert on that data.
 Below is an example of how to assert data using the `SLProtocol` methods.
 
 ```csharp
 [TestMethod]
-public void ParameterChangeTest()
+public void TestMethod()
 {
     // Arrange
     var protocolMock = new SLProtocolMock();    
@@ -162,7 +165,7 @@ Alternatively, the `SLProtocolMock` class exposes an `Assert()` method that retu
 Useful features of this interface are
 
 1. Getting all rows in a table using `SLProtocolMock.Assert().Table([tableId]).AllRows()`
-1. Getting a specific row in a table as `QActionTableRow` by using `SLProtocolMock.Assert().Table([tableId]).Row<[QActionTableRowType]>()`
+1. Getting a specific row in a table as `QActionTableRow` by using `SLProtocolMock.Assert().Table([tableId]).Row<[QActionTableRowType]>([primary key or index])`
 
 Below is an example of how to assert data using the `AssertHandler` class.
 
@@ -221,5 +224,5 @@ public void TestMethod()
 }
 ```
 
-> WARNING
-As of version 8.0.0, using the Fluent Assertions library requires a license for commercial use. Use version 7.2.0 or earlier for free commercial use.
+> [!WARNING]
+> As of version 8.0.0, using the Fluent Assertions library requires a license for commercial use. Use version 7.2.0 or earlier for free commercial use.
