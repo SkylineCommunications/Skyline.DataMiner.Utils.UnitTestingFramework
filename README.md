@@ -1,10 +1,10 @@
 
 # Protocol Unit Testing Framework
 
-The Protocol Unit Testing Framework aims to simplify writing unit tests when developing a protocol.
-This is achieved by allowing
-1. Easier arranging of data needed for testing SLProtocol calls.
-1. Enabling assertion on the result of SLProtocol calls instead of verifying if specific SLProtocol calls were made with specific arguments.
+The Protocol Unit Testing Framework aims to simplify writing unit tests when developing a protocol and make those tests more future-proof, more resilient.
+It allows us to
+1. Arrange the data for testing code involving SLProtocol calls more easily and faster.
+1. Assert on the result of SLProtocol calls instead of verifying if specific SLProtocol calls were made with specific arguments. In other words, test the output, not the implementation.
 
 ## SLProtocolMock Class
 
@@ -15,7 +15,7 @@ It will store any data set using SLProtocol calls such as `SetParameter`, `AddRo
 As a result, it is possible to
 
 1. Arrange data by using SLProtocol calls
-1. Assert on that stored data instead of verifying if specific SLProtocol calls were made with specific arguments.
+1. Assert on that stored data instead of verifying if specific SLProtocol calls were made with specific arguments. Again, testing the output, not the implementation.
 
 > [!NOTE]
 > Because `SLProtocolMock` only provides an instance of `SLProtocol`, the Unit Testing Framework currently does not support `SLProtocolExt`.
@@ -33,6 +33,13 @@ Below is an example of how this unit test would be written **without** using the
 public void ResponseParserTest()
 {
     // Arrange
+    var protocolMock = new Mock<SLProtocol>();
+    string response = File.ReadAllText("response_content.xml");
+
+    // Act
+    ResponseParser.ParseAndStoreInTable(protocolMock.Object, response);
+    
+    // Assert
     var expectedRows = new List<object[]>
     {
         new MediainstancesusagetableQActionRow
@@ -47,27 +54,19 @@ public void ResponseParserTest()
             Mediainstancesusagetableearliestusagetime_2408 = 0.0d
         }.ToObjectArray(),
     };
-
-    string response = File.ReadAllText("response_content.xml");
-    var protocolMock = new Mock<SLProtocol>();
-
-    // Act
-    ResponseParser.ParseAndStoreInTable(protocolMock.Object, response);
-    
-    // Assert
     protocolMock.Verify(p => p.FillArray(Parameter.Mediainstancesusagetable.tablePid, expectedRows, NotifyProtocol.SaveOption.Full));
 }
 ```
 
 By using this approach we can see multiple problems:
 
-1. If in the future the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` uses a different way if populating the table instead of a `FillArray` call, the unit test will fail.
-2. The format of the arguments used in the `FillArray` of the `Verify` need to be exactly the same as the format of the arguments of the `FillArray` call inside the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)`.
+1. If in the future the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` uses a different way to populate the table instead of a `FillArray` call, the unit test will be broken.
+2. The format of the arguments used in the `FillArray` of the `Verify` needs to be exactly the same as the format of the arguments of the `FillArray` call inside the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)`.
 3. If the developer wishes to just check the row key or the table row length, the `Verify` will require the developer to build exactly the same arguments, forcing the developer to spend way more time than needed.
 
 Basically, the unit test is tightly coupled to the implementation of the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` and the assertion is not very flexible.
 
-By using the `SLProtocolMock` class from the Unit Testing Framework, we can achieve the same goal but just simply doing the following:
+By using the `SLProtocolMock` class from the Unit Testing Framework, we can achieve the same goal (and more) simply by doing the following:
 
 ```csharp
 [TestMethod]
@@ -75,7 +74,6 @@ public void ResponseParserTest()
 {
     // Arrange
     var protocolMock = new SLProtocolMock();    
-
     string responseContent = File.ReadAllText("response_content.xml");
 
     // Act
@@ -101,7 +99,7 @@ Compared to the previous approach, this new approach has the following advantage
 ### Arranging Data
 
 The `SLProtocolMock` class exposes an instance of `SLProtocol` through its `Object` property.
-This means that any method available in the `SLProtocol` interface can be called using `SLProtocolMock.Object`.
+This means that any method available in the `SLProtocol` interface can all be called using `SLProtocolMock.Object`.
 
 Below is an example of how to arrange data using the `SLProtocolMock` class.
 
@@ -156,7 +154,6 @@ public void TestMethod()
     
     // Assert
     Assert.AreEqual(30, protocolMock.Object.GetParameter(1000));
-
     Assert.AreEqual("expected cell value", protocolMock.Object.GetRow(2000, "primary key")[0]);
 }
 ```
@@ -210,18 +207,18 @@ public void TestMethod()
     {
         // Only values for the columns that are relevant for the test need to be set
         Livestreamordersareenaid_1001 = "1-62831376",
-        Livestreamordersdescriptionmainfin_1002 = "Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. T‰ll‰ matkitaan hirvilive‰. Liveen liitet‰‰n 2 chattia: fin ja swe. Live on liitetty myˆs sarjaan. Livelle on laitettu myˆs suomenkielinen herovideo. / 16.6.-22",
-        Livestreamordersdescriptionmainswe_1003 = "Robot Framework -test pÂ svenska: Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. / 16.6.-22",
+        Livestreamordersdescriptionmainfin_1002 = "Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. T√§ll√§ matkitaan hirvilive√§. Liveen liitet√§√§n 2 chattia: fin ja swe. Live on liitetty my√∂s sarjaan. Livelle on laitettu my√∂s suomenkielinen herovideo. / 16.6.-22",
+        Livestreamordersdescriptionmainswe_1003 = "Robot Framework -test p√• svenska: Robot Framework -testi: luodaan 4h urheilulive, joka alkaa nyt. / 16.6.-22",
         Livestreamordersdescriptionshortfin_1004 = "-1",
     };
 
     protocolMock.Assert().Table(1000).RowCount.Should().Be(2);
 
     protocolMock.Assert().Table(1000).Row<LivestreamordersQActionRow>("1-62831376").Should().BeEquivalentTo(expectedLiveStreamOrderRow, options => options
-    .ExcludeMissingMembers() // Exclude properties that are not set in expectedLiveStreamOrderRow
-    .Excluding(row => row.Livestreamorderslastupdatedtimestamp) // Exclude non-deterministic values (e.g.: timestamps set to DateTime.Now)
-    .Excluding(row => row.Livestreamorderslastupdatedtimestamp_1091) // Exclude non-deterministic values
-    .Excluding(row => row.Columns)); // Exclude irrelevant properties
+    .ExcludeMissingMembers()                                          // Exclude properties that are not set in expectedLiveStreamOrderRow
+    .Excluding(row => row.Livestreamorderslastupdatedtimestamp)       // Exclude non-deterministic values (e.g.: timestamps set to DateTime.Now)
+    .Excluding(row => row.Livestreamorderslastupdatedtimestamp_1091)  // Exclude non-deterministic values
+    .Excluding(row => row.Columns));                                  // Exclude irrelevant properties
 
     protocolMock.Assert().Table(1000).AllRows().Should().ContainKeys("1-62831376_1", "1-62831376_2");
 }
