@@ -17,6 +17,9 @@ As a result, it is possible to
 1. Arrange data by using SLProtocol calls
 1. Assert on that stored data instead of verifying if specific SLProtocol calls were made with specific arguments.
 
+> [!NOTE]
+> Because `SLProtocolMock` only provides an instance of `SLProtocol`, the Unit Testing Framework currently does not support `SLProtocolExt`.
+
 Initializing an instance of the `SLProtocolMock` class is as simple as calling its parameterless constructor.
 This constructor will find the protocol.xml file, parse it and create internal storage for standalone parameters and tables.
 
