@@ -12,7 +12,7 @@
 
         public ArrayHandler(HashSet<int> excludedPids)
         {
-            this.excludedPids = excludedPids;
+            this.excludedPids = excludedPids ?? throw new ArgumentNullException(nameof(excludedPids));
         }
 
         public void CreateModelAndAddToCache(IProtocolCache cache, IParamsParam parameter)

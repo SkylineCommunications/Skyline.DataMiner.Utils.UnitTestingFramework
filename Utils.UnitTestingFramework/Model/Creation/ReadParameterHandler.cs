@@ -11,10 +11,10 @@
 
         public ReadParameterHandler(HashSet<int> excludedPids)
         {
-            this.excludedPids = excludedPids;
+            this.excludedPids = excludedPids ?? throw new System.ArgumentNullException(nameof(excludedPids));
         }
 
-        public override void ProcessString(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessString(IProtocolCache cache, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -28,7 +28,7 @@
             cache.Parameters.SetParameter(parameterId, defaultValue, null, false);
         }
 
-        public override void ProcessDouble(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessDouble(IProtocolCache cache, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 

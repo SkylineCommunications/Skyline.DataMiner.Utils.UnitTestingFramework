@@ -15,10 +15,10 @@
 
         public FixedParameterHandler(HashSet<int> excludedPids)
         {
-            this.excludedPids = excludedPids;
+            this.excludedPids = excludedPids ?? throw new ArgumentNullException(nameof(excludedPids));
         }
 
-        public override void ProcessString(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessString(IProtocolCache cache, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -28,10 +28,10 @@
             }
 
             string fixedValueString = parameter.Interprete.ValueElement.Value;
-            cache.Parameters.SetParameter(parameterId, fixedValueString, null, false);
+            cache.Parameters.SetParameter(parameterId, fixedValueString, checkIfExists: false);
         }
 
-        public override void ProcessDouble(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessDouble(IProtocolCache cache, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -49,7 +49,7 @@
                 fixedValueInt = Int32.Parse(parts[0], System.Globalization.NumberStyles.HexNumber);
             }
 
-            cache.Parameters.SetParameter(parameterId, fixedValueInt, null, false);
+            cache.Parameters.SetParameter(parameterId, fixedValueInt, checkIfExists: false);
         }
     }
 }

@@ -91,7 +91,28 @@ Any inquiries can be addressed to:
 				</Discreets>
 			</Measurement>
 		</Param>
-
+		<Param id="150">
+			<Name>Title_Begin_Test</Name>
+			<Description>Test Title</Description>
+			<Type>fixed</Type>
+			<Display>
+				<RTDisplay>true</RTDisplay>
+			</Display>
+			<Measurement>
+				<Type options="begin">title</Type>
+			</Measurement>
+		</Param>
+		<Param id="151">
+			<Name>title_End_Test</Name>
+			<Description />
+			<Type>fixed</Type>
+			<Display>
+				<RTDisplay>true</RTDisplay>
+			</Display>
+			<Measurement>
+				<Type options="end;connect">title</Type>
+			</Measurement>
+		</Param>
 		<Param id="1000" trending="false">
 			<Name>NumericParameter</Name>
 			<Description>Numeric Parameter</Description>

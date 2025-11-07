@@ -38,15 +38,22 @@
                 int parameterId = (int)parameter.Id.Value.Value;
                 string parameterName = parameter.Name.Value;
 
-                var paramType = (EnumParamType)parameter.Type.Value;
-
-                if (!cache.Parameters.TryGetParameterId(parameterName, out _) || !(paramType is EnumParamType.Read))
+                try
                 {
-                    cache.Parameters.LoadParameterName(parameterName, parameterId);
-                }
+                    var paramType = (EnumParamType)parameter.Type.Value;
 
-                var modelCreator = ModelCreatorFactory.Create(paramType, excludedPids);
-                modelCreator.CreateModelAndAddToCache(cache, parameter);
+                    if (!cache.Parameters.TryGetParameterId(parameterName, out _) || !(paramType is EnumParamType.Read))
+                    {
+                        cache.Parameters.LoadParameterName(parameterName, parameterId);
+                    }
+
+                    var modelCreator = ModelCreatorFactory.Create(paramType, excludedPids);
+                    modelCreator.CreateModelAndAddToCache(cache, parameter);
+                }
+                catch(Exception ex)
+                {
+                    throw new InvalidOperationException($"An exception occurred while processing protocol parameter '{parameterName}' (ID: {parameterId}). See inner exception for more details.", ex);
+                }
             }
 
             return cache;
