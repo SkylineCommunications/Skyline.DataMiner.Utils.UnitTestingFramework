@@ -95,6 +95,12 @@ Any inquiries can be addressed to:
 			<Name>Title_Begin_Test</Name>
 			<Description>Test Title</Description>
 			<Type>fixed</Type>
+			<Interprete>
+				<RawType>other</RawType>
+				<LengthType>fixed</LengthType>
+				<Length>23</Length>
+				<Type>string</Type>
+			</Interprete>
 			<Display>
 				<RTDisplay>true</RTDisplay>
 			</Display>

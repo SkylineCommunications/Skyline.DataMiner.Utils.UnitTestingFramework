@@ -29,11 +29,9 @@
             }
 
             var cache = new ProtocolCache();
-
-            var parameters = protocolModel.Protocol.Params.ToList();
             var excludedPids = new HashSet<int>();
 
-            foreach (var parameter in parameters)
+            foreach (var parameter in protocolModel.Protocol.Params)
             {
                 int parameterId = (int)parameter.Id.Value.Value;
                 string parameterName = parameter.Name.Value;

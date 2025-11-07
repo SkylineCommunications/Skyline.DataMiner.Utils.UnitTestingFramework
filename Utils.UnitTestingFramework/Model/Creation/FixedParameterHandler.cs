@@ -27,6 +27,12 @@
                 return;
             }
 
+            if (parameter.Measurement.Type.Value == CICD.Models.Protocol.Enums.EnumParamMeasurementType.Title)
+            {
+                // Skip title parameters
+                return;
+            }
+
             string fixedValueString = parameter.Interprete.ValueElement.Value;
             cache.Parameters.SetParameter(parameterId, fixedValueString, checkIfExists: false);
         }
@@ -37,6 +43,12 @@
 
             if (excludedPids.Contains(parameterId))
             {
+                return;
+            }
+
+            if (parameter.Measurement.Type.Value == CICD.Models.Protocol.Enums.EnumParamMeasurementType.Title)
+            {
+                // Skip title parameters
                 return;
             }
 
