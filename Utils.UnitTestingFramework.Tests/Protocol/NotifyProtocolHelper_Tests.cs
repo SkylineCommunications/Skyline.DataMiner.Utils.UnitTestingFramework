@@ -5,6 +5,7 @@
     using FluentAssertions;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
@@ -14,6 +15,23 @@
     public class NotifyProtocolHelper_Tests
     {
         private readonly string path = "protocol.xml";
+
+        [TestMethod]
+        public void UnsupportedNotifyType_DoesNotThrowException()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            // Mock the specific call to NotifyProtocol with NotifyType -1 to make sure it does not throw an exception
+            mock.Setup(x => x.NotifyProtocol(-1, It.IsAny<object>(), It.IsAny<object>())).Returns(1);
+
+            // Act 
+            mock.Object.NotifyProtocol(-1, null, null);
+            var output = mock.Object.NotifyProtocol(73, 1000, null); // GetParameter
+
+            // Assert
+            Assert.AreEqual(10, output);
+        }
 
         [TestMethod]
         public void GetParameter_IsEqual()

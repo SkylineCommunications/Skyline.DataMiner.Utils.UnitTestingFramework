@@ -130,6 +130,30 @@ public void TestMethod()
 }
 ```
 
+### Mocking More SLProtocol Calls
+
+Not all SLProtocol methods are implemented in the `SLProtocolMock` class. For example, some less common variations of inputs for `SLProtocol.NotifyProtocol` will throw an exception indicating that they are not supported.
+However, it is possible to mock additional SLProtocol calls using the Moq library. This will allow you to extend the behavior of the `SLProtocolMock` instance as needed.
+
+```csharp
+[TestMethod]
+public void TestMethod()
+{
+    // Arrange
+    var protocolMock = new SLProtocolMock();    
+
+    // Mocking an variation of NotifyProtocol that is not supported out of the box by the framework
+    protocolMock.Setup(x => x.NotifyProtocol([notify type integer], It.IsAny<object>(), It.IsAny<object>())).Returns(...);
+
+    // Act
+    ... some code that uses protocolMock.Object ...
+    
+    // Assert
+    ... some assertions ...
+}
+```
+
+
 ### Asserting Data
 
 There are two ways of asserting on the data stored in the internal storage structures of the `SLProtocolMock` instance.
