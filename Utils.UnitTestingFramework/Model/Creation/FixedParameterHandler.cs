@@ -27,7 +27,7 @@
                 return;
             }
 
-            if (parameter.Measurement.Type.Value == CICD.Models.Protocol.Enums.EnumParamMeasurementType.Title)
+            if (parameter.Measurement?.Type?.Value == CICD.Models.Protocol.Enums.EnumParamMeasurementType.Title)
             {
                 // Skip title parameters
                 return;
