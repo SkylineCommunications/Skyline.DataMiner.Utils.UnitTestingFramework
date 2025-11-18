@@ -24,9 +24,9 @@
                 return;
             }
 
-            EnumParamInterpretType interpretType = (EnumParamInterpretType)parameter.Interprete.Type.Value;
+            var interpreteType = parameter.Interprete.Type.Value.Value;
 
-            switch (interpretType)
+            switch (interpreteType)
             {
                 case EnumParamInterpretType.String:
                     ProcessString(cache, parameter);

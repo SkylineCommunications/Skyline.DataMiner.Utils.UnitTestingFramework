@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
-
+    using Skyline.DataMiner.CICD.Models.Protocol.Enums;
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
@@ -27,7 +27,7 @@
                 return;
             }
 
-            if (parameter.Measurement?.Type?.Value == CICD.Models.Protocol.Enums.EnumParamMeasurementType.Title)
+            if (IsTitleParameter(parameter))
             {
                 // Skip title parameters
                 return;
@@ -46,7 +46,7 @@
                 return;
             }
 
-            if (parameter.Measurement.Type.Value == CICD.Models.Protocol.Enums.EnumParamMeasurementType.Title)
+            if (IsTitleParameter(parameter))
             {
                 // Skip title parameters
                 return;
@@ -62,6 +62,11 @@
             }
 
             cache.Parameters.SetParameter(parameterId, fixedValueInt, checkIfExists: false);
+        }
+
+        private bool IsTitleParameter(IParamsParam parameter)
+        {
+            return parameter.Measurement?.Type?.Value == EnumParamMeasurementType.Title;
         }
     }
 }
