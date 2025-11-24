@@ -10,6 +10,30 @@
     {
         internal class NotifyProtocolHelper
         {
+            private static readonly IReadOnlyCollection<NotifyType> RelevantNotYetSupportedNotifyTypes = new List<NotifyType>
+            {
+                NotifyType.GetData, // gets raw data for a parameter
+                NotifyType.GetName, // gets the name tag for a parameter
+                NotifyType.GetParameterDisplayValue, // gets the display value for a parameter
+                NotifyType.GetDisplayForPK, // gets the display key for a primary key
+                NotifyType.GetPKForDisplay, // gets the primary key for a display key
+                NotifyType.SetParameterWithWait, // sets a parameter and waits for the operation to complete
+                NotifyType.GetIndexes, // gets the primary keys and display keys of a table
+                NotifyType.SetBinaryData, // sets binary data for a parameter
+                NotifyType.GetKeysForIndex, // gets the primary keys of all rows that have the specified value for the specified column.
+                NotifyType.NT_REBUILD_INDEX, // rebuilds the index of the specified column
+                NotifyType.NT_SET_PARAMETER_WITH_HISTORY, // sets a parameter with the provided timestamp
+                NotifyType.NT_INCREMENT_ROW, // Adds the specified numeric values to the current values in the row.
+                NotifyType.NT_GET_COLUMN, // ?
+                NotifyType.NT_GET_PARAMETER_BY_OID, // gets a parameter value by its SNMP OID
+                NotifyType.NT_FILL_ARRAY_WITH_COLUMN_ONLY_UPDATES, // Sets or updates one or more table columns with the provided values
+                NotifyType.NT_SET_PARAMETER_BY_ID, // ?
+                NotifyType.NT_SET_PARAMETER_CHECK_CONDITIONS, // ?
+                NotifyType.NT_GET_KEYS_SLPROTOCOL, // Retrieves the primary keys of a table from the SLProtocol process without interacting with the SLElement process.
+                NotifyType.NT_GET_KEYS_FOR_INDEX_CASED, // Gets the primary keys of all rows that have the specified value (case sensitive) for the specified column
+                NotifyType.NT_GET_TABLE_PARAMETER_VALUE_BY_INDEX, // ?
+            };
+
             private readonly Dictionary<NotifyType, Func<object, object, object>> notifyToActionMapper = new Dictionary<NotifyType, Func<object, object, object>>();
             private readonly ProtocolCache protocolCache;
 
@@ -43,15 +67,30 @@
 
             public object Execute(int notifyType, object value1, object value2)
             {
-                NotifyType castedNotifyType = (NotifyType)notifyType;
+                NotifyType castedNotifyType;
+
+                try
+                {
+                    castedNotifyType = (NotifyType)notifyType;
+                }
+                catch
+                {
+                    // Ignore irrelevant notify types.
+                    return null; // Irrelevant return value
+                }
 
                 if (notifyToActionMapper.TryGetValue(castedNotifyType, out var functionToExecute))
                 {
                     return functionToExecute.Invoke(value1, value2);
                 }
+                else if (RelevantNotYetSupportedNotifyTypes.Contains(castedNotifyType))
+                {
+                    throw new NotImplementedException($"Notify type '{castedNotifyType} ({notifyType})' is recognized but not yet implemented in this mock. Please create a feature request.");
+                }
                 else
                 {
-                    throw new ArgumentException($"Notify type '{castedNotifyType} ({notifyType})' is not supported.");
+                    // Ignore irrelevant notify types.
+                    return null; // Irrelevant return value
                 }
             }
 

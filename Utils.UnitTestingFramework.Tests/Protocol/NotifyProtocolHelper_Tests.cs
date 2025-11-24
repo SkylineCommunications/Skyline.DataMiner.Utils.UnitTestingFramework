@@ -17,20 +17,26 @@
         private readonly string path = "protocol.xml";
 
         [TestMethod]
-        public void UnsupportedNotifyType_DoesNotThrowException()
+        public void IrrelevantUnsupportedNotifyType_DoesNotThrowException()
         {
             // Arrange
             var mock = new SLProtocolMock(path);
 
-            // Mock the specific call to NotifyProtocol with NotifyType -1 to make sure it does not throw an exception
-            mock.Setup(x => x.NotifyProtocol(-1, It.IsAny<object>(), It.IsAny<object>())).Returns(1);
-
             // Act 
-            mock.Object.NotifyProtocol(-1, null, null);
-            var output = mock.Object.NotifyProtocol(73, 1000, null); // GetParameter
+            Action act = () => mock.Object.NotifyProtocol(-1, null, null); // Irrelevant unsupported NotifyType
 
             // Assert
-            Assert.AreEqual(10, output);
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void RelevantNotYetSupportedNotifyType_ThrowsException()
+        {
+            // Arrange
+            var mock = new SLProtocolMock(path);
+
+            // Act & Assert
+            Assert.Throws<Exception>(() => mock.Object.NotifyProtocol((int)NotifyType.GetData, null, null)); // Relevant not yet supported NotifyType
         }
 
         [TestMethod]
@@ -505,20 +511,6 @@
 
             string[] row2 = { "Row 2 PK", "B", null, null, "H" };
             outputGetRow2.Should().BeEquivalentTo(row2);
-        }
-
-        [TestMethod]
-        public void InexistentNotifyProtocol_Exception()
-        {
-            // Arrange
-
-            var mock = new SLProtocolMock(path);
-
-            int viewID = 10045;
-
-            // Act & Assert
-            Assert.ThrowsExactly<ArgumentException>(
-                () => mock.Object.NotifyProtocol(303 /*NT_GET_VIEW_NAME*/, viewID, null));
         }
 
         [TestMethod]
