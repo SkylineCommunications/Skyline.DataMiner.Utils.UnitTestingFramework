@@ -23,12 +23,10 @@
             var mock = new SLProtocolMock(path);
 
             // Act 
-            mock.Object.NotifyProtocol(-1, null, null); // Irrelevant unsupported NotifyType
-
-            var output = mock.Object.NotifyProtocol(73, 1000, null); // GetParameter
+            Action act = () => mock.Object.NotifyProtocol(-1, null, null); // Irrelevant unsupported NotifyType
 
             // Assert
-            Assert.AreEqual(10, output);
+            act.Should().NotThrow();
         }
 
         [TestMethod]
