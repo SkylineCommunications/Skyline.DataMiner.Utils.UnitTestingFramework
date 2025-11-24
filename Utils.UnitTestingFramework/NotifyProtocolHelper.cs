@@ -10,7 +10,7 @@
     {
         internal class NotifyProtocolHelper
         {
-            private static readonly IReadOnlyCollection<NotifyType> RelevantUnsupportedNotifyTypes = new List<NotifyType>
+            private static readonly IReadOnlyCollection<NotifyType> RelevantNotYetSupportedNotifyTypes = new List<NotifyType>
             {
                 NotifyType.GetData, // gets raw data for a parameter
                 NotifyType.GetName, // gets the name tag for a parameter
@@ -83,9 +83,9 @@
                 {
                     return functionToExecute.Invoke(value1, value2);
                 }
-                else if (RelevantUnsupportedNotifyTypes.Contains(castedNotifyType))
+                else if (RelevantNotYetSupportedNotifyTypes.Contains(castedNotifyType))
                 {
-                    throw new NotImplementedException($"Notify type '{castedNotifyType} ({notifyType})' is recognized but not implemented in this mock. Please create a feature request.");
+                    throw new NotImplementedException($"Notify type '{castedNotifyType} ({notifyType})' is recognized but not yet implemented in this mock. Please create a feature request.");
                 }
                 else
                 {

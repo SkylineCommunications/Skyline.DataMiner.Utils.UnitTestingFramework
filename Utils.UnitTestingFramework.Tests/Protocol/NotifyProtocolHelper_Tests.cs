@@ -32,14 +32,13 @@
         }
 
         [TestMethod]
-        public void RelevantUnsupportedNotifyType_DoesNotThrowException()
+        public void RelevantNotYetSupportedNotifyType_ThrowsException()
         {
             // Arrange
             var mock = new SLProtocolMock(path);
 
             // Act & Assert
-            Assert.Throws<Exception>(() => mock.Object.NotifyProtocol((int)NotifyType.GetData, null, null)); // Relevant unsupported NotifyType
-
+            Assert.Throws<Exception>(() => mock.Object.NotifyProtocol((int)NotifyType.GetData, null, null)); // Relevant not yet supported NotifyType
         }
 
         [TestMethod]
