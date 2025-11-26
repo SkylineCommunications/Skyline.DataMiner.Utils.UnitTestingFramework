@@ -111,7 +111,7 @@ public void TestMethod()
     protocolMock.Object.SetParameter(150, 30);
 
     var firstRow = new object[] { "PK1", "First Stream Name", "10.12.80.124", "8080" };
-    protocolMock.Object.AddRow(1000, row);
+    protocolMock.Object.AddRow(1000, firstRow);
 
     var secondRow = new StreamsQActionRow
 	{
@@ -120,7 +120,7 @@ public void TestMethod()
 		Streamsname_1002 = "Second Stream Name",
 	};
 
-	protocolMock.Object.AddRow(1000, eventRow.ToObjectArray());
+	protocolMock.Object.AddRow(1000, secondRow.ToObjectArray());
 
     // Act
     ... some code that uses protocolMock.Object ...
