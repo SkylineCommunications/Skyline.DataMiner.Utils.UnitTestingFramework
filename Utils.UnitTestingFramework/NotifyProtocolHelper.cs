@@ -4,9 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    public partial class SLProtocolMock
+    public partial class SLProtocolMock<T> where T : class, SLProtocol
     {
         internal class NotifyProtocolHelper
         {

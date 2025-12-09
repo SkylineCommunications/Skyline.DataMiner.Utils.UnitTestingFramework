@@ -9,11 +9,11 @@
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
     using static Skyline.DataMiner.Scripting.NotifyProtocol;
 
-    public partial class SLProtocolMock
+    public partial class SLProtocolMock<T> where T : class, SLProtocol
     {
         internal static class ProtocolMockSetupHelper
         {
-            public static void Setup(SLProtocolMock mock, IProtocolModel protocolModel)
+            public static void Setup(SLProtocolMock<T> mock, IProtocolModel protocolModel)
             {
                 SetupProperties(mock, protocolModel);
 
@@ -37,7 +37,7 @@
                     });
             }
 
-            private static void SetupProperties(Mock<SLProtocol> mock, IProtocolModel protocolModel)
+            private static void SetupProperties(Mock<T> mock, IProtocolModel protocolModel)
             {
                 mock.SetupGet(p => p.ProtocolName).Returns(protocolModel.Protocol.Name.Value);
                 mock.SetupGet(p => p.ProtocolVersion).Returns(protocolModel.Protocol.Version.Value);
@@ -45,7 +45,7 @@
                 mock.SetupGet(p => p.Clear).Returns(Constants.Constants.PROTOCOL_CLEAR);
             }
 
-            private static void SetupParameterGets(Mock<SLProtocol> mock, ProtocolCache protocolCache)
+            private static void SetupParameterGets(Mock<T> mock, ProtocolCache protocolCache)
             {
                 mock.Setup(p => p.GetParameter(It.IsAny<int>()))
                     .Returns(
@@ -81,11 +81,11 @@
                     .Returns(
                     (int pid) =>
                     {
-                        return protocolCache.Parameters.IsEmpty(pid, mock);
+                        return protocolCache.Parameters.IsEmpty(pid, mock.Object);
                     });
             }
 
-            private static void SetupParameterSets(Mock<SLProtocol> mock, ProtocolCache protocolCache)
+            private static void SetupParameterSets(Mock<T> mock, ProtocolCache protocolCache)
             {
                 mock.Setup(p => p.SetParameter(It.IsAny<int>(), It.IsAny<object>()))
                     .Returns(
@@ -130,7 +130,7 @@
                     });
             }
 
-            private static void SetupTableAddsAndExists(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupTableAddsAndExists(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.AddRow(It.IsAny<int>(), It.IsAny<object[]>(), It.IsAny<bool[]>()))
                     .Callback(
@@ -175,7 +175,7 @@
                     });
             }
 
-            private static void SetupTableDeleteAndClearKeys(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupTableDeleteAndClearKeys(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.DeleteRow(It.IsAny<int>(), It.IsAny<string[]>()))
                    .Returns(
@@ -206,7 +206,7 @@
                    });
             }
 
-            private static void SetupGetRowsAndKeyPosition(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupGetRowsAndKeyPosition(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.GetKeyPosition(It.IsAny<int>(), It.IsAny<string>()))
                    .Returns(
@@ -236,7 +236,7 @@
                    });
             }
 
-            private static void SetupSetRows(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupSetRows(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>(), It.IsAny<bool>()))
                    .Returns(
@@ -335,7 +335,7 @@
                    });
             }
 
-            private static void SetupFillArray(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupFillArray(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<List<object[]>>(), It.IsAny<SaveOption>(), It.IsAny<DateTime?>()))
                    .Returns(
@@ -453,7 +453,7 @@
                     });
             }
 
-            private static void SetupParametersIndexByKeys(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupParametersIndexByKeys(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.GetParameterIndexByKey(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
                     .Returns(
@@ -491,7 +491,7 @@
                    });
             }
 
-            private static void SetupParametersIndexByCoordinates(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupParametersIndexByCoordinates(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.GetParameterIndex(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                    .Returns(
@@ -529,7 +529,7 @@
                    });
             }
 
-            private static void SetupCounts(Mock<SLProtocol> mock, TablesCache tablesCache)
+            private static void SetupCounts(Mock<T> mock, TablesCache tablesCache)
             {
                 mock.Setup(p => p.RowCount(It.IsAny<int>()))
                    .Returns(

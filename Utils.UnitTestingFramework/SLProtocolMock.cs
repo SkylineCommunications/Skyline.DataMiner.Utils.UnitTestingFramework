@@ -9,10 +9,22 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
+    public partial class SLProtocolMock : SLProtocolMock<SLProtocol>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SLProtocolMock"/> class.
+        /// </summary>
+        /// <param name="customPathToProtocolXml">An optional path to the protocol.xml file. If not defined, the protocol.xml file in the root of the solution will be used.</param>
+        public SLProtocolMock(string customPathToProtocolXml = null) : base(customPathToProtocolXml)
+        {
+        }
+    }
+
     /// <summary>
     /// SLProtocol fake.
     /// </summary>
-    public partial class SLProtocolMock : Mock<SLProtocol>
+    public partial class SLProtocolMock<T> : Mock<T>
+        where T : class, SLProtocol
     {
         private readonly ProtocolCache protocolCache;
         private readonly NotifyProtocolHelper notifyProtocolHelper;
