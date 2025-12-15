@@ -9,7 +9,10 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    public partial class SLProtocolMock : SLProtocolMock<SLProtocol>
+    /// <summary>
+    /// SLProtocol mock.
+    /// </summary>
+    public class SLProtocolMock : SLProtocolMock<SLProtocol>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SLProtocolMock"/> class.
@@ -21,7 +24,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
     }
 
     /// <summary>
-    /// SLProtocol fake.
+    /// SLProtocol mock that supports SLProtocolExt.
     /// </summary>
     public partial class SLProtocolMock<T> : Mock<T>
         where T : class, SLProtocol
