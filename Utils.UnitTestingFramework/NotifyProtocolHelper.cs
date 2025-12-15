@@ -370,18 +370,18 @@
                 return null; // Irrelevant return value.
             }
 
-            public static T[] CastItemsOrThrow<T>(object[] arrayToConvert)
+            public static TCast[] CastItemsOrThrow<TCast>(object[] arrayToConvert)
             {
                 if (arrayToConvert is null)
                 {
                     throw new ArgumentNullException(nameof(arrayToConvert));
                 }
 
-                var arrayOfType = arrayToConvert.OfType<T>().ToArray();
+                var arrayOfType = arrayToConvert.OfType<TCast>().ToArray();
 
                 if (arrayToConvert.Length != arrayOfType.Length)
                 {
-                    throw new ArgumentException($"Expected all items to be of type {typeof(T).Name}");
+                    throw new ArgumentException($"Expected all items to be of type {typeof(TCast).Name}");
                 }
 
                 return arrayOfType;
