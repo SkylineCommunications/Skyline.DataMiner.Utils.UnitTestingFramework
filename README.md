@@ -57,6 +57,8 @@ The framework provides the `SLProtocolMock<T>` class, which extends the `Mock<T>
 This class allows a user of the framework to create a mock of the `SLProtocolExt` interface by creating an instance of `SLProtocolMock<ConcreteSLProtocolExt>`,
 which exposes an instance of `SLProtocolExt` through its `Object` property.
 
+Note that `ConcreteSLProtocolExt` is part of the DIS-generated QAction_Helper project in your protocol solution.
+
 Similar to `SLProtocolMock`, it will store any data set in internal storage structures.
 
 Initializing an instance of the `SLProtocolMock<ConcreteSLProtocolExt>` class is as simple as calling its parameterless constructor.
