@@ -469,7 +469,7 @@
             int pid = 101;
 
             // Act
-            bool actual = cache.IsEmpty(pid, mock);
+            bool actual = cache.IsEmpty(pid, mock.Object);
 
             // Assert
             Assert.IsTrue(actual);
@@ -487,7 +487,7 @@
             var mock = new SLProtocolMock(path);
 
             // Act
-            bool actual = cache.IsEmpty(pid, mock);
+            bool actual = cache.IsEmpty(pid, mock.Object);
 
             // Assert
             Assert.IsTrue(actual);
@@ -504,7 +504,7 @@
             var mock = new SLProtocolMock(path);
 
             // Act
-            bool actual = cache.IsEmpty(100, mock);
+            bool actual = cache.IsEmpty(100, mock.Object);
 
             // Assert
             Assert.IsFalse(actual);

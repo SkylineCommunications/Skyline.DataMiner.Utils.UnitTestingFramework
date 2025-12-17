@@ -2,6 +2,7 @@
 {
     using System;
     using global::Utils.UnitTestingFramework.Tests.Protocol;
+    using global::Utils.UnitTestingFramework.Tests.Protocol.SLProtocolExt;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
@@ -48,7 +49,7 @@
             tableModel.SetRow(row);
 
             // Assert
-            object[] rowOutput = tableModel.GetRow<PollingConfigurationQActionTableRow>("skyline1");
+            object[] rowOutput = tableModel.GetRow<PollingConfigurationQActionRow>("skyline1");
 
             Assert.IsNotNull(rowOutput);
             Assert.AreEqual("skyline1", rowOutput[0]);

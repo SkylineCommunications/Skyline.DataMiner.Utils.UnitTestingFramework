@@ -4,6 +4,7 @@
 
     using FluentAssertions;
     using global::Utils.UnitTestingFramework.Tests.Protocol;
+    using global::Utils.UnitTestingFramework.Tests.Protocol.SLProtocolExt;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
@@ -176,8 +177,8 @@
             mock.Object.FillArray(900, listOfRows, Skyline.DataMiner.Scripting.NotifyProtocol.SaveOption.Partial);
 
             // Assert
-            mock.Assert().Table(900).Row<PollingConfigurationQActionTableRow>("one").ToObjectArray().Should().Equal(row1);
-            mock.Assert().Table(900).Row<PollingConfigurationQActionTableRow>("two").ToObjectArray().Should().Equal(row2);
+            mock.Assert().Table(900).Row<PollingConfigurationQActionRow>("one").ToObjectArray().Should().Equal(row1);
+            mock.Assert().Table(900).Row<PollingConfigurationQActionRow>("two").ToObjectArray().Should().Equal(row2);
         }
 
         [TestMethod]

@@ -414,9 +414,9 @@
         /// Sets the parameters with the specified name to the specified values.
         /// </summary>
         /// <param name="iID">The ID of the parameter.</param>
-        /// <param name="mock">The mock of the SLProtocol.</param>
+        /// <param name="protocol">The SLProtocol instance.</param>
         /// <returns>True if the value has been initialized. Otherwise, false.</returns>
-        public bool IsEmpty(int iID, Mock<SLProtocol> mock)
+        public bool IsEmpty(int iID, SLProtocol protocol)
         {
             if (ParametersToValues.TryGetValue(iID, out IParameterModel output))
             {
@@ -430,7 +430,7 @@
                 }
             }
 
-            mock.Object.Log($"NT_GET_DATA for '{iID}' failed. 0x80040239");
+            protocol.Log($"NT_GET_DATA for '{iID}' failed. 0x80040239");
             return true;
         }
     }
