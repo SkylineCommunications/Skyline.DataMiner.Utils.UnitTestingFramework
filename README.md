@@ -6,19 +6,14 @@ It allows us to
 1. Arrange the data for testing code involving SLProtocol calls more easily and faster.
 1. Assert on the result of SLProtocol calls instead of verifying if specific SLProtocol calls were made with specific arguments. In other words, test the output, not the implementation.
 
-## SLProtocolMock Class
+The framework achieves this by providing a mock implementation of the `SLProtocol` and `SLProtocolExt` interface, which stores data in internal storage structures.
 
-The framework provides the `SLProtocolMock` class, which extends the `Mock<SLProtocol>` class from the [Moq library](https://www.nuget.org/packages/Moq).
+## Mocking SLProtocol
+
+The framework provides the `SLProtocolMock` class, which extends the `Mock<T>` class from the [Moq library](https://www.nuget.org/packages/Moq).
 
 An instance of `SLProtocolMock` exposes an instance of `SLProtocol` through its `Object` property.
 It will store any data set using SLProtocol calls such as `SetParameter`, `AddRow`, and others, in internal storage structures.
-As a result, it is possible to
-
-1. Arrange data by using SLProtocol calls
-1. Assert on that stored data instead of verifying if specific SLProtocol calls were made with specific arguments. Again, testing the output, not the implementation.
-
-> [!NOTE]
-> Because `SLProtocolMock` only provides an instance of `SLProtocol`, the Unit Testing Framework currently does not support `SLProtocolExt`.
 
 Initializing an instance of the `SLProtocolMock` class is as simple as calling its parameterless constructor.
 This constructor will find the protocol.xml file, parse it and create internal storage for standalone parameters and tables.
@@ -26,44 +21,7 @@ This constructor will find the protocol.xml file, parse it and create internal s
 Consider the following use case, where we want to unit test a `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` method.
 As the method name indicates, it will parse the string and store the parsed values in a table.
 
-Below is an example of how this unit test would be written **without** using the Unit Testing Framework:
-
-```csharp
-[TestMethod]
-public void ResponseParserTest()
-{
-    // Arrange
-    var protocolMock = new Mock<SLProtocol>();
-    string response = File.ReadAllText("response_content.xml");
-
-    // Act
-    ResponseParser.ParseAndStoreInTable(protocolMock.Object, response);
-    
-    // Assert
-    var expectedRows = new List<object[]>
-    {
-        new StreamsQActionRow
-        {
-            Streamsid_1001 = "PK1",
-            Streamsname_1002 = "Stream Name",
-            Streamsaddress_1003 = "10.12.80.124",
-            Streamsport_1004 = "8080",
-        }.ToObjectArray(),
-    };
-
-    protocolMock.Verify(p => p.FillArray(1000, expectedRows, NotifyProtocol.SaveOption.Full));
-}
-```
-
-By using this approach we can see multiple problems:
-
-1. If in the future the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` uses a different way to populate the table instead of a `FillArray` call, the unit test will be broken.
-2. The format of the arguments used in the `FillArray` of the `Verify` needs to be exactly the same as the format of the arguments of the `FillArray` call inside the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)`.
-3. If the developer wishes to just check the row key or the table row length, the `Verify` will require the developer to build exactly the same arguments, forcing the developer to spend way more time than needed.
-
-Basically, the unit test is tightly coupled to the implementation of the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)` and the assertion is not very flexible.
-
-By using the `SLProtocolMock` class from the Unit Testing Framework, we can achieve the same goal (and more) simply by doing the following:
+By using the `SLProtocolMock` class from the Unit Testing Framework, the test method can look as simple as:
 
 ```csharp
 [TestMethod]
@@ -86,11 +44,49 @@ public void ResponseParserTest()
 }
 ```
 
-Note the difference in the Assert step. Instead of verifying that a specific SLProtocol call was made with specific arguments, we're now asserting on the content of the table.
+Note the clean Assert step. Instead of verifying that a specific SLProtocol call was made with specific arguments, we're asserting on the content of the table.
 
-Compared to the previous approach, this new approach has the following advantages:
+This approach has the following advantages:
 1. The unit test is not tightly coupled to the implementation of the method `ResponseParser.ParseAndStoreInTable(SLProtocol protocol, string response)`. If the implementation changes but the end result is the same, the unit test will still pass.
 1. Assertion is more flexible, it can check only the parts of the data that are relevant for the unit test.
+
+## Mocking SLProtocolExt
+
+The framework provides the `SLProtocolMock<T>` class, which extends the `Mock<T>` class from the [Moq library](https://www.nuget.org/packages/Moq) and where `T` has the constraint that it needs to implement the `SLProtocol` interface.
+
+This class allows a user of the framework to create a mock of the `SLProtocolExt` interface by creating an instance of `SLProtocolMock<ConcreteSLProtocolExt>`,
+which exposes an instance of `SLProtocolExt` through its `Object` property.
+
+Similar to `SLProtocolMock`, it will store any data set in internal storage structures.
+
+Initializing an instance of the `SLProtocolMock<ConcreteSLProtocolExt>` class is as simple as calling its parameterless constructor.
+This constructor will find the protocol.xml file, parse it and create internal storage for standalone parameters and tables.
+
+Consider the following use case, where we want to unit test a `ResponseParser.ParseAndStoreInTable(SLProtocolExt protocolExt, string response)` method.
+As the method name indicates, it will parse the string and store the parsed values in a table.
+
+By using the `SLProtocolMock<T>` class from the Unit Testing Framework, the test method can look as simple as:
+
+```csharp
+[TestMethod]
+public void ResponseParserTest()
+{
+    // Arrange
+    var protocolExtMock = new SLProtocolMock<ConcreteSLProtocolExt>();    
+
+    string responseContent = File.ReadAllText("response_content.xml");
+
+    // Act
+    ResponseParser.ParseAndStoreInTable(protocolExtMock.Object, response);
+    
+    // Assert
+    protocolExtMock.Assert()
+        .Table(1000)
+        .Column(1001)
+        .Should()
+        .Contain("PK1");
+}
+```
 
 ## How To Use The Framework
 
@@ -100,6 +96,8 @@ The `SLProtocolMock` class exposes an instance of `SLProtocol` through its `Obje
 This means that methods available in the `SLProtocol` interface can all be called using `SLProtocolMock.Object`.
 
 Below is an example of how to arrange data using the `SLProtocolMock` class.
+
+A similar approach can be used for `SLProtocolMock<ConcreteSLProtocolExt>`.
 
 ```csharp
 [TestMethod]
@@ -130,30 +128,6 @@ public void TestMethod()
 }
 ```
 
-### Mocking More SLProtocol Calls
-
-Not all SLProtocol methods are implemented in the `SLProtocolMock` class. For example, some less common variations of inputs for `SLProtocol.NotifyProtocol` will throw an exception indicating that they are not supported.
-However, it is possible to mock additional SLProtocol calls using the Moq library. This will allow you to extend the behavior of the `SLProtocolMock` instance as needed.
-
-```csharp
-[TestMethod]
-public void TestMethod()
-{
-    // Arrange
-    var protocolMock = new SLProtocolMock();    
-
-    // Mocking an variation of NotifyProtocol that is not supported out of the box by the framework
-    protocolMock.Setup(x => x.NotifyProtocol([notify type integer], It.IsAny<object>(), It.IsAny<object>())).Returns(...);
-
-    // Act
-    ... some code that uses protocolMock.Object ...
-    
-    // Assert
-    ... some assertions ...
-}
-```
-
-
 ### Asserting Data
 
 There are two ways of asserting on the data stored in the internal storage structures of the `SLProtocolMock` instance.
@@ -162,6 +136,8 @@ There are two ways of asserting on the data stored in the internal storage struc
 
 As SLProtocolMock exposes exposes an instance of `SLProtocol` through its `Object` property, it is possible to retrieve the data using SLProtocol calls and then assert on that data.
 Below is an example of how to assert data using the `SLProtocol` methods.
+
+A similar approach can be used for `SLProtocolMock<ConcreteSLProtocolExt>`.
 
 ```csharp
 [TestMethod]
