@@ -191,7 +191,7 @@
 
             if (!ColumnsMapper.ContainsKey(columnPid))
             {
-                throw new ArgumentException("Invalid pid.");
+                throw new ArgumentException($"Invalid pid '{columnPid}'.");
             }
 
             for (int i = 0; i < keys.Length; i++)
@@ -200,9 +200,8 @@
                 {
                     int rowIndex = KeyToRowIndex[keys[i]];
 
-                    var parameterModel = new ParameterModel(values[i], timeInfo);
-                    
-                    columnPidToColumnData[columnPid][rowIndex] = parameterModel;
+                    var parameterModel = columnPidToColumnData[columnPid][rowIndex];
+                    parameterModel.Update(values[i], timeInfo);
 
                     continue;
                 }
@@ -281,9 +280,8 @@
 
                 changes[columnIdx] = data == ColumnsMapper[ColumnIndexesToPids[columnIdx]][rowIndex].Value ? 2 : 1;
 
-                var parameterModel = new ParameterModel(data, timestamp);
-
-                columnPidToColumnData[ColumnIndexesToPids[columnIdx]][rowIndex] = parameterModel;
+                var parameterModel = columnPidToColumnData[ColumnIndexesToPids[columnIdx]][rowIndex];
+                parameterModel.Update(data, timestamp);
             }
 
             changes[PrimaryKeyColumnIdx] = 0;
