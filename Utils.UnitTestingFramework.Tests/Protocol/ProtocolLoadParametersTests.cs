@@ -54,7 +54,7 @@
             string missingDirectoryPath = path + "\\..\\";
 
             // Act & Assert
-            Assert.ThrowsExactly<DirectoryNotFoundException>(
+            Assert.ThrowsExactly<FileNotFoundException>(
                 () => ProtocolCacheBuilder.Build(missingDirectoryPath));
         }
 
