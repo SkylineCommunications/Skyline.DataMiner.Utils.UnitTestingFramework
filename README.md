@@ -218,7 +218,7 @@ public void TestMethod()
 
     protocolMock.Assert()
         .Table(1000).Row<StreamsQActionRow>("PK1").Should().BeEquivalentTo(expectedStreamRow, options => options
-            .ExcludeMissingMembers()         // Exclude properties that are not set in expectedStreamRow
+            .ExcludingMissingMembers()         // Exclude properties that are not set in expectedStreamRow
             .Excluding(row => row.Columns)); // Exclude irrelevant properties
 }
 ```
