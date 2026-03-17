@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Threading;
 
     using Skyline.DataMiner.Scripting;
 
@@ -15,19 +16,40 @@
     {
         private readonly Dictionary<string, int> keyToRowIndex;
         private readonly Dictionary<int, int> columnIndexesToPids;
-        private readonly Dictionary<int, IList<IParameterModel>> columnPidToColumnData;
+
+        private readonly ReaderWriterLockSlim _lock;
+        private readonly Dictionary<string, Column> _columns;
+        private readonly List<Dictionary<string, IParameterModel>> _rows;
+        private int _suspendNotifications;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableModel"/> class.
         /// </summary>
         /// <param name="tableId">The table identifier.</param>
-        internal TableModel(int tableId)
+        internal TableModel(int tableId) : this(tableId, Enumerable.Empty<Column>())
         {
-            TableId = tableId;
+        }
 
-            columnPidToColumnData = new Dictionary<int, IList<IParameterModel>>();
-            columnIndexesToPids = new Dictionary<int, int>();
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TableModel"/> class.
+        /// </summary>
+        /// <param name="tableId">The table identifier.</param>
+        /// <param name="columns">The table columns.</param>
+        internal TableModel(int tableId, IEnumerable<Column> columns)
+        {
             keyToRowIndex = new Dictionary<string, int>();
+            columnIndexesToPids = new Dictionary<int, int>();
+
+            TableId = tableId;
+            _columns = columns.ToDictionary(c => c.Name);
+
+            foreach (var column in _columns.Values)
+            {
+                columnIndexesToPids[column.Idx] = column.Pid;
+            }
+
+            _rows = new List<Dictionary<string, IParameterModel>>();
+            _lock = new ReaderWriterLockSlim();
         }
 
         /// <summary>
@@ -61,7 +83,7 @@
         public int TableId { get; }
 
         /// <summary>
-        /// Gets or sets the index of the key column.
+        /// Gets the index of the key column.
         /// </summary>
         /// <value>
         /// The index of the key column.
@@ -74,17 +96,12 @@
         /// <value>
         /// The column count.
         /// </value>
-        public int ColumnCount => columnPidToColumnData.Count;
+        public int ColumnCount => _columns.Count;
 
         /// <summary>
         /// Gets the row count.
         /// </summary>
-        public int RowCount => KeyToRowIndex.Count;
-
-        internal IDictionary<int, IList<IParameterModel>> ColumnsMapper
-        {
-            get { return columnPidToColumnData; }
-        }
+        public int RowCount => _rows.Count;
 
         /// <summary>
         /// Gets a value indicating whether a key column exists.
@@ -94,6 +111,43 @@
         /// </value>
         private bool KeyColumnExists { get; set; }
 
+        public void SetCell(int rowIndex, string columnName, object value, DateTime? timestamp = null)
+        {
+            if (rowIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(rowIndex), rowIndex, $"'{nameof(rowIndex)}' cannot be negative");
+            }
+
+            _lock.EnterWriteLock();
+            try
+            {
+                var column = _columns[columnName];
+                column.Validate(value);
+
+                if (rowIndex >= _rows.Count)
+                {
+                    throw new InvalidOperationException($"No row with index {rowIndex} exists. Rows count: '{_rows.Count}'");
+                }
+
+                var row = _rows[rowIndex];
+                if (!row.TryGetValue(columnName, out var oldValue))
+                {
+                    throw new InvalidOperationException($"No column with name '{columnName}' exists in row {rowIndex}.");
+                }
+
+                if (Equals(oldValue.Value, value) && Equals(oldValue.Timestamp, timestamp))
+                {
+                    return;
+                }
+
+                row[columnName] = new ParameterModel(value, timestamp);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
         /// <summary>
         /// Retrieves the column data of the column with the specified pid.
         /// </summary>
@@ -101,19 +155,17 @@
         /// <returns>The column data or <see langword="null"/> if there is no column with the specified ID.</returns>
         public object[] GetColumn(int pid)
         {
-            if (!ColumnsMapper.TryGetValue(pid, out IList<IParameterModel> columnEntries))
+            var column = FindColumnByPid(pid);
+
+            _lock.EnterReadLock();
+            try
             {
-                throw new ArgumentException($"No column with ID {pid} exists.");
+                return _rows.Select(row => row[column.Name].Value).ToArray();
             }
-
-            var columnValues = new object[columnEntries.Count];
-
-            for (int i = 0; i < columnEntries.Count; i++)
+            finally
             {
-                columnValues[i] = columnEntries[i].Value;
+                _lock.ExitReadLock();
             }
-
-            return columnValues;
         }
 
         /// <summary>
@@ -125,6 +177,11 @@
         /// <exception cref="ArgumentException">No row with key the specified key exists.</exception>
         public object[] GetRow(string key)
         {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
             if (!KeyToRowIndex.TryGetValue(key, out int rowIndex))
             {
                 throw new ArgumentException($"No row with key '{key}' exists.");
@@ -141,12 +198,21 @@
         /// <exception cref="ArgumentException">No row with the specified index exists.</exception>
         public object[] GetRow(int rowIndex)
         {
-            if (!keyToRowIndex.ContainsValue(rowIndex))
+            _lock.EnterReadLock();
+            try
             {
-                throw new ArgumentException($"No row with index {rowIndex} exists.");
-            }
+                if (rowIndex < 0 || rowIndex >= _rows.Count)
+                {
+                    throw new ArgumentException($"No row with index {rowIndex} exists.");
+                }
 
-            return ColumnsMapper.Select(x => x.Value[rowIndex].Value).ToArray();
+                var row = _rows[rowIndex];
+                return OrderedColumns().Select(c => row[c.Name].Value).ToArray();
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
         }
 
         /// <summary>
@@ -185,34 +251,36 @@
         /// <exception cref="ArgumentException">Invalid pid.</exception>
         public void SetColumn(int idx, string[] keys, object[] values, DateTime? timeInfo = null)
         {
-            int columnsNumber = ColumnsMapper.Count;
+            var column = FindColumnByIdx(idx);
 
-            ColumnIndexesToPids.TryGetValue(idx, out int columnPid);
-
-            if (!ColumnsMapper.ContainsKey(columnPid))
+            _lock.EnterWriteLock();
+            try
             {
-                throw new ArgumentException($"Invalid pid '{columnPid}'.");
-            }
-
-            for (int i = 0; i < keys.Length; i++)
-            {
-                if (KeyToRowIndex.ContainsKey(keys[i]))
+                for (int i = 0; i < keys.Length; i++)
                 {
-                    int rowIndex = KeyToRowIndex[keys[i]];
+                    var key = keys[i];
+                    var value = values[i];
 
-                    var parameterModel = columnPidToColumnData[columnPid][rowIndex];
-                    parameterModel.Update(values[i], timeInfo);
+                    if (keyToRowIndex.TryGetValue(key, out int rowIndex))
+                    {
+                        var parameterModel = _rows[rowIndex][column.Name];
+                        parameterModel.Update(value, timeInfo);
+                        continue;
+                    }
 
-                    continue;
+                    var newRow = CreateEmptyRow(timeInfo);
+                    var pkColumn = FindColumnByIdx(PrimaryKeyColumnIdx);
+
+                    newRow[pkColumn.Name] = new ParameterModel(key, timeInfo);
+                    newRow[column.Name] = new ParameterModel(value, timeInfo);
+
+                    _rows.Add(newRow);
+                    keyToRowIndex[key] = _rows.Count - 1;
                 }
-
-                var row = new object[columnsNumber];
-
-                row[PrimaryKeyColumnIdx] = keys[i];
-
-                row[idx] = values[i];
-
-                SetRow(row);
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
             }
         }
 
@@ -224,31 +292,32 @@
         /// <returns>The changes.</returns>
         public object SetRow(object[] rowData, DateTime? timestamp = null)
         {
-            int columnsNumber = ColumnsMapper.Count;
-
-            int[] changes = new int[columnsNumber];
-
-            for (int columnIdx = 0; columnIdx < columnsNumber; columnIdx++)
+            _lock.EnterWriteLock();
+            try
             {
-                object data = null;
+                var columns = OrderedColumns();
+                int columnsNumber = columns.Count;
 
-                if (columnIdx < rowData.Length)
+                int[] changes = new int[columnsNumber];
+                var row = new Dictionary<string, IParameterModel>(columnsNumber);
+
+                for (int columnIdx = 0; columnIdx < columnsNumber; columnIdx++)
                 {
-                    data = rowData[columnIdx];
+                    object data = columnIdx < rowData.Length ? rowData[columnIdx] : null;
+                    changes[columnIdx] = data is null ? 0 : 1;
+                    row[columns[columnIdx].Name] = new ParameterModel(data, timestamp);
                 }
 
-                changes[columnIdx] = data is null ? 0 : 1;
+                var key = Convert.ToString(rowData[PrimaryKeyColumnIdx]);
+                _rows.Add(row);
+                keyToRowIndex[key] = _rows.Count - 1;
 
-                var parameterModel = new ParameterModel(data, timestamp);
-
-                ColumnsMapper[ColumnIndexesToPids[columnIdx]].Add(parameterModel);
+                return changes;
             }
-
-            var key = Convert.ToString(rowData[PrimaryKeyColumnIdx]);
-
-            keyToRowIndex[key] = ColumnsMapper[ColumnIndexesToPids[PrimaryKeyColumnIdx]].Count - 1;
-
-            return changes;
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -260,33 +329,34 @@
         /// <returns>The changes.</returns>
         public object SetExistingRow(object[] rowData, int rowIndex, DateTime? timestamp = null)
         {
-            int columnsNumber = ColumnsMapper.Count;
-
-            int[] changes = new int[rowData.Length];
-
-            for (int columnIdx = 0; columnIdx < rowData.Length; columnIdx++)
+            _lock.EnterWriteLock();
+            try
             {
-                if (columnIdx == columnsNumber)
+                var columns = OrderedColumns();
+                int[] changes = new int[rowData.Length];
+
+                for (int columnIdx = 0; columnIdx < rowData.Length && columnIdx < columns.Count; columnIdx++)
                 {
-                    break;
+                    if (columnIdx == PrimaryKeyColumnIdx)
+                    {
+                        changes[columnIdx] = 0;
+                        continue;
+                    }
+
+                    object data = rowData[columnIdx];
+                    var column = columns[columnIdx];
+                    var parameterModel = _rows[rowIndex][column.Name];
+
+                    changes[columnIdx] = Equals(data, parameterModel.Value) ? 2 : 1;
+                    parameterModel.Update(data, timestamp);
                 }
 
-                if (columnIdx == PrimaryKeyColumnIdx)
-                {
-                    continue;
-                }
-
-                object data = rowData[columnIdx];
-
-                changes[columnIdx] = data == ColumnsMapper[ColumnIndexesToPids[columnIdx]][rowIndex].Value ? 2 : 1;
-
-                var parameterModel = columnPidToColumnData[ColumnIndexesToPids[columnIdx]][rowIndex];
-                parameterModel.Update(data, timestamp);
+                return changes;
             }
-
-            changes[PrimaryKeyColumnIdx] = 0;
-
-            return changes;
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -295,50 +365,86 @@
         /// <param name="rowIndex">Index of the row.</param>
         public void RemoveRow(int rowIndex)
         {
-            int columnsNumber = ColumnsMapper.Count;
-
-            int remainingRows = KeyToRowIndex.Select(x => x.Key != null).Count();
-
-            int[] pids = ColumnsMapper.Keys.ToArray();
-
-            int pid = ColumnIndexesToPids[PrimaryKeyColumnIdx];
-
-            for (int index = 0; index < columnsNumber; index++)
+            _lock.EnterWriteLock();
+            try
             {
-                columnPidToColumnData[pids[index]][rowIndex] = ColumnsMapper[pids[index]][remainingRows - 1];
+                if (rowIndex < 0 || rowIndex >= _rows.Count)
+                {
+                    throw new ArgumentException($"No row with index {rowIndex} exists.");
+                }
 
-                columnPidToColumnData[pids[index]].RemoveAt(remainingRows - 1);
+                int lastIndex = _rows.Count - 1;
+                var pkColumn = FindColumnByIdx(PrimaryKeyColumnIdx);
+
+                var primaryKey = (string)_rows[rowIndex][pkColumn.Name].Value;
+                keyToRowIndex.Remove(primaryKey);
+
+                if (rowIndex < lastIndex)
+                {
+                    var lastRow = _rows[lastIndex];
+                    _rows[rowIndex] = lastRow;
+
+                    var swappedPrimaryKey = (string)lastRow[pkColumn.Name].Value;
+                    keyToRowIndex[swappedPrimaryKey] = rowIndex;
+                }
+
+                _rows.RemoveAt(lastIndex);
             }
-
-            var primaryKey = KeyToRowIndex.FirstOrDefault(x => x.Value == rowIndex).Key;
-
-            keyToRowIndex.Remove(primaryKey);
-
-            remainingRows = KeyToRowIndex.Select(x => x.Key != null).Count();
-
-            if (rowIndex < remainingRows)
+            finally
             {
-                string newKey = (string)ColumnsMapper[pid][rowIndex].Value;
-
-                keyToRowIndex[newKey] = rowIndex;
+                _lock.ExitWriteLock();
             }
         }
 
         /// <summary>
         /// Gets all rows.
         /// </summary>
-        /// <returns>a array of rows.</returns>
         public IDictionary<string, object[]> GetAllRows()
         {
-            var allRows = new Dictionary<string, object[]>();
-
-            for (int i = 0; i < RowCount; i++)
+            _lock.EnterReadLock();
+            try
             {
-                var row = GetRow(i);
-                allRows[Convert.ToString(row[PrimaryKeyColumnIdx])] = row;
+                var pkColumn = FindColumnByIdx(PrimaryKeyColumnIdx);
+                var result = new Dictionary<string, object[]>(_rows.Count);
+
+                for (int i = 0; i < _rows.Count; i++)
+                {
+                    var row = _rows[i];
+                    var rowValues = OrderedColumns().Select(c => row[c.Name].Value).ToArray();
+                    result[Convert.ToString(row[pkColumn.Name].Value)] = rowValues;
+                }
+
+                return result;
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
+        /// <summary>
+        /// Adds a column with the specified metadata.
+        /// </summary>
+        internal void AddColumn(Column column, bool isKey = false)
+        {
+            if (column == null)
+            {
+                throw new ArgumentNullException(nameof(column));
             }
 
-            return allRows;
+            _columns[column.Name] = column;
+            columnIndexesToPids[column.Idx] = column.Pid;
+
+            if (isKey)
+            {
+                if (KeyColumnExists)
+                {
+                    throw new InvalidOperationException($"Column with pid '{ColumnIndexesToPids[PrimaryKeyColumnIdx]}' is already the primary key column.");
+                }
+
+                KeyColumnExists = true;
+                PrimaryKeyColumnIdx = column.Idx;
+            }
         }
 
         /// <summary>
@@ -350,22 +456,33 @@
         /// <exception cref="InvalidOperationException">Another column has already been added as primary key column.</exception>
         internal void AddColumn(int columnPid, int idx, bool isKey = false)
         {
-            columnIndexesToPids[idx] = columnPid;
+            throw new NotSupportedException("AddColumn(int, int, bool) is no longer supported. Provide full column metadata via AddColumn(Column, bool).");
+        }
 
-            columnPidToColumnData[columnPid] = new List<IParameterModel>();
+        private Column FindColumnByPid(int pid)
+        {
+            return _columns.Values.FirstOrDefault(c => c.Pid == pid) ?? throw new ArgumentException($"No column with ID {pid} exists.");
+        }
 
-            if (!isKey)
+        private Column FindColumnByIdx(int idx)
+        {
+            return _columns.Values.FirstOrDefault(c => c.Idx == idx) ?? throw new ArgumentException($"Invalid idx '{idx}'.");
+        }
+
+        private Dictionary<string, IParameterModel> CreateEmptyRow(DateTime? timestamp)
+        {
+            var row = new Dictionary<string, IParameterModel>(_columns.Count);
+            foreach (var column in _columns.Values)
             {
-                return;
+                row[column.Name] = new ParameterModel(null, timestamp);
             }
 
-            if (KeyColumnExists)
-            {
-                throw new InvalidOperationException($"Column with pid '{ColumnIndexesToPids[PrimaryKeyColumnIdx]}' is already the primary key column.");
-            }
+            return row;
+        }
 
-            KeyColumnExists = true;
-            PrimaryKeyColumnIdx = idx;
+        private List<Column> OrderedColumns()
+        {
+            return _columns.Values.OrderBy(c => c.Idx).ToList();
         }
     }
 }
