@@ -258,9 +258,13 @@
                 throw new ArgumentNullException(nameof(primaryKeys));
             }
 
-            foreach (var primaryKey in primaryKeys)
+            using (var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
+            using (@lock.Write())
             {
-                RemoveRow(primaryKey);
+                foreach (var primaryKey in primaryKeys)
+                {
+                    RemoveRow(primaryKey, eventDispatcher);
+                }
             }
         }
 
@@ -305,14 +309,13 @@
             return new NotificationScope(this);
         }
 
-        private void RemoveRow(string primaryKey)
+        private void RemoveRow(string primaryKey, EventDispatchScope eventDispatchScope)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
             {
                 throw new ArgumentNullException(nameof(primaryKey));
             }
 
-            using(var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
             using (@lock.Write())
             {
                 if (!RowExists(primaryKey))
@@ -332,7 +335,7 @@
                     keyToRowIndex[kvp.Key] = kvp.Value - 1;
                 }
 
-                eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Deleted));
+                eventDispatchScope.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Deleted));
             }
         }
 
