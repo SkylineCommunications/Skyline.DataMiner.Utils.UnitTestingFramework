@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone
 {
     using System;
 
@@ -12,6 +12,9 @@
         /// </summary>
         event EventHandler<ParameterModelChangedEventArgs> Changed;
 
+        /// <summary>
+        /// Gets the parameter definition.
+        /// </summary>
         ParameterDefinition Definition { get; }
     }
 }

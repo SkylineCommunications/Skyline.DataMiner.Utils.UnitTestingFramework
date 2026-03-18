@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table
 {
     using System;
     using System.Collections.Generic;

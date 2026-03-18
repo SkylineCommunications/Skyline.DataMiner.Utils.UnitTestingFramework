@@ -7,7 +7,8 @@
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
 
     internal static class TableModelExtensionsForProtocol
     {

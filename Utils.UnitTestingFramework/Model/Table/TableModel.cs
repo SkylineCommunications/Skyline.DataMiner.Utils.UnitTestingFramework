@@ -1,10 +1,11 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table
 {
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Threading;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
 
     /// <summary>
     /// Table model.
@@ -35,7 +36,7 @@
         public event EventHandler<CellChangedEventArgs> CellChanged;
 
         /// <inheritdoc/>
-        public event EventHandler<string> RowChanged;
+        public event EventHandler<RowChangedEventArgs> RowChanged;
 
         /// <inheritdoc/>
         public event EventHandler TableChanged;
@@ -396,7 +397,7 @@
         private void RaiseRowChanged(string primaryKey)
         {
             if (suspendNotifications > 0) return;
-            RowChanged?.Invoke(this, primaryKey);
+            RowChanged?.Invoke(this, new RowChangedEventArgs(primaryKey));
         }
 
         private void RaiseTableChanged()

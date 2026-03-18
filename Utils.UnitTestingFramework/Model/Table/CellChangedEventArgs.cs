@@ -1,17 +1,9 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table
 {
     using System;
 
     public sealed class CellChangedEventArgs : EventArgs
     {
-        public string PrimaryKey { get; }
-
-        public ColumnDefinition ColumnDefinition { get; }
-
-        public object OldValue { get; }
-
-        public object NewValue { get; }
-
         public CellChangedEventArgs(string primaryKey, ColumnDefinition columnDefinition, object oldValue, object newValue)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
@@ -24,5 +16,14 @@
             OldValue = oldValue;
             NewValue = newValue;
         }
+
+        public string PrimaryKey { get; }
+
+        public ColumnDefinition ColumnDefinition { get; }
+
+        public object OldValue { get; }
+
+        public object NewValue { get; }
+
     }
 }

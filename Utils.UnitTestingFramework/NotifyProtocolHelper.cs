@@ -7,7 +7,7 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
     using ElementData = Data.ElementData;
 
     public partial class SLProtocolMock<T> where T : class, SLProtocol

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table
 {
     public readonly struct WriteLockScope : IDisposable
     {

@@ -9,7 +9,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
 
     /// <summary>
     /// SLProtocol mock.

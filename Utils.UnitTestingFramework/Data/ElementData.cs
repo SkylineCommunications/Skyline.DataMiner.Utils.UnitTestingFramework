@@ -2,7 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
 
     public class ElementData
     {

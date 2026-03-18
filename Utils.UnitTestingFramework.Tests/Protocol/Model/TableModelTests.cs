@@ -2,8 +2,8 @@
 {
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
 
     [TestClass]
     public class TableModelTests
@@ -974,10 +974,10 @@
             bool eventRaised = false;
             string eventKey = null;
 
-            tableModel.RowChanged += (sender, key) =>
+            tableModel.RowChanged += (sender, e) =>
             {
                 eventRaised = true;
-                eventKey = key;
+                eventKey = e.PrimaryKey;
             };
 
             // Act
@@ -1004,10 +1004,10 @@
             bool eventRaised = false;
             string eventKey = null;
 
-            tableModel.RowChanged += (sender, key) =>
+            tableModel.RowChanged += (sender, e) =>
             {
                 eventRaised = true;
-                eventKey = key;
+                eventKey = e.PrimaryKey;
             };
 
             // Act

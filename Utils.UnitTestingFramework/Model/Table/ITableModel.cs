@@ -1,7 +1,8 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table
 {
     using System;
     using System.Collections.ObjectModel;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
 
     /// <summary>
     /// Table model interface.
@@ -14,9 +15,9 @@
         event EventHandler<CellChangedEventArgs> CellChanged;
 
         /// <summary>
-        /// Occurs when a row is added, removed, or updated. The event argument contains the primary key of the affected row.
+        /// Occurs when a row is added, removed, or updated.
         /// </summary>
-        event EventHandler<string> RowChanged;
+        event EventHandler<RowChangedEventArgs> RowChanged;
 
         /// <summary>
         /// Occurs when any change is made to the table, including changes to cell values and row additions, removals, or updates.

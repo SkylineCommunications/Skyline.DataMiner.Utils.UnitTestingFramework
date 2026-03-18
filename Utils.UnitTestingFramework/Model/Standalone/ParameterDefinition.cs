@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone
 {
     using System;
     using System.Security.AccessControl;

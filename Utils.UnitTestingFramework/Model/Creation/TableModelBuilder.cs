@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
 
     /// <summary>
     /// Table model builder.

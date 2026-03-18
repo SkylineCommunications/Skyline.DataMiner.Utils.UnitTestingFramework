@@ -2,7 +2,7 @@
 {
     using System;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
 
     internal class Asserter : IAsserter
     {
