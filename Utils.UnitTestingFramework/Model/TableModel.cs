@@ -16,7 +16,6 @@
 
         // List to keep track of row indexes. Each Dictionary represents a row, mapping column names to cell values.
         private readonly List<IParameterModel[]> rows = new List<IParameterModel[]>();
-        private int suspendNotifications;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableModel"/> class.
@@ -29,22 +28,13 @@
             Schema = tableSchema ?? throw new ArgumentNullException(nameof(tableSchema));
         }
 
-        /// <summary>
-        /// Gets the table identifier.
-        /// </summary>
-        /// <value>
-        /// The table identifier.
-        /// </value>
+        /// <inheritdoc/>
         public int TableId { get; }
 
-        /// <summary>
-        /// Gets the table schema.
-        /// </summary>
+        /// <inheritdoc/>
         public TableSchema Schema { get; }
 
-        /// <summary>
-        /// Gets the row count.
-        /// </summary>
+        /// <inheritdoc/>
         public int RowCount
         {
             get
@@ -56,6 +46,8 @@
             }
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
         public bool RowExists(string key)
         {
             if (String.IsNullOrWhiteSpace(key))
@@ -69,6 +61,7 @@
             }
         }
 
+        /// <inheritdoc/>
         public int GetRowIndex(string key)
         {
             using (@lock.Read())
@@ -84,6 +77,8 @@
             }
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="rowIndex"/> is negative.</exception>
         public string GetRowKey(int rowIndex)
         {
             if (rowIndex < 0)
@@ -106,6 +101,8 @@
             }
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/> or whitespace.</exception>
         public void SetCell(string primaryKey, int columnPid, object value, DateTime? timestamp = null)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
@@ -127,13 +124,8 @@
             }
         }
 
-        /// <summary>
-        /// Rows the row data of the row with the specified key.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        /// <returns>The row data.</returns>
+        /// <inheritdoc/>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException">No row with key the specified key exists.</exception>
         public IParameterModel[] GetRow(string key)
         {
             if (key == null)
@@ -154,6 +146,9 @@
             }
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentException">No column with the specified PID exists.</exception>"
+        /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/> or whitespace.</exception>
         public IParameterModel GetCell(string primaryKey, int columnPid)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
@@ -178,12 +173,8 @@
             }
         }
 
-        /// <summary>
-        /// Retrieves the row data of the row with the specified row index.
-        /// </summary>
-        /// <param name="rowIndex">Index of the row.</param>
-        /// <returns>The row data.</returns>
-        /// <exception cref="ArgumentException">No row with the specified index exists.</exception>
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="rowIndex"/> is negative.</exception>
         public IParameterModel[] GetRow(int rowIndex)
         {
             if (rowIndex < 0)
@@ -204,17 +195,18 @@
             }
         }
 
-        /// <summary>
-        /// Sets the specified row.
-        /// </summary>
-        /// <param name="rowData">The row data.</param>
-        /// <param name="timestamp">The timestamp.</param>
-        /// <returns>The changes.</returns>
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentNullException"><paramref name="rowData"/> is <see langword="null"/>.</exception>
         public void SetRow(object[] rowData, DateTime? timestamp = null)
         {
             if (rowData is null)
             {
                 throw new ArgumentNullException(nameof(rowData));
+            }
+
+            if (rowData.Length != Schema.ColumnDefinitions.Count)
+            {
+                throw new ArgumentException($"Argument must contain exactly {Schema.ColumnDefinitions.Count} values, one for each column.", nameof(rowData));
             }
 
             using (@lock.Write())
@@ -234,33 +226,8 @@
             }
         }
 
-        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, IParameterModel[] existingRow)
-        {
-            foreach (var columnDefinition in Schema.ColumnDefinitions)
-            {
-                columnDefinition.Validate(rowData[columnDefinition.Idx]);
-
-                existingRow[columnDefinition.Idx].Update(rowData[columnDefinition.Idx], timestamp);
-            }
-        }
-
-        private void AddNewRow(object[] rowData, DateTime? timestamp)
-        {
-            string primaryKey = Convert.ToString(rowData[Schema.PrimaryKeyColumn.Idx]);
-
-            var rowToAdd = new IParameterModel[Schema.ColumnDefinitions.Count];
-
-            foreach (var columnDefinition in Schema.ColumnDefinitions)
-            {
-                columnDefinition.Validate(rowData[columnDefinition.Idx]);
-
-                rowToAdd[columnDefinition.Idx] = new ParameterModel(rowData[columnDefinition.Idx], timestamp);
-            }
-
-            rows.Add(rowToAdd);
-            keyToRowIndex[primaryKey] = rows.Count - 1;
-        }
-
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentNullException"><paramref name="primaryKeys"/> is <see langword="null"/>.</exception>
         public void RemoveRows(params string[] primaryKeys)
         {
             if (primaryKeys == null)
@@ -274,9 +241,25 @@
             }
         }
 
-        /// <summary>
-        /// Removes the row with the specified index.
-        /// </summary>
+        /// <inheritdoc/>
+        public void RemoveAllRows()
+        {
+            using (@lock.Write())
+            {
+                rows.Clear();
+                keyToRowIndex.Clear();
+            }
+        }
+
+        /// <inheritdoc/>
+        public IDictionary<string, IParameterModel[]> GetAllRows()
+        {
+            using (@lock.Read())
+            {
+                return rows.ToDictionary(row => (string)row[Schema.PrimaryKeyColumn.Idx].Value, row => row);
+            }
+        }
+
         private void RemoveRow(string primaryKey)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
@@ -305,24 +288,33 @@
             }
         }
 
-        public void RemoveAllRows()
+        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, IParameterModel[] existingRow)
         {
-            using (@lock.Write())
+            foreach (var columnDefinition in Schema.ColumnDefinitions)
             {
-                rows.Clear();
-                keyToRowIndex.Clear();
+                columnDefinition.Validate(rowData[columnDefinition.Idx]);
+
+                existingRow[columnDefinition.Idx].Update(rowData[columnDefinition.Idx], timestamp);
             }
         }
 
-        /// <summary>
-        /// Gets all rows.
-        /// </summary>
-        public IDictionary<string, IParameterModel[]> GetAllRows()
+        private void AddNewRow(object[] rowData, DateTime? timestamp)
         {
-            using (@lock.Read())
+            string primaryKey = Convert.ToString(rowData[Schema.PrimaryKeyColumn.Idx]);
+
+            var rowToAdd = new IParameterModel[Schema.ColumnDefinitions.Count];
+
+            foreach (var columnDefinition in Schema.ColumnDefinitions)
             {
-                return rows.ToDictionary(row => (string)row[Schema.PrimaryKeyColumn.Idx].Value, row => row);
+                var valueToAdd = rowData[columnDefinition.Idx];
+
+                columnDefinition.Validate(valueToAdd);       
+
+                rowToAdd[columnDefinition.Idx] = new ParameterModel(valueToAdd, timestamp);
             }
+
+            rows.Add(rowToAdd);
+            keyToRowIndex[primaryKey] = rows.Count - 1;
         }
     }
 }

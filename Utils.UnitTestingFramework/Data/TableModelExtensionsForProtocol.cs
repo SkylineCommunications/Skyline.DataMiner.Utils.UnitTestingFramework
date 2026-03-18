@@ -14,8 +14,9 @@
         /// <summary>
         /// Adds the specified row.
         /// </summary>
-        /// <param name="tablePid">The ID of the table parameter.</param>
+        /// <param name="tableModel"></param>
         /// <param name="row">The row data.</param>
+        /// <param name="timestamp"></param>
         /// <returns>The 1-based row number or 0 if the cache does not contain a table model for the specified table ID.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="row"/> is <see langword="null"/>.</exception>
         public static int SetRowReturnOneBasedIndex(this ITableModel tableModel, object[] row, DateTime? timestamp = null)
@@ -25,13 +26,32 @@
                 throw new ArgumentNullException(nameof(row));
             }
 
-            tableModel.SetRow(row, timestamp);
+            var rowToSet = FitRowToCorrectSize(tableModel, row);
 
-            string key = Convert.ToString(row[tableModel.Schema.PrimaryKeyColumn.Idx]);
+            tableModel.SetRow(rowToSet, timestamp);
+
+            string key = Convert.ToString(rowToSet[tableModel.Schema.PrimaryKeyColumn.Idx]);
 
             int oneBasedRowNumber = tableModel.GetRowIndex(key) + 1;
 
             return oneBasedRowNumber;
+        }
+
+        private static object[] FitRowToCorrectSize(ITableModel tableModel, object[] row)
+        {
+            object[] rowToSet = row;
+            if (row.Length < tableModel.Schema.ColumnDefinitions.Count)
+            {
+                rowToSet = new object[tableModel.Schema.ColumnDefinitions.Count];
+                Array.Copy(row, rowToSet, row.Length);
+            }
+            else if (row.Length > tableModel.Schema.ColumnDefinitions.Count)
+            {
+                rowToSet = new object[tableModel.Schema.ColumnDefinitions.Count];
+                Array.Copy(row, rowToSet, rowToSet.Length);
+            }
+
+            return rowToSet;
         }
 
         public static int SetRowReturnOneBasedIndex(this ITableModel tableModel, string primaryKey)
@@ -54,15 +74,17 @@
                 return tableModel.AddRowReturnKey();
             }
 
-            tableModel.SetRow(row);
+            var rowToSet = FitRowToCorrectSize(tableModel, row);
 
-            return (string)row[tableModel.Schema.PrimaryKeyColumn.Idx];
+            tableModel.SetRow(rowToSet);
+
+            return (string)rowToSet[tableModel.Schema.PrimaryKeyColumn.Idx];
         }
 
         /// <summary>
         /// Adds a row with the specified primary key to the table with the specified ID.
         /// </summary>
-        /// <param name="tablePid">The table identifier.</param>
+        /// <param name="tableModel"></param>
         /// <param name="primaryKey">The primary key of the row.</param>
         /// <returns>The primary key of the added row or <see langword="null"/> if the cache does not contain a table model for the specified table ID.</returns>
         public static string AddRowReturnKey(this ITableModel tableModel, string primaryKey)
@@ -233,6 +255,12 @@
 
             foreach (var columnDefinition in tableModel.Schema.ColumnDefinitions)
             {
+                if (rowToSet.Length <= columnDefinition.Idx)
+                {
+                    // If the provided row has fewer columns than the current column index, we skip
+                    continue;
+                }
+
                 if (columnDefinition == tableModel.Schema.PrimaryKeyColumn)
                 {
                     changes[columnDefinition.Idx] = 0;
@@ -269,9 +297,11 @@
                 rowToSet = ConvertProtocolClearAndleaveToActualValuesForRow(rowIndex, rowToSet, tableModel);
             }
 
-            string rowKey = tableModel.GetRowKey(rowIndex);
-
-            var oldRow = tableModel.GetRow(rowKey);
+            var oldRow = tableModel.GetRow(rowIndex);
+            if (oldRow == null)
+            {
+                return new int[tableModel.Schema.ColumnDefinitions.Count];
+            }
 
             return UpdateCellsAndReturnChanges(tableModel, timestamp, rowToSet, oldRow);
         }
@@ -412,7 +442,7 @@
         /// <returns><c>true</c> or <see langword="null"/> if the table cache does not contain a model for that table with the specified ID.</returns>
         public static void FillArrayNoDelete(this ITableModel tableModel, object[][] columns, DateTime? timeInfo = null, bool useClearAndLeave = false)
         {
-            var primaryKeys = tableModel.GetColumnByPid(tableModel.Schema.PrimaryKeyColumn.Pid).Select(cell => Convert.ToString(cell)).ToArray();
+            var newPrimaryKeys = columns[tableModel.Schema.PrimaryKeyColumn.Idx].Select(key => Convert.ToString(key)).ToArray();
 
             for (int index = 0; index < columns.Length; index++)
             {
@@ -420,14 +450,26 @@
 
                 if (useClearAndLeave)
                 {
-                    columnToSet = ConvertProtocolClearAndleaveToActualValuesForColumn(primaryKeys, columnToSet, tableModel, index);
+                    columnToSet = ConvertProtocolClearAndleaveToActualValuesForColumn(newPrimaryKeys, columnToSet, tableModel, index);
                 }
 
                 int columnPid = tableModel.Schema.FindColumnDefinitionByIdx(index).Pid;
 
-                for (int i = 0; i < primaryKeys.Length; i++)
+                for (int i = 0; i < newPrimaryKeys.Length; i++)
                 {
-                    tableModel.SetCell(primaryKeys[i], columnPid, columnToSet[i], timeInfo);
+                    string primaryKeyToSet = newPrimaryKeys[i];
+                    if (tableModel.RowExists(primaryKeyToSet))
+                    {
+                        tableModel.SetCell(primaryKeyToSet, columnPid, columnToSet[i], timeInfo);
+                    }
+                    else
+                    {
+                        var emptyRow = new object[tableModel.Schema.ColumnDefinitions.Count];
+                        emptyRow[tableModel.Schema.PrimaryKeyColumn.Idx] = primaryKeyToSet;
+                        emptyRow[index] = columnToSet[i];
+
+                        tableModel.SetRow(emptyRow);
+                    }
                 }
             }
         }
@@ -473,7 +515,19 @@
 
             for (int i = 0; i < primaryKeys.Length; i++)
             {
-                tableModel.SetCell(primaryKeys[i], columnPid, columnValuesToSet[i], timeInfo);
+                string primaryKeyToSet = primaryKeys[i];
+                if (tableModel.RowExists(primaryKeyToSet))
+                {
+                    tableModel.SetCell(primaryKeys[i], columnPid, columnValuesToSet[i], timeInfo);
+                }
+                else
+                {
+                    var emptyRow = new object[tableModel.Schema.ColumnDefinitions.Count];
+                    emptyRow[tableModel.Schema.PrimaryKeyColumn.Idx] = primaryKeyToSet;
+                    emptyRow[columnIndex] = columnValuesToSet[i];
+
+                    tableModel.SetRow(emptyRow);
+                }
             }
         }
 

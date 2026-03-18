@@ -219,8 +219,12 @@
                    {
                        var tableModel = element.GetTable(tableId);
 
-                       tableModel.RemoveRows(tableModel.GetRowKey(rowIndex));
-                       
+                       string rowkey = tableModel.GetRowKey(rowIndex);
+                       if (!String.IsNullOrWhiteSpace(rowkey))
+                       {
+                           tableModel.RemoveRows(tableModel.GetRowKey(rowIndex));
+                       }
+    
                        return tableModel.RowCount;
                    });
 

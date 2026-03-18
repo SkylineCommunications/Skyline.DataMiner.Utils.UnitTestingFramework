@@ -62,7 +62,7 @@
             var output = mock.Object.NotifyProtocol(85, "NumericParameter", null); // GetParameterByName
 
             // Assert
-            Assert.AreEqual(10, output);
+            Assert.AreEqual(10.0, output);
         }
 
         [TestMethod]

@@ -80,7 +80,7 @@
                 Pollingconfigurationinstance_901 = "key",
                 Pollingconfigurationdescription_902 = "description",
                 Pollingconfigurationperiod_903 = 30,
-                Pollingconfigurationlastpolled_904 = "never",
+                Pollingconfigurationlastpolled_904 = 12,
                 Pollingconfigurationconnectionid_905 = 1,
             };
 
@@ -101,7 +101,7 @@
                 Pollingconfigurationinstance_901 = "key",
                 Pollingconfigurationdescription_902 = "description",
                 Pollingconfigurationperiod_903 = 30,
-                Pollingconfigurationlastpolled_904 = "never",
+                Pollingconfigurationlastpolled_904 = 12,
                 Pollingconfigurationconnectionid_905 = 1,
             };
 

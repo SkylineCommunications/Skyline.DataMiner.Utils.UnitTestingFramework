@@ -1,6 +1,7 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
 {
     using System;
+    using System.Security.AccessControl;
 
     public class ParameterDefinition : IEquatable<ParameterDefinition>
     {
@@ -10,14 +11,12 @@
             {
                 throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace.", nameof(name));
             }
-            if (Type != typeof(string) && Type != typeof(double))
-            {
-                throw new ArgumentException("Only 'string' and 'double' parameter types are supported.", nameof(type));
-            }
+
             if (pid <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pid), pid, $"'{nameof(pid)}' cannot be negative or zero");
             }
+
             Name = name;
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Pid = pid;
@@ -60,12 +59,19 @@
                 {
                     throw new InvalidOperationException($"Parameter '{Name}' does not allow nulls.");
                 }
+
+                return;
+            }
+
+            // Allow int to double conversion
+            if (Type == typeof(double) && value is int)
+            {
                 return;
             }
 
             if (!Type.IsInstanceOfType(value))
             {
-                throw new InvalidOperationException($"Invalid value type for parameter '{Name}'. Expected {Type}, got {value.GetType()}.");
+                throw new InvalidOperationException($"Invalid value type for parameter '{Name}' (PID {Pid}). Expected {Type} but got {value.GetType()}.");
             }
         }
     }

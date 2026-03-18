@@ -17,7 +17,7 @@
         /// </summary>
         public ColumnDefinition PrimaryKeyColumn { get; }
 
-        public IReadOnlyCollection<ColumnDefinition> ColumnDefinitions { get; }
+        public IReadOnlyList<ColumnDefinition> ColumnDefinitions { get; }
 
         public ColumnDefinition FindColumnDefinitionByName(string name)
         {

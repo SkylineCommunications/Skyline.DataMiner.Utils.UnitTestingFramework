@@ -6,7 +6,6 @@
 
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -271,7 +270,7 @@
             var value = mock.Object.GetParameterByName("NumericParameter");
 
             // Assert
-            Assert.AreEqual(10, value);
+            Assert.AreEqual(10.0, value);
         }
 
         [TestMethod]

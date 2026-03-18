@@ -1,9 +1,10 @@
 ﻿
 namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
 {
-    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Skyline.DataMiner.Scripting;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     internal class TableAsserter : ITableAsserter
@@ -15,13 +16,13 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
             this.tableModel = tableModel;
         }
 
-        public int ColumnCount => tableModel?.GetColumnCount() ?? 0;
+        public int ColumnCount => tableModel?.Schema?.ColumnDefinitions?.Count ?? 0;
 
         public int RowCount => tableModel?.RowCount ?? 0;
 
         public IDictionary<string, object[]> AllRows()
         {
-            return tableModel?.GetAllRows();
+            return tableModel?.GetAllRows()?.ToDictionary(x => x.Key, x => x.Value.Select(cell => cell.Value).ToArray());
         }
 
         public object[] Column(int pid)

@@ -25,16 +25,6 @@
         private ColumnDefinition KeyColumn { get; set; }
 
         /// <summary>
-        /// Returns an empty table model.
-        /// </summary>
-        /// <param name="tableId">The table ID.</param>
-        /// <returns>An empty table model.</returns>
-        public static ITableModel EmptyTableModel(int tableId)
-        {
-            return new TableModel(tableId, Enumerable.Empty<ColumnDefinition>(), primaryKeyColumn: null);
-        }
-
-        /// <summary>
         /// Adds a column with the specified column ID and index.
         /// </summary>
         /// <param name="column">The column to add.</param>
@@ -63,6 +53,17 @@
         }
 
         /// <summary>
+        /// Adds a column with the specified column ID and index.
+        /// </summary>
+        /// <param name="column">The column to add.</param>
+        /// <param name="isKey">if set to <c>true</c> [is key].</param>
+        /// <exception cref="InvalidOperationException">Another column has already been added as primary key column.</exception>
+        internal void AddColumn(int columnPid, int columnIdx, bool isKey = false, string columnName = null)
+        {
+            AddColumn(new ColumnDefinition(columnName ?? "random name", typeof(object), columnPid, columnIdx), isKey);
+        }
+
+        /// <summary>
         /// Builds this instance.
         /// </summary>
         /// <returns>Table model instance.</returns>
@@ -74,7 +75,9 @@
                 throw new InvalidOperationException("No primary key column defined.");
             }
 
-           return new TableModel(tableId, columns, KeyColumn);
+            var tableSchema = new TableSchema(columns, KeyColumn);
+
+            return new TableModel(tableId, tableSchema);
         }
     }
 }

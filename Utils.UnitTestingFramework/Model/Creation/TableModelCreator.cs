@@ -42,6 +42,11 @@
         {
             var tableModel = CreateTableModelFromArrayOptions(parameter, protocolModelParameterFinder);
 
+            if (tableModel == null)
+            {
+                return;
+            }
+
             elementData.AddTable(tableModel);
         }
 
@@ -51,15 +56,14 @@
 
             if (parameter.ArrayOptions == null)
             {
-                return TableModelBuilder.EmptyTableModel(tableId);
+                return null;
             }
 
             int keyColumnIdx = (int)parameter.ArrayOptions.Index.Value.Value;
 
             int columnCount = parameter.ArrayOptions.Count;
 
-            var columns = new List<ColumnDefinition>();
-            ColumnDefinition keyColumn = null;
+            var tableModelBuilder = new TableModelBuilder(tableId);
 
             for (int i = 0; i < columnCount; i++)
             {
@@ -68,19 +72,14 @@
 
                 var columnParameter = protocolModelParameterFinder.FindParameter((int)columnPid) ?? throw new InvalidOperationException($"Parameter with ID {columnPid} not found.");
 
-                var column = new ColumnDefinition(columnParameter.Name.Value, GetTypeForDefinition(columnParameter), (int)columnPid, (int)columnIdx, allowNull: false);
-                columns.Add(column);
+                var column = new ColumnDefinition(columnParameter.Name.Value, GetTypeForDefinition(columnParameter), (int)columnPid, (int)columnIdx, allowNull: true);
+
+                tableModelBuilder.AddColumn(column, isKey: columnIdx == keyColumnIdx);
 
                 excludedPids.Add((int)columnPid);
-
-                bool isKeyColumn = columnIdx == keyColumnIdx;
-                if (isKeyColumn)
-                {
-                    keyColumn = column;
-                }
             }
 
-            return new TableModel(tableId, columns, keyColumn);
+            return tableModelBuilder.Build();
         }
     }
 }

@@ -414,7 +414,7 @@
 
                 if (value2 is string primaryKey)
                 {
-                    return elementData.GetTable(tablePid).AddRowReturnKey(primaryKey);
+                    return elementData.GetTable(tablePid).SetRowReturnOneBasedIndex(primaryKey);
                 }
                 else if(value2 is object[] objectArray)
                 {    

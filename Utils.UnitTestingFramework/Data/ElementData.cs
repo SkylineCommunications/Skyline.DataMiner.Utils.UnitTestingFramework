@@ -82,11 +82,6 @@
                 throw new ArgumentNullException(nameof(parameterDefinition));
             }
 
-            if (parameterModel == null)
-            {
-                throw new ArgumentNullException(nameof(parameterModel));
-            }
-
             parameterNameToDefinition.Add(parameterDefinition.Name, parameterDefinition);
             parameterIdToDefinition.Add(parameterDefinition.Pid, parameterDefinition);
             parametersToValues.Add(parameterDefinition, parameterModel ?? new ParameterModel(null));
