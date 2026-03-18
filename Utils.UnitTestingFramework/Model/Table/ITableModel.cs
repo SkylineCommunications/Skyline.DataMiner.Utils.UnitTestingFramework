@@ -22,7 +22,7 @@
         /// <summary>
         /// Occurs when any change is made to the table, including changes to cell values and row additions, removals, or updates.
         /// </summary>
-        event EventHandler TableChanged;
+        event EventHandler<TableChangedEventArgs> TableChanged;
 
         /// <summary>
         /// Gets the table identifier.

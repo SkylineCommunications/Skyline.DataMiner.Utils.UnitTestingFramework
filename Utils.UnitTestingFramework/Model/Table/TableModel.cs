@@ -39,7 +39,7 @@
         public event EventHandler<RowChangedEventArgs> RowChanged;
 
         /// <inheritdoc/>
-        public event EventHandler TableChanged;
+        public event EventHandler<TableChangedEventArgs> TableChanged;
 
         /// <inheritdoc/>
         public int TableId { get; }
@@ -123,24 +123,24 @@
                 throw new ArgumentNullException(nameof(primaryKey));
             }
 
-            var column = Schema.FindColumnDefinitionByPid(columnPid) ?? throw new ArgumentException(nameof(columnPid), $"A column with PID '{columnPid}' does not exist.");
+            var columnDefinition = Schema.FindColumnDefinitionByPid(columnPid) ?? throw new ArgumentException(nameof(columnPid), $"A column with PID '{columnPid}' does not exist.");
 
             using (var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
             using (@lock.Write())
             {
-                column.Validate(value);
+                columnDefinition.Validate(value);
 
                 var row = GetRow(primaryKey) ?? throw new ArgumentException($"No row with primary key '{primaryKey}' exists.", nameof(primaryKey));
 
-                var cell = row[column.Idx];
+                var cell = row[columnDefinition.Idx];
 
-                var oldValue = cell.Value;
+                var oldCellValue = cell.Value;
 
-                bool changed = cell.Update(value, timestamp);
-                if (changed)
+                bool cellChanged = cell.Update(value, timestamp);
+                if (cellChanged)
                 {
-                    eventDispatcher.Enqueue(() => RaiseCellChanged(primaryKey, column, oldValue, cell.Value));
-                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
+                    eventDispatcher.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldCellValue, cell.Value));
+                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Updated));
                 }
             }
         }
@@ -240,7 +240,7 @@
                 if (existingRow == null)
                 {
                     AddNewRow(rowData, timestamp);
-                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
+                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Added));
                 }
                 else
                 {
@@ -274,7 +274,7 @@
                 {
                     string primaryKey = Convert.ToString(row[Schema.PrimaryKeyColumn.Idx].Value);
 
-                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
+                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Deleted));
                 }
 
                 rows.Clear();
@@ -332,7 +332,7 @@
                     keyToRowIndex[kvp.Key] = kvp.Value - 1;
                 }
 
-                eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
+                eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Deleted));
             }
         }
 
@@ -360,7 +360,7 @@
             if (oneOrMoreCellsChanged)
             {
                 // If at least one cell has changed, we also need to raise a RowChanged event.
-                eventDispatchScope.Enqueue(() => RaiseRowChanged(primaryKey));
+                eventDispatchScope.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Updated));
             }
         }
 
@@ -394,16 +394,16 @@
             CellChanged?.Invoke(this, new CellChangedEventArgs(primaryKey, column, oldValue, newValue));
         }
 
-        private void RaiseRowChanged(string primaryKey)
+        private void RaiseRowChanged(string primaryKey, RowChangeType changeType)
         {
             if (suspendNotifications > 0) return;
-            RowChanged?.Invoke(this, new RowChangedEventArgs(primaryKey));
+            RowChanged?.Invoke(this, new RowChangedEventArgs(primaryKey, changeType));
         }
 
         private void RaiseTableChanged()
         {
             if (suspendNotifications > 0) return;
-            TableChanged?.Invoke(this, EventArgs.Empty);
+            TableChanged?.Invoke(this, new TableChangedEventArgs());
         }
 
         private sealed class NotificationScope : IDisposable
