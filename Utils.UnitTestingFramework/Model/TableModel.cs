@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Threading;
 
@@ -14,8 +15,10 @@
         private readonly Dictionary<string, int> keyToRowIndex = new Dictionary<string, int>();
         private readonly ReaderWriterLockSlim @lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
-        // List to keep track of row indexes. Each Dictionary represents a row, mapping column names to cell values.
+        // List type to allow keep track of row indexes.
         private readonly List<IParameterModel[]> rows = new List<IParameterModel[]>();
+
+        private int suspendNotifications;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableModel"/> class.
@@ -27,6 +30,15 @@
             TableId = tableId;
             Schema = tableSchema ?? throw new ArgumentNullException(nameof(tableSchema));
         }
+
+        /// <inheritdoc/>
+        public event EventHandler<CellChangedEventArgs> CellChanged;
+
+        /// <inheritdoc/>
+        public event EventHandler<string> RowChanged;
+
+        /// <inheritdoc/>
+        public event EventHandler TableChanged;
 
         /// <inheritdoc/>
         public int TableId { get; }
@@ -112,6 +124,7 @@
 
             var column = Schema.FindColumnDefinitionByPid(columnPid) ?? throw new ArgumentException(nameof(columnPid), $"A column with PID '{columnPid}' does not exist.");
 
+            using (var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
             using (@lock.Write())
             {
                 column.Validate(value);
@@ -120,13 +133,20 @@
 
                 var cell = row[column.Idx];
 
-                cell.Update(value, timestamp);
+                var oldValue = cell.Value;
+
+                bool changed = cell.Update(value, timestamp);
+                if (changed)
+                {
+                    eventDispatcher.Enqueue(() => RaiseCellChanged(primaryKey, column, oldValue, cell.Value));
+                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
+                }
             }
         }
 
         /// <inheritdoc/>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        public IParameterModel[] GetRow(string key)
+        public IParameterValue[] GetRow(string key)
         {
             if (key == null)
             {
@@ -149,7 +169,7 @@
         /// <inheritdoc/>
         /// <exception cref="ArgumentException">No column with the specified PID exists.</exception>"
         /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/> or whitespace.</exception>
-        public IParameterModel GetCell(string primaryKey, int columnPid)
+        public IParameterValue GetCell(string primaryKey, int columnPid)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
             {
@@ -175,7 +195,7 @@
 
         /// <inheritdoc/>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="rowIndex"/> is negative.</exception>
-        public IParameterModel[] GetRow(int rowIndex)
+        public IParameterValue[] GetRow(int rowIndex)
         {
             if (rowIndex < 0)
             {
@@ -209,6 +229,7 @@
                 throw new ArgumentException($"Argument must contain exactly {Schema.ColumnDefinitions.Count} values, one for each column.", nameof(rowData));
             }
 
+            using(var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
             using (@lock.Write())
             {
                 string primaryKey = Convert.ToString(rowData[Schema.PrimaryKeyColumn.Idx]);
@@ -218,10 +239,11 @@
                 if (existingRow == null)
                 {
                     AddNewRow(rowData, timestamp);
+                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
                 }
                 else
                 {
-                    UpdateExistingRow(rowData, timestamp, existingRow);
+                    UpdateExistingRow(rowData, timestamp, existingRow, eventDispatcher);
                 }
             }
         }
@@ -244,20 +266,42 @@
         /// <inheritdoc/>
         public void RemoveAllRows()
         {
+            using (var eventDispatcher = GetEventDispatcher())
             using (@lock.Write())
             {
+                foreach (var row in rows)
+                {
+                    string primaryKey = Convert.ToString(row[Schema.PrimaryKeyColumn.Idx].Value);
+
+                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
+                }
+
                 rows.Clear();
                 keyToRowIndex.Clear();
             }
         }
 
         /// <inheritdoc/>
-        public IDictionary<string, IParameterModel[]> GetAllRows()
+        public ReadOnlyDictionary<string, IParameterValue[]> GetAllRows()
         {
             using (@lock.Read())
             {
-                return rows.ToDictionary(row => (string)row[Schema.PrimaryKeyColumn.Idx].Value, row => row);
+                var dict = new Dictionary<string, IParameterValue[]>(rows.Count);
+
+                foreach (var row in rows)
+                {
+                    dict[(string)row[Schema.PrimaryKeyColumn.Idx].Value] = row;
+                }
+
+                return new ReadOnlyDictionary<string, IParameterValue[]>(dict);
             }
+        }
+
+        /// <inheritdoc/>
+        public IDisposable SuspendNotifications()
+        {
+            Interlocked.Increment(ref suspendNotifications);
+            return new NotificationScope(this);
         }
 
         private void RemoveRow(string primaryKey)
@@ -267,6 +311,7 @@
                 throw new ArgumentNullException(nameof(primaryKey));
             }
 
+            using(var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
             using (@lock.Write())
             {
                 if (!RowExists(primaryKey))
@@ -285,16 +330,36 @@
                 {
                     keyToRowIndex[kvp.Key] = kvp.Value - 1;
                 }
+
+                eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey));
             }
         }
 
-        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, IParameterModel[] existingRow)
+        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, IParameterValue[] existingRow, EventDispatchScope eventDispatchScope)
         {
+            string primaryKey = Convert.ToString(existingRow[Schema.PrimaryKeyColumn.Idx].Value);
+
+            bool oneOrMoreCellsChanged = false;
             foreach (var columnDefinition in Schema.ColumnDefinitions)
             {
                 columnDefinition.Validate(rowData[columnDefinition.Idx]);
 
-                existingRow[columnDefinition.Idx].Update(rowData[columnDefinition.Idx], timestamp);
+                object oldValue = existingRow[columnDefinition.Idx].Value;
+                object newValue = rowData[columnDefinition.Idx];
+
+                bool changed = existingRow[columnDefinition.Idx].Update(newValue, timestamp);
+
+                if (changed)
+                {
+                    eventDispatchScope.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldValue, newValue));
+                    oneOrMoreCellsChanged = true;
+                }
+            }
+
+            if (oneOrMoreCellsChanged)
+            {
+                // If at least one cell has changed, we also need to raise a RowChanged event.
+                eventDispatchScope.Enqueue(() => RaiseRowChanged(primaryKey));
             }
         }
 
@@ -310,11 +375,95 @@
 
                 columnDefinition.Validate(valueToAdd);       
 
-                rowToAdd[columnDefinition.Idx] = new ParameterModel(valueToAdd, timestamp);
+                rowToAdd[columnDefinition.Idx] = new ParameterModel(columnDefinition, valueToAdd, timestamp);
             }
 
             rows.Add(rowToAdd);
             keyToRowIndex[primaryKey] = rows.Count - 1;
+        }
+
+        private EventDispatchScope GetEventDispatcher()
+        {
+            return new EventDispatchScope(this);
+        }
+
+        private void RaiseCellChanged(string primaryKey, ColumnDefinition column, object oldValue, object newValue)
+        {
+            if (suspendNotifications > 0) return;
+            CellChanged?.Invoke(this, new CellChangedEventArgs(primaryKey, column, oldValue, newValue));
+        }
+
+        private void RaiseRowChanged(string primaryKey)
+        {
+            if (suspendNotifications > 0) return;
+            RowChanged?.Invoke(this, primaryKey);
+        }
+
+        private void RaiseTableChanged()
+        {
+            if (suspendNotifications > 0) return;
+            TableChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        private sealed class NotificationScope : IDisposable
+        {
+            private readonly TableModel _table;
+
+            public NotificationScope(TableModel table)
+            {
+                _table = table;
+            }
+
+            public void Dispose()
+            {
+                Interlocked.Decrement(ref _table.suspendNotifications);
+            }
+        }
+
+        private sealed class EventDispatchScope : IDisposable
+        {
+            private readonly List<Action> eventsToRaise = new List<Action>();
+            private readonly TableModel tableModel;
+
+            private bool tableChangedEventEnqueued;
+            private bool _disposed;
+
+            public EventDispatchScope(TableModel tableModel)
+            {
+                this.tableModel = tableModel ?? throw new ArgumentNullException(nameof(tableModel));
+            }
+
+            public void Enqueue(Action action)
+            {
+                if (_disposed)
+                    throw new ObjectDisposedException(nameof(EventDispatchScope));
+
+                if (action == null)
+                {
+                    return;
+                }
+
+                eventsToRaise.Add(action);
+
+                if (!tableChangedEventEnqueued)
+                {
+                    eventsToRaise.Add(() => tableModel.RaiseTableChanged());
+                    tableChangedEventEnqueued = true;
+                }
+            }
+
+            public void Dispose()
+            {
+                if (_disposed)
+                    return;
+
+                _disposed = true;
+
+                foreach (var eventToRaise in eventsToRaise)
+                {
+                    eventToRaise();
+                }
+            }
         }
     }
 }

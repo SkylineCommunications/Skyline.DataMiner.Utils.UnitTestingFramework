@@ -36,9 +36,9 @@
             var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
             string fixedValueString = parameter.Interprete.ValueElement.Value;
-            var parameterModel = new ParameterModel(fixedValueString);
+            var parameterModel = new ParameterModel(parameterDefinition, fixedValueString);
 
-            element.AddParameter(parameterDefinition, parameterModel);
+            element.AddParameter(parameterModel);
         }
 
         protected override void ProcessDouble(ElementData elementData, IParamsParam parameter)
@@ -67,9 +67,9 @@
                 fixedValueInt = Int32.Parse(parts[0], System.Globalization.NumberStyles.HexNumber);
             }
 
-            var parameterModel = new ParameterModel(fixedValueInt);
+            var parameterModel = new ParameterModel(parameterDefinition, fixedValueInt);
 
-            elementData.AddParameter(parameterDefinition, parameterModel);
+            elementData.AddParameter(parameterModel);
         }
 
         private bool IsTitleParameter(IParamsParam parameter)

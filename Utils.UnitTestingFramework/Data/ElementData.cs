@@ -75,16 +75,16 @@
             tablesPerTablePid[tableModel.TableId] = tableModel;
         }
 
-        internal void AddParameter(ParameterDefinition parameterDefinition, IParameterModel parameterModel = null)
+        internal void AddParameter(IParameterModel parameterModel)
         {
-            if (parameterDefinition == null)
+            if (parameterModel is null)
             {
-                throw new ArgumentNullException(nameof(parameterDefinition));
+                throw new ArgumentNullException(nameof(parameterModel));
             }
 
-            parameterNameToDefinition.Add(parameterDefinition.Name, parameterDefinition);
-            parameterIdToDefinition.Add(parameterDefinition.Pid, parameterDefinition);
-            parametersToValues.Add(parameterDefinition, parameterModel ?? new ParameterModel(null));
+            parameterNameToDefinition.Add(parameterModel.Definition.Name, parameterModel.Definition);
+            parameterIdToDefinition.Add(parameterModel.Definition.Pid, parameterModel.Definition);
+            parametersToValues.Add(parameterModel.Definition, parameterModel);
         }
     }
 }

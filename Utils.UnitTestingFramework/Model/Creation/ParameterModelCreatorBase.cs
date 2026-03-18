@@ -56,7 +56,7 @@
 
             var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
-            elementData.AddParameter(parameterDefinition);
+            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
         }
 
         protected virtual void ProcessUndefinedType(ElementData elementData, IParamsParam parameter)
@@ -65,7 +65,7 @@
             
             var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
-            elementData.AddParameter(parameterDefinition);
+            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
         }
     }
 }

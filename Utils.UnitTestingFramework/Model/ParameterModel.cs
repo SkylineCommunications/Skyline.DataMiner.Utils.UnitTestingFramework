@@ -15,18 +15,22 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ParameterModel"/> class.
         /// </summary>
+        /// <param name="parameterDefinition"></param>
         /// <param name="value">The value.</param>
         /// <param name="timestamp">The timestamp.</param>
-        public ParameterModel(object value, DateTime? timestamp = null)
+        public ParameterModel(ParameterDefinition parameterDefinition, object value, DateTime? timestamp = null)
         {
             this.value = value;
             this.timestamp = timestamp ?? DateTime.Now;
+            Definition = parameterDefinition ?? throw new ArgumentNullException(nameof(parameterDefinition));
         }
 
         /// <summary>
         /// Occurs when the parameter value or timestamp changes.
         /// </summary>
         public event EventHandler<ParameterModelChangedEventArgs> Changed;
+
+        public ParameterDefinition Definition { get; }
 
         /// <summary>
         /// Gets the parameter value.
@@ -67,7 +71,7 @@
         /// </summary>
         /// <param name="value">The new value.</param>
         /// <param name="timestamp">The timestamp.</param>
-        public void Update(object value, DateTime? timestamp = null)
+        public bool Update(object value, DateTime? timestamp = null)
         {
             var updatedTimestamp = timestamp ?? DateTime.Now;
             EventHandler<ParameterModelChangedEventArgs> handler;
@@ -78,7 +82,7 @@
             {
                 if (Equals(this.value, value) && this.timestamp == updatedTimestamp)
                 {
-                    return;
+                    return false;
                 }
 
                 this.value = value;
@@ -90,6 +94,8 @@
             {
                 handler(this, new ParameterModelChangedEventArgs(oldValue, value, oldTimestamp, updatedTimestamp));
             }
+
+            return true;
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
 
     [TestClass]
@@ -870,6 +871,452 @@
             // Act & Assert
             Assert.ThrowsException<InvalidOperationException>(
                 () => tableModelBuilder.AddColumn(1202, 1, true));
+        }
+
+        #endregion
+
+        #region Event Tests
+
+        [TestMethod]
+        public void CellChanged_SetCell_RaisesEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            CellChangedEventArgs cellChangedEventArgs = null;
+
+            tableModel.CellChanged += (sender, e) =>
+            {
+               cellChangedEventArgs = e;
+            };
+
+            // Act
+            tableModel.SetCell("key1", 1202, "newValue");
+
+            // Assert
+            Assert.IsNotNull(cellChangedEventArgs);
+            Assert.AreEqual("key1", cellChangedEventArgs.PrimaryKey);
+            Assert.AreEqual(1202, cellChangedEventArgs.ColumnDefinition.Pid);
+            Assert.AreEqual("value1", cellChangedEventArgs.OldValue);
+            Assert.AreEqual("newValue", cellChangedEventArgs.NewValue);
+        }
+
+        [TestMethod]
+        public void CellChanged_SetRow_NewRow_RaisesOneEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            int cellChangeEventCount = 0;
+
+            tableModel.CellChanged += (sender, e) =>
+            {
+                cellChangeEventCount++;
+            };
+
+            // Act
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            // Assert
+            Assert.AreEqual(0, cellChangeEventCount); // None for new rows
+        }
+
+        [TestMethod]
+        public void CellChanged_SetRow_UpdateExistingRow_RaisesEvents()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] originalRow = { "key1", "originalValue" };
+            tableModel.SetRow(originalRow);
+
+            CellChangedEventArgs cellChangedEventArgs = null;
+
+            tableModel.CellChanged += (sender, e) =>
+            {
+                cellChangedEventArgs = e;
+            };
+
+            // Act
+            object[] updatedRow = { "key1", "updatedValue" };
+            tableModel.SetRow(updatedRow);
+
+            // Assert
+            Assert.IsNotNull(cellChangedEventArgs);
+            Assert.AreEqual("key1", cellChangedEventArgs.PrimaryKey);
+            Assert.AreEqual(1202, cellChangedEventArgs.ColumnDefinition.Pid);
+            Assert.AreEqual("originalValue", cellChangedEventArgs.OldValue);
+            Assert.AreEqual("updatedValue", cellChangedEventArgs.NewValue);
+        }
+
+        [TestMethod]
+        public void RowChanged_SetRow_RaisesEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            bool eventRaised = false;
+            string eventKey = null;
+
+            tableModel.RowChanged += (sender, key) =>
+            {
+                eventRaised = true;
+                eventKey = key;
+            };
+
+            // Act
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            // Assert
+            Assert.IsTrue(eventRaised);
+            Assert.AreEqual("key1", eventKey);
+        }
+
+        [TestMethod]
+        public void RowChanged_SetCell_RaisesEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            bool eventRaised = false;
+            string eventKey = null;
+
+            tableModel.RowChanged += (sender, key) =>
+            {
+                eventRaised = true;
+                eventKey = key;
+            };
+
+            // Act
+            tableModel.SetCell("key1", 1202, "newValue");
+
+            // Assert
+            Assert.IsTrue(eventRaised);
+            Assert.AreEqual("key1", eventKey);
+        }
+
+        [TestMethod]
+        public void RowChanged_RemoveRows_RaisesEventForEachRow()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row1 = { "key1", "value1" };
+            object[] row2 = { "key2", "value2" };
+            tableModel.SetRow(row1);
+            tableModel.SetRow(row2);
+
+            int eventCount = 0;
+
+            tableModel.RowChanged += (sender, key) =>
+            {
+                eventCount++;
+            };
+
+            // Act
+            tableModel.RemoveRows("key1", "key2");
+
+            // Assert
+            Assert.AreEqual(2, eventCount);
+        }
+
+        [TestMethod]
+        public void RowChanged_RemoveAllRows_RaisesEventForEachRow()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row1 = { "key1", "value1" };
+            object[] row2 = { "key2", "value2" };
+            object[] row3 = { "key3", "value3" };
+            tableModel.SetRow(row1);
+            tableModel.SetRow(row2);
+            tableModel.SetRow(row3);
+
+            int eventCount = 0;
+
+            tableModel.RowChanged += (sender, key) =>
+            {
+                eventCount++;
+            };
+
+            // Act
+            tableModel.RemoveAllRows();
+
+            // Assert
+            Assert.AreEqual(3, eventCount);
+        }
+
+        [TestMethod]
+        public void TableChanged_SetRow_RaisesEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            bool eventRaised = false;
+
+            tableModel.TableChanged += (sender, e) =>
+            {
+                eventRaised = true;
+            };
+
+            // Act
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            // Assert
+            Assert.IsTrue(eventRaised);
+        }
+
+        [TestMethod]
+        public void TableChanged_SetCell_RaisesEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            bool eventRaised = false;
+
+            tableModel.TableChanged += (sender, e) =>
+            {
+                eventRaised = true;
+            };
+
+            // Act
+            tableModel.SetCell("key1", 1202, "newValue");
+
+            // Assert
+            Assert.IsTrue(eventRaised);
+        }
+
+        [TestMethod]
+        public void TableChanged_RemoveRows_RaisesEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            bool eventRaised = false;
+
+            tableModel.TableChanged += (sender, e) =>
+            {
+                eventRaised = true;
+            };
+
+            // Act
+            tableModel.RemoveRows("key1");
+
+            // Assert
+            Assert.IsTrue(eventRaised);
+        }
+
+        [TestMethod]
+        public void TableChanged_RemoveAllRows_RaisesEvent()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row1 = { "key1", "value1" };
+            object[] row2 = { "key2", "value2" };
+            tableModel.SetRow(row1);
+            tableModel.SetRow(row2);
+
+            bool eventRaised = false;
+
+            tableModel.TableChanged += (sender, e) =>
+            {
+                eventRaised = true;
+            };
+
+            // Act
+            tableModel.RemoveAllRows();
+
+            // Assert
+            Assert.IsTrue(eventRaised);
+        }
+
+        [TestMethod]
+        public void SuspendNotifications_SetCell_DoesNotRaiseEvents()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            bool cellChangedRaised = false;
+            bool rowChangedRaised = false;
+            bool tableChangedRaised = false;
+
+            tableModel.CellChanged += (sender, e) => cellChangedRaised = true;
+            tableModel.RowChanged += (sender, key) => rowChangedRaised = true;
+            tableModel.TableChanged += (sender, e) => tableChangedRaised = true;
+
+            // Act
+            using (tableModel.SuspendNotifications())
+            {
+                tableModel.SetCell("key1", 1202, "newValue");
+            }
+
+            // Assert
+            Assert.IsFalse(cellChangedRaised);
+            Assert.IsFalse(rowChangedRaised);
+            Assert.IsFalse(tableChangedRaised);
+        }
+
+        [TestMethod]
+        public void SuspendNotifications_AfterDispose_RaisesEvents()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            bool cellChangedRaised = false;
+            bool rowChangedRaised = false;
+            bool tableChangedRaised = false;
+
+            tableModel.CellChanged += (sender, e) => cellChangedRaised = true;
+            tableModel.RowChanged += (sender, key) => rowChangedRaised = true;
+            tableModel.TableChanged += (sender, e) => tableChangedRaised = true;
+
+            // Act
+            using (tableModel.SuspendNotifications())
+            {
+                tableModel.SetCell("key1", 1202, "suspendedValue");
+            }
+
+            tableModel.SetCell("key1", 1202, "newValue");
+
+            // Assert
+            Assert.IsTrue(cellChangedRaised);
+            Assert.IsTrue(rowChangedRaised);
+            Assert.IsTrue(tableChangedRaised);
+        }
+
+        [TestMethod]
+        public void SuspendNotifications_MultipleOperations_DoesNotRaiseEvents()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            int cellChangedCount = 0;
+            int rowChangedCount = 0;
+            int tableChangedCount = 0;
+
+            tableModel.CellChanged += (sender, e) => cellChangedCount++;
+            tableModel.RowChanged += (sender, key) => rowChangedCount++;
+            tableModel.TableChanged += (sender, e) => tableChangedCount++;
+
+            // Act
+            using (tableModel.SuspendNotifications())
+            {
+                object[] row1 = { "key1", "value1" };
+                object[] row2 = { "key2", "value2" };
+                tableModel.SetRow(row1);
+                tableModel.SetRow(row2);
+                tableModel.SetCell("key1", 1202, "newValue");
+                tableModel.RemoveRows("key2");
+            }
+
+            // Assert
+            Assert.AreEqual(0, cellChangedCount);
+            Assert.AreEqual(0, rowChangedCount);
+            Assert.AreEqual(0, tableChangedCount);
+        }
+
+        [TestMethod]
+        public void SuspendNotifications_NestedSuspensions_DoesNotRaiseEvents()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            bool cellChangedRaised = false;
+            bool rowChangedRaised = false;
+            bool tableChangedRaised = false;
+
+            tableModel.CellChanged += (sender, e) => cellChangedRaised = true;
+            tableModel.RowChanged += (sender, key) => rowChangedRaised = true;
+            tableModel.TableChanged += (sender, e) => tableChangedRaised = true;
+
+            // Act
+            using (tableModel.SuspendNotifications())
+            {
+                using (tableModel.SuspendNotifications())
+                {
+                    tableModel.SetCell("key1", 1202, "newValue");
+                }
+
+                // Still suspended here
+                Assert.IsFalse(cellChangedRaised);
+            }
+
+            // Assert - events should resume after all suspensions are disposed
+            tableModel.SetCell("key1", 1202, "anotherValue");
+            Assert.IsTrue(cellChangedRaised);
+            Assert.IsTrue(rowChangedRaised);
+            Assert.IsTrue(tableChangedRaised);
         }
 
         #endregion

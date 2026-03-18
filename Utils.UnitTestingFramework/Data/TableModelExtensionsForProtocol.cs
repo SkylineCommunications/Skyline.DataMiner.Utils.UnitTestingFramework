@@ -249,7 +249,7 @@
             return UpdateCellsAndReturnChanges(tableModel, timestamp, rowToSet, oldRow);
         }
 
-        private static object UpdateCellsAndReturnChanges(ITableModel tableModel, DateTime? timestamp, object[] rowToSet, IParameterModel[] oldRow)
+        private static object UpdateCellsAndReturnChanges(ITableModel tableModel, DateTime? timestamp, object[] rowToSet, IParameterValue[] oldRow)
         {
             var changes = new int[rowToSet.Length];
 

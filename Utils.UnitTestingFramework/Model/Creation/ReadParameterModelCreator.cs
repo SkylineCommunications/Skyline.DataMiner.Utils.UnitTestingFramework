@@ -27,9 +27,9 @@
             var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
             string defaultValue = parameter.Interprete.DefaultValue?.Value;
-            var parameterModel = new ParameterModel(defaultValue);
+            var parameterModel = new ParameterModel(parameterDefinition, defaultValue);
 
-            element.AddParameter(parameterDefinition, parameterModel);
+            element.AddParameter(parameterModel);
         }
 
         protected override void ProcessDouble(ElementData elementData, IParamsParam parameter)
@@ -44,9 +44,9 @@
             var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
             string defaultValueString = parameter.Interprete.DefaultValue?.Value;
-            var parameterModel = Double.TryParse(defaultValueString, out double defaultValue) ? new ParameterModel(defaultValue) : new ParameterModel(null);
+            var parameterModel = Double.TryParse(defaultValueString, out double defaultValue) ? new ParameterModel(parameterDefinition, defaultValue) : new ParameterModel(parameterDefinition, null);
 
-            elementData.AddParameter(parameterDefinition, parameterModel);
+            elementData.AddParameter(parameterModel);
         }
     }
 }

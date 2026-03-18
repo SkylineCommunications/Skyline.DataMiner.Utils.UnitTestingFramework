@@ -1,13 +1,28 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
 
     /// <summary>
     /// Table model interface.
     /// </summary>
     public interface ITableModel
     {
+        /// <summary>
+        /// Occurs when a cell value changes.
+        /// </summary>
+        event EventHandler<CellChangedEventArgs> CellChanged;
+
+        /// <summary>
+        /// Occurs when a row is added, removed, or updated. The event argument contains the primary key of the affected row.
+        /// </summary>
+        event EventHandler<string> RowChanged;
+
+        /// <summary>
+        /// Occurs when any change is made to the table, including changes to cell values and row additions, removals, or updates.
+        /// </summary>
+        event EventHandler TableChanged;
+
         /// <summary>
         /// Gets the table identifier.
         /// </summary>
@@ -50,7 +65,7 @@
         /// <param name="primaryKey">The primary key.</param>
         /// <param name="columnPid">The column PID.</param>
         /// <returns>The cell data, or <see langword="null"/> if no such cell exists.</returns>
-        IParameterModel GetCell(string primaryKey, int columnPid);
+        IParameterValue GetCell(string primaryKey, int columnPid);
 
         /// <summary>
         /// Sets the cell data for the cell with the specified primary key and column PID.
@@ -67,20 +82,20 @@
         /// <param name="key">The key.</param>
         /// <returns>The row data, or <see langword="null"/> if no such row exists.</returns>
         /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        IParameterModel[] GetRow(string key);
+        IParameterValue[] GetRow(string key);
 
         /// <summary>
         /// Retrieves the row data of the row with the specified row index, or <see langword="null"/> if no such row exists.
         /// </summary>
         /// <param name="rowIndex">Index of the row.</param>
         /// <returns>The row data, or <see langword="null"/> if no such row exists.</returns>
-        IParameterModel[] GetRow(int rowIndex);
+        IParameterValue[] GetRow(int rowIndex);
 
         /// <summary>
         /// Gets all rows.
         /// </summary>
         /// <returns>A dictionary of rows, where the key represents the primary key.</returns>
-        IDictionary<string, IParameterModel[]> GetAllRows();
+        ReadOnlyDictionary<string, IParameterValue[]> GetAllRows();
 
         /// <summary>
         /// Sets the row data for the row with the specified key, adding a new row if no such row exists.
@@ -99,5 +114,11 @@
         /// Removes all rows from the table.
         /// </summary>
         void RemoveAllRows();
+
+        /// <summary>
+        /// No longer raises any notifications until the returned <see cref="IDisposable"/> is disposed.
+        /// </summary>
+        /// <returns>An <see cref="IDisposable"/> that, when disposed, resumes notifications.</returns>
+        IDisposable SuspendNotifications();
     }
 }
