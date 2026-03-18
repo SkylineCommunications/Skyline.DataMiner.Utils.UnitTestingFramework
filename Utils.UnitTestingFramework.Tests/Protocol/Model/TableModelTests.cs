@@ -213,7 +213,7 @@
             // Act
             tableModel.SetColumn(1, keys, values2nd);
             tableModel.SetColumn(2, keys, values3rd);
-            object[] columnOutput = tableModel.GetColumn(1203);
+            object[] columnOutput = tableModel.GetColumnByPid(1203);
 
             // Assert
             Assert.AreEqual("3ndColumn9", columnOutput[0]);
@@ -238,7 +238,7 @@
             tableModel.SetColumn(2, keys, values3rd);
 
             // Act & Assert
-            Assert.Throws<Exception>(() => tableModel.GetColumn(1204));
+            Assert.Throws<Exception>(() => tableModel.GetColumnByPid(1204));
         }
 
         [TestMethod]

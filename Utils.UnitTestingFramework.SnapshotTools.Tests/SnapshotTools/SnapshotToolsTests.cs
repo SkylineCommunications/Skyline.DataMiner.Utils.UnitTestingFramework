@@ -19,15 +19,15 @@
         public Task SnapTest_CorrectOutput()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "notOne", "notTwo", 6, 7, 8 };
 
             // Act
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Assert
             return this.Verify(SnapshotTools.ShowTable(protocolCache, 900));
@@ -37,15 +37,15 @@
         public Task SnapTest_EmptyCell()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", null, 3, 4, 5 };
             object[] row2 = new object[] { "notOne", "notTwo", 6, 7 };
 
             // Act
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Assert
             return Verifier.Verify(SnapshotTools.ShowTable(protocolCache, 900));
@@ -55,7 +55,7 @@
         public Task SnapTest_EmptyTable()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             // Act
 
@@ -67,7 +67,7 @@
         public Task SnapTest_MultipleTables()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
@@ -75,9 +75,9 @@
             object[] row3 = new object[] { "1", "1" };
 
             // Act
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
-            tablesCache.AddRow(1100, row3);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(1100, row3);
 
             // Assert
             return Verifier.Verify(SnapshotTools.ShowTables(protocolCache, new int[] { 900, 1100 }));
@@ -87,7 +87,7 @@
         public Task SnapTest_MultipleEmptyTables()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             // Act
 
@@ -99,7 +99,7 @@
         public Task SnapTest_MultipleTables_EmptyCells()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "two", 3, 4 };
@@ -107,9 +107,9 @@
             object[] row3 = new object[] { "1", null };
 
             // Act
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
-            tablesCache.AddRow(1100, row3);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(1100, row3);
 
             // Assert
             return Verifier.Verify(SnapshotTools.ShowTables(protocolCache, new int[] { 900, 1100 }));

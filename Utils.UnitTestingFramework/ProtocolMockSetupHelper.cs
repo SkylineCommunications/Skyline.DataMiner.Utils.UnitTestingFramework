@@ -17,17 +17,17 @@
             {
                 SetupProperties(mock, protocolModel);
 
-                SetupParameterGets(mock, mock.protocolCache);
-                SetupParameterSets(mock, mock.protocolCache);
+                SetupParameterGets(mock);
+                SetupParameterSets(mock);
 
-                SetupTableAddsAndExists(mock, mock.protocolCache.Tables);
-                SetupTableDeleteAndClearKeys(mock, mock.protocolCache.Tables);
-                SetupParametersIndexByKeys(mock, mock.protocolCache.Tables);
-                SetupParametersIndexByCoordinates(mock, mock.protocolCache.Tables);
-                SetupGetRowsAndKeyPosition(mock, mock.protocolCache.Tables);
-                SetupSetRows(mock, mock.protocolCache.Tables);
-                SetupFillArray(mock, mock.protocolCache.Tables);
-                SetupCounts(mock, mock.protocolCache.Tables);
+                SetupTableAddsAndExists(mock, mock.elementData);
+                SetupTableDeleteAndClearKeys(mock, mock.elementData);
+                SetupParametersIndexByKeys(mock, mock.elementData);
+                SetupParametersIndexByCoordinates(mock, mock.elementData);
+                SetupGetRowsAndKeyPosition(mock, mock.elementData);
+                SetupSetRows(mock, mock.elementData);
+                SetupFillArray(mock, mock.elementData);
+                SetupCounts(mock, mock.elementData);
 
                 mock.Setup(p => p.NotifyProtocol(It.IsAny<int>(), It.IsAny<object>(), It.IsAny<object>()))
                     .Returns(
@@ -45,198 +45,251 @@
                 mock.SetupGet(p => p.Clear).Returns(Constants.Constants.PROTOCOL_CLEAR);
             }
 
-            private static void SetupParameterGets(Mock<T> mock, ProtocolCache protocolCache)
+            private static void SetupParameterGets(SLProtocolMock<T> protocolMock)
             {
-                mock.Setup(p => p.GetParameter(It.IsAny<int>()))
+                protocolMock.Setup(p => p.GetParameter(It.IsAny<int>()))
                     .Returns(
                     (int pid) =>
                     {
-                        protocolCache.Parameters.TryGetParameter(pid, out object value);
-                        return value;
+                        return protocolMock.GetParameter(pid).Value;
                     });
 
-                mock.Setup(p => p.GetParameterByName(It.IsAny<string>()))
+                protocolMock.Setup(p => p.GetParameterByName(It.IsAny<string>()))
                     .Returns(
                     (string parameterName) =>
                     {
-                        protocolCache.Parameters.TryGetParameterByName(parameterName, out object value);
-                        return value;
+                        return protocolMock.GetParameter(parameterName).Value;
                     });
 
-                mock.Setup(p => p.GetParameters(It.IsAny<object>()))
+                protocolMock.Setup(p => p.GetParameters(It.IsAny<object>()))
                     .Returns(
                     (uint[] parameters) =>
                     {
-                        if (parameters.GetType() == typeof(uint[]))
-                        {
-                            return protocolCache.Parameters.GetParameters(parameters);
-                        }
-                        else
+                        if (parameters.GetType() != typeof(uint[]))
                         {
                             throw new ArgumentException("Argument should be of type uint[]");
                         }
+
+                        return parameters.Select(pid => protocolMock.GetParameter((int)pid).Value).ToArray();
                     });
 
-                mock.Setup(p => p.IsEmpty(It.IsAny<int>()))
+                protocolMock.Setup(p => p.IsEmpty(It.IsAny<int>()))
                     .Returns(
                     (int pid) =>
                     {
-                        return protocolCache.Parameters.IsEmpty(pid, mock.Object);
+                        return protocolMock.GetParameter(pid).Value == null;
                     });
             }
 
-            private static void SetupParameterSets(Mock<T> mock, ProtocolCache protocolCache)
+            private static void SetupParameterSets(SLProtocolMock<T> mock)
             {
                 mock.Setup(p => p.SetParameter(It.IsAny<int>(), It.IsAny<object>()))
                     .Returns(
                     (int pid, object value) =>
                     {
-                        return protocolCache.Parameters.SetParameter(pid, value);
+                        mock.GetParameter(pid).Update(value);
+                        return 0;
                     });
 
                 mock.Setup(p => p.SetParameter(It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
                     .Returns(
                     (int pid, object value, DateTime timestamp) =>
                     {
-                        return protocolCache.Parameters.SetParameter(pid, value, timestamp);
+                        mock.GetParameter(pid).Update(value, timestamp);
+                        return 0;
                     });
 
                 mock.Setup(p => p.SetParameterByName(It.IsAny<string>(), It.IsAny<object>()))
                     .Returns(
                     (string name, object value) =>
                     {
-                        return protocolCache.Parameters.SetParameterByName(name, value);
+                        mock.GetParameter(name).Update(value);
+                        return 0;
                     });
 
                 mock.Setup(p => p.SetParametersByName(It.IsAny<string[]>(), It.IsAny<object[]>()))
                     .Returns(
                     (string[] names, object[] values) =>
                     {
-                        return protocolCache.Parameters.SetParametersByName(names, values);
+                        if (names.Length != values.Length)
+                        {
+                            return Constants.Constants.HRESULT_FAIL_DIFFLEN;
+                        }
+
+                        for (int i = 0; i < names.Length; i++)
+                        {
+                            mock.GetParameter(names[i]).Update(values[i]);
+                        }
+
+                        return names.Select(n => 0).ToArray();
                     });
 
                 mock.Setup(p => p.SetParameters(It.IsAny<int[]>(), It.IsAny<object[]>()))
                     .Returns(
                     (int[] parameterIDs, object[] values) =>
                     {
-                        return protocolCache.Parameters.SetParameters(parameterIDs, values);
+                        if (parameterIDs.Length != values.Length)
+                        {
+                            return Constants.Constants.HRESULT_FAIL_DIFFLEN;
+                        }
+
+                        for (int i = 0; i < parameterIDs.Length; i++)
+                        {
+                            mock.GetParameter(parameterIDs[i]).Update(values[i]);
+                        }
+
+                        return parameterIDs.Select(n => 0).ToArray();
                     });
 
                 mock.Setup(p => p.SetParameters(It.IsAny<int[]>(), It.IsAny<object[]>(), It.IsAny<DateTime[]>()))
                     .Returns(
-                    (int[] parameterIDs, object[] values, DateTime[] timestamp) =>
+                    (int[] parameterIDs, object[] values, DateTime[] timestamps) =>
                     {
-                        return protocolCache.Parameters.SetParameters(parameterIDs, values, timestamp);
+                        if (parameterIDs.Length != values.Length || parameterIDs.Length != timestamps.Length)
+                        {
+                            return Constants.Constants.HRESULT_FAIL_DIFFLEN;
+                        }
+
+                        for (int i = 0; i < parameterIDs.Length; i++)
+                        {
+                            mock.GetParameter(parameterIDs[i]).Update(values[i], timestamps[i]);
+                        }
+
+                        return parameterIDs.Select(n => 0).ToArray();
                     });
             }
 
-            private static void SetupTableAddsAndExists(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupTableAddsAndExists(Mock<T> mock, ElementData elementData)
             {
                 mock.Setup(p => p.AddRow(It.IsAny<int>(), It.IsAny<object[]>(), It.IsAny<bool[]>()))
                     .Callback(
                     (int tableId, object[] row, bool[] keyMask) =>
                     {
-                        tablesCache.AddRow(tableId, row);
+                        elementData.GetTable(tableId).SetRowReturnOneBasedIndex(row);
                     });
 
                 mock.Setup(p => p.AddRow(It.IsAny<int>(), It.IsAny<object[]>()))
                     .Returns(
                     (int tableId, object[] row) =>
                     {
-                        return tablesCache.AddRow(tableId, row);
+                        return elementData.GetTable(tableId).SetRowReturnOneBasedIndex(row);
                     });
 
                 mock.Setup(p => p.AddRow(It.IsAny<int>(), It.IsAny<string>()))
                     .Returns(
                     (int tableId, string primaryKey) =>
                     {
-                        return tablesCache.AddRow(tableId, primaryKey);
+                        return elementData.GetTable(tableId).SetRowReturnOneBasedIndex(primaryKey);
                     });
 
                 mock.Setup(p => p.AddRowReturnKey(It.IsAny<int>(), It.IsAny<object[]>()))
                     .Returns(
                     (int tableId, object[] row) =>
                     {
-                        return tablesCache.AddRowReturnKey(tableId, row);
+                        return elementData.GetTable(tableId).AddRowReturnKey(row);
                     });
 
                 mock.Setup(p => p.AddRowReturnKey(It.IsAny<int>()))
                     .Returns(
                     (int tableId) =>
                     {
-                        return tablesCache.AddRowReturnKey(tableId);
+                        return elementData.GetTable(tableId).AddRowReturnKey();
                     });
 
                 mock.Setup(p => p.Exists(It.IsAny<int>(), It.IsAny<string>()))
                     .Returns(
                     (int tableId, string primaryKey) =>
                     {
-                        return tablesCache.Exists(tableId, primaryKey);
+                        return elementData.GetTable(tableId).RowExists(primaryKey);
                     });
             }
 
-            private static void SetupTableDeleteAndClearKeys(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupTableDeleteAndClearKeys(Mock<T> mock, ElementData element)
             {
                 mock.Setup(p => p.DeleteRow(It.IsAny<int>(), It.IsAny<string[]>()))
                    .Returns(
                    (int tableId, string[] primaryKeys) =>
                    {
-                       return tablesCache.DeleteRow(tableId, primaryKeys);
+                       return element.GetTable(tableId).DeleteRowReturnRemainingRows(primaryKeys);
                    });
 
                 mock.Setup(p => p.DeleteRow(It.IsAny<int>(), It.IsAny<int>()))
                    .Returns(
                    (int tableId, int rowIndex) =>
                    {
-                       return tablesCache.DeleteRow(tableId, rowIndex);
+                       var tableModel = element.GetTable(tableId);
+
+                       tableModel.RemoveRows(tableModel.GetRowKey(rowIndex));
+                       
+                       return tableModel.RowCount;
                    });
 
                 mock.Setup(p => p.DeleteRow(It.IsAny<int>(), It.IsAny<string>()))
                    .Returns(
                    (int tableId, string primaryKey) =>
                    {
-                       return tablesCache.DeleteRow(tableId, primaryKey);
+                       return element.GetTable(tableId).DeleteRowReturnRemainingRows(primaryKey);
                    });
 
                 mock.Setup(p => p.ClearAllKeys(It.IsAny<int>()))
                    .Returns(
                    (int tableId) =>
                    {
-                       return tablesCache.ClearAllKeys(tableId);
+                       var table = element.GetTable(tableId);
+                       table.RemoveAllRows();
+                       return 0;
                    });
             }
 
-            private static void SetupGetRowsAndKeyPosition(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupGetRowsAndKeyPosition(Mock<T> mock, ElementData elementData)
             {
                 mock.Setup(p => p.GetKeyPosition(It.IsAny<int>(), It.IsAny<string>()))
                    .Returns(
                    (int tableId, string primaryKey) =>
                    {
-                       return tablesCache.GetOneBasedRowIndex(tableId, primaryKey);
+                       return elementData.GetTable(tableId).GetRowIndex(primaryKey) + 1;
                    });
 
                 mock.Setup(p => p.GetRow(It.IsAny<int>(), It.IsAny<int>()))
                    .Returns(
                    (int tableId, int rowIndex) =>
                    {
-                       return tablesCache.GetRow(tableId, rowIndex);
+                       var table = elementData.GetTable(tableId);
+                       var row = table.GetRow(rowIndex);
+                       if (row == null)
+                       {
+                            return new object[table.Schema.ColumnDefinitions.Count];
+                       }
+                       else
+                       {
+                            return row.Select(cell => cell.Value).ToArray();
+                       }
                    });
 
                 mock.Setup(p => p.GetRow(It.IsAny<int>(), It.IsAny<string>()))
                    .Returns(
                    (int tableId, string primaryKey) =>
                    {
-                       return tablesCache.GetRow(tableId, primaryKey);
+                       var table = elementData.GetTable(tableId);
+                       var row = table.GetRow(primaryKey);
+                       if (row == null)
+                       {
+                           return new object[table.Schema.ColumnDefinitions.Count];
+                       }
+                       else
+                       {
+                           return row.Select(cell => cell.Value).ToArray();
+                       }
                    });
                 mock.Setup(p => p.GetKeys(It.IsAny<int>()))
                    .Returns(
                    (int tableId) =>
                    {
-                       return tablesCache.GetKeys(tableId);
+                       return elementData.GetTable(tableId).GetAllRows().Keys.ToArray();
                    });
             }
 
-            private static void SetupSetRows(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupSetRows(Mock<T> mock, ElementData elementData)
             {
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>(), It.IsAny<bool>()))
                    .Returns(
@@ -247,7 +300,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, rowIndex, row, timestamp, useClearAndLeave);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(rowIndex, row, timestamp, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>()))
@@ -259,7 +312,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, rowIndex, row);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(rowIndex, row);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<bool>()))
@@ -271,7 +324,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, rowIndex, row, timestamp: null, useClearAndLeave);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(rowIndex, row, timestamp: null, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
@@ -283,7 +336,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, rowIndex, row, timestamp);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(rowIndex, row, timestamp);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTime>(), It.IsAny<bool>()))
@@ -295,7 +348,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp, useClearAndLeave);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(primaryKey, rowValues, timestamp, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>()))
@@ -307,7 +360,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, primaryKey, rowValues);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(primaryKey, rowValues);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<bool>()))
@@ -319,7 +372,7 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp: null, useClearAndLeave);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(primaryKey, rowValues, timestamp: null, useClearAndLeave);
                    });
 
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTime>()))
@@ -331,31 +384,31 @@
                            throw new ArgumentException($"Expected type object[], but got {rowData?.GetType()} instead.");
                        }
 
-                       return tablesCache.SetRow(tableId, primaryKey, rowValues, timestamp);
+                       return elementData.GetTable(tableId).SetRowReturnChanges(primaryKey, rowValues, timestamp);
                    });
             }
 
-            private static void SetupFillArray(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupFillArray(Mock<T> mock, ElementData elementData)
             {
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<List<object[]>>(), It.IsAny<SaveOption>(), It.IsAny<DateTime?>()))
                    .Returns(
                    (int tableId, List<object[]> rows, SaveOption option, DateTime? timeInfo) =>
                    {
-                       return tablesCache.FillArray(tableId, rows, option, timeInfo);
+                       return elementData.GetTable(tableId).FillArray(rows, option, timeInfo);
                    });
 
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<List<object[]>>(), It.IsAny<SaveOption>()))
                     .Returns(
                     (int tableId, List<object[]> rows, SaveOption option) =>
                     {
-                        return tablesCache.FillArray(tableId, rows, option);
+                        return elementData.GetTable(tableId).FillArray(rows, option);
                     });
 
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<List<object[]>>()))
                     .Returns(
                     (int tableId, List<object[]> columns) =>
                     {
-                        tablesCache.FillArray(tableId, columns.ToArray());
+                        elementData.GetTable(tableId).FillArray(columns.ToArray());
                         return null; // Irrelevant return value.
                     });
 
@@ -363,7 +416,7 @@
                     .Returns(
                     (int tableId, List<object[]> columns, DateTime? timeInfo) =>
                     {
-                        tablesCache.FillArray(tableId, columns.ToArray(), timeInfo);
+                        elementData.GetTable(tableId).FillArray(columns.ToArray(), timeInfo);
                         return null; // Irrelevant return value.
                     });
 
@@ -376,7 +429,7 @@
                             throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
                         }
 
-                        tablesCache.FillArray(tableId, columns.Cast<object[]>().ToArray());
+                        elementData.GetTable(tableId).FillArray(columns.Cast<object[]>().ToArray());
                         return null; // Irrelevant return value.
                     });
 
@@ -389,7 +442,7 @@
                             throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
                         }
 
-                        tablesCache.FillArray(tableId, columns.Cast<object[]>().ToArray(), timeInfo);
+                        elementData.GetTable(tableId).FillArray(columns.Cast<object[]>().ToArray(), timeInfo);
                         return null; // Irrelevant return value.
                     });
 
@@ -397,7 +450,7 @@
                     .Returns(
                     (int tableId, List<object[]> columns) =>
                     {
-                        tablesCache.FillArrayNoDelete(tableId, columns.ToArray());
+                        elementData.GetTable(tableId).FillArrayNoDelete(columns.ToArray());
                         return null; // Irrelevant return value.
                     });
 
@@ -405,7 +458,7 @@
                     .Returns(
                     (int tableId, List<object[]> columns, DateTime? timeInfo) =>
                     {
-                        tablesCache.FillArrayNoDelete(tableId, columns.ToArray(), timeInfo);
+                        elementData.GetTable(tableId).FillArrayNoDelete(columns.ToArray(), timeInfo);
                         return null; // Irrelevant return value.
                     });
 
@@ -418,7 +471,7 @@
                             throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
                         }
 
-                        tablesCache.FillArrayNoDelete(tableId, columns.Cast<object[]>().ToArray());
+                        elementData.GetTable(tableId).FillArrayNoDelete(columns.Cast<object[]>().ToArray());
                         return null; // Irrelevant return value.
                     });
 
@@ -431,7 +484,7 @@
                             throw new ArgumentException("One or more items are not of type object[]", nameof(columns));
                         }
 
-                        tablesCache.FillArrayNoDelete(tableId, columns.Cast<object[]>().ToArray(), timeInfo);
+                        elementData.GetTable(tableId).FillArrayNoDelete(columns.Cast<object[]>().ToArray(), timeInfo);
 
                         return null; // Irrelevant return value.
                     });
@@ -440,7 +493,7 @@
                     .Returns(
                     (int tableId, int columnPid, object[] keys, object[] values, DateTime? timeInfo) =>
                     {
-                        tablesCache.FillArrayWithColumn(tableId, columnPid, Array.ConvertAll(keys, Convert.ToString), values, timeInfo);
+                        elementData.GetTable(tableId).FillArrayWithColumn(columnPid, Array.ConvertAll(keys, Convert.ToString), values, timeInfo);
                         return null; // Irrelevant return value.
                     });
 
@@ -448,95 +501,186 @@
                     .Returns(
                     (int tableId, int columnPid, object[] keys, object[] values) =>
                     {
-                        tablesCache.FillArrayWithColumn(tableId, columnPid, Array.ConvertAll(keys, Convert.ToString), values);
+                        elementData.GetTable(tableId).FillArrayWithColumn(columnPid, Array.ConvertAll(keys, Convert.ToString), values);
                         return null; // Irrelevant return value.
                     });
             }
 
-            private static void SetupParametersIndexByKeys(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupParametersIndexByKeys(Mock<T> mock, ElementData elementData)
             {
                 mock.Setup(p => p.GetParameterIndexByKey(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
                     .Returns(
-                    (int iPID, string key, int iY) =>
+                    (int tableId, string key, int oneBasedColumnIndex) =>
                     {
-                        return tablesCache.GetParameterIndexByKey(iPID, key, iY);
+                        return elementData.GetTable(tableId).GetParameterIndexByKey(key, oneBasedColumnIndex);
                     });
 
                 mock.Setup(p => p.SetParameterIndexByKey(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
                    .Returns(
-                   (int iID, string key, int iY, object value, DateTime timeInfo) =>
+                   (int tableId, string key, int oneBasedColumnIndex, object value, DateTime timeInfo) =>
                    {
-                       return tablesCache.SetParameterIndexByKey(iID, key, iY, value, timeInfo);
+                       return elementData.GetTable(tableId).SetParameterIndexByKey(key, oneBasedColumnIndex, value, timeInfo);
                    });
 
                 mock.Setup(p => p.SetParameterIndexByKey(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<object>()))
                    .Returns(
-                   (int iID, string key, int iY, object value) =>
+                   (int tableId, string key, int oneBasedColumnIndex, object value) =>
                    {
-                       return tablesCache.SetParameterIndexByKey(iID, key, iY, value);
+                       return elementData.GetTable(tableId).SetParameterIndexByKey(key, oneBasedColumnIndex, value);
                    });
 
                 mock.Setup(p => p.SetParametersIndexByKey(It.IsAny<int[]>(), It.IsAny<string[]>(), It.IsAny<int[]>(), It.IsAny<object[]>(), It.IsAny<DateTime[]>()))
                    .Returns(
-                   (int[] iIDs, string[] keys, int[] iYs, object[] values, DateTime?[] timeInfos) =>
+                   (int[] tableIds, string[] keys, int[] oneBasedColumnIndices, object[] values, DateTime?[] timeInfos) =>
                    {
-                       return tablesCache.SetParametersIndexByKey(iIDs, keys, iYs, values, timeInfos);
+                       return SetParametersIndexByKey(elementData, tableIds, keys, oneBasedColumnIndices, values, timeInfos);
                    });
 
                 mock.Setup(p => p.SetParametersIndexByKey(It.IsAny<int[]>(), It.IsAny<string[]>(), It.IsAny<int[]>(), It.IsAny<object[]>()))
                    .Returns(
-                   (int[] iIDs, string[] keys, int[] iYs, object[] values) =>
+                   (int[] tableIds, string[] keys, int[] oneBasedColumnIndices, object[] values) =>
                    {
-                       return tablesCache.SetParametersIndexByKey(iIDs, keys, iYs, values);
+                       return SetParametersIndexByKey(elementData, tableIds, keys, oneBasedColumnIndices, values);
                    });
             }
 
-            private static void SetupParametersIndexByCoordinates(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupParametersIndexByCoordinates(Mock<T> mock, ElementData elementData)
             {
                 mock.Setup(p => p.GetParameterIndex(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                    .Returns(
-                   (int iID, int iX, int iY) =>
+                   (int tableId, int oneBasedRowIndex, int oneBasedColumnIndex) =>
                    {
-                       return tablesCache.GetParameterIndex(iID, iX, iY);
+                       return elementData.GetTable(tableId).GetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex);
                    });
 
                 mock.Setup(p => p.SetParameterIndex(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
                    .Returns(
-                   (int iID, int iX, int iY, object value, DateTime timeInfo) =>
+                   (int tableId, int oneBasedRowIndex, int oneBasedColumnIndex, object value, DateTime timeInfo) =>
                    {
-                       return tablesCache.SetParameterIndex(iID, iX, iY, value, timeInfo);
+                       return elementData.GetTable(tableId).SetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex, value, timeInfo);
                    });
 
                 mock.Setup(p => p.SetParameterIndex(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>()))
                    .Returns(
-                   (int iID, int iX, int iY, object value) =>
-                   {
-                       return tablesCache.SetParameterIndex(iID, iX, iY, value);
-                   });
+                    (int tableId, int oneBasedRowIndex, int oneBasedColumnIndex, object value) =>
+                    {
+                        return elementData.GetTable(tableId).SetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex, value);
+                    });
 
                 mock.Setup(p => p.SetParametersIndex(It.IsAny<int[]>(), It.IsAny<int[]>(), It.IsAny<int[]>(), It.IsAny<object[]>(), It.IsAny<DateTime[]>()))
                    .Returns(
-                   (int[] iIDs, int[] iXs, int[] iYs, object[] values, DateTime?[] timeInfos) =>
+                   (int[] tableIds, int[] oneBasedRowIndexes, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos) =>
                    {
-                       return tablesCache.SetParametersIndex(iIDs, iXs, iYs, values, timeInfos);
+                       return SetParametersIndex(elementData, tableIds, oneBasedRowIndexes, oneBasedColumnIndexes, values, timeInfos);
                    });
 
                 mock.Setup(p => p.SetParametersIndex(It.IsAny<int[]>(), It.IsAny<int[]>(), It.IsAny<int[]>(), It.IsAny<object[]>()))
                    .Returns(
-                   (int[] iIDs, int[] iXs, int[] iYs, object[] values) =>
+                   (int[] tableIds, int[] oneBasedRowIndexes, int[] oneBasedColumnIndexes, object[] values) =>
                    {
-                       return tablesCache.SetParametersIndex(iIDs, iXs, iYs, values);
+                       return SetParametersIndex(elementData, tableIds, oneBasedRowIndexes, oneBasedColumnIndexes, values);
                    });
             }
 
-            private static void SetupCounts(Mock<T> mock, TablesCache tablesCache)
+            private static void SetupCounts(Mock<T> mock, ElementData elementData)
             {
                 mock.Setup(p => p.RowCount(It.IsAny<int>()))
                    .Returns(
                    (int tableId) =>
                    {
-                       return tablesCache.RowCount(tableId);
+                       return elementData.GetTable(tableId).RowCount;
                    });
+            }
+
+            /// <summary>
+            /// Sets the value of a cell in a table, identified by its 1-based row and column position, with the specified value.
+            /// </summary>
+            /// <param name="tableIds">The IDs of the table parameters.</param>
+            /// <param name="oneBasedRowIndexes">The 1-based positions of the rows.</param>
+            /// <param name="oneBasedColumnIndexes">The 1-based positions of the columns.</param>
+            /// <param name="values">The values to set.</param>
+            /// <param name="timeInfos">Time stamps.</param>
+            /// <returns>This method call can return an unsigned integer error code, e.g. when the size of the ids array does not
+            /// match the size of the values array. Otherwise a uint[] is returned that has the same size as the ids array containing
+            /// the HRESULT value.At each position, this array contains the result value as would be returned when performing a
+            /// SetParameterIndex call on the individual cell.In case the value in the array is 262730 (0x0004024AL), this indicates
+            /// the cell value changed.</returns>
+            private static object SetParametersIndex(ElementData elementData, int[] tableIds, int[] oneBasedRowIndexes, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
+            {
+                if (!(tableIds.Length == oneBasedRowIndexes.Length
+                        && tableIds.Length == oneBasedColumnIndexes.Length
+                        && tableIds.Length == values.Length))
+                {
+                    return 0x80040221L; // Invalid data.
+                }
+
+                if (timeInfos == null)
+                {
+                    timeInfos = new DateTime?[5];
+                }
+
+                uint[] results = new uint[tableIds.Length];
+
+                for (int i = 0; i < tableIds.Length; i++)
+                {
+                    var tableModel = elementData.GetTable(tableIds[i]);
+
+                    if (tableModel.SetParameterIndex(oneBasedRowIndexes[i], oneBasedColumnIndexes[i], values[i], timeInfos[i]))
+                    {
+                        results[i] = (uint)0x0004024AL; //// Parameter changed
+                    }
+                    else
+                    {
+                        results[i] = (uint)0x800402A4L; //// Action not performed;
+                    }
+                }
+
+                return results;
+            }
+
+            /// <summary>
+            /// Sets the value of cells in tables, identified by their primary key and 1-based column position, with the specified values.
+            /// </summary>
+            /// <param name="tableIds">The IDs of the table parameters.</param>
+            /// <param name="keys">The primary keys of the rows.</param>
+            /// <param name="oneBasedColumnIndexes">The 1-based positions of the columns.</param>
+            /// <param name="values">The values to set.</param>
+            /// <param name="timeInfos">Time stamps.</param>
+            /// <returns>This method call can return an unsigned integer error code, e.g. when the size of the ids array does not match the
+            /// size of the values array.Otherwise a uint[] is returned that has the same size as the ids array containing the HRESULT value.
+            /// At each position, this array contains the result value as would be returned when performing a SetParameterIndexByKey call on
+            /// the individual cell.In case the value in the array is 262730 (0x0004024AL), this indicates the cell value changed.</returns>
+            private static object SetParametersIndexByKey(ElementData elementData, int[] tableIds, string[] keys, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
+            {
+                if (!(tableIds.Length == keys.Length
+                        && tableIds.Length == oneBasedColumnIndexes.Length
+                        && tableIds.Length == values.Length))
+                {
+                    return 0x80040221L; // Invalid data
+                }
+
+                if (timeInfos == null)
+                {
+                    timeInfos = new DateTime?[5];
+                }
+
+                uint[] results = new uint[tableIds.Length];
+
+                for (int i = 0; i < tableIds.Length; i++)
+                {
+                    var tableModel = elementData.GetTable(tableIds[i]);
+
+                    if (tableModel.SetParameterIndexByKey(keys[i], oneBasedColumnIndexes[i], values[i], timeInfos[i]))
+                    {
+                        results[i] = (uint)0x0004024AL; // Parameter changed
+                    }
+                    else
+                    {
+                        results[i] = (uint)0x800402A4L; // Action not performed
+                    }
+                }
+
+                return results;
             }
         }
     }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     /// <summary>
@@ -10,7 +11,7 @@
     public class TableModelBuilder
     {
         private readonly int tableId;
-        private readonly Dictionary<int, int> columnIndexesToPids;
+        private readonly List<ColumnDefinition> columns = new List<ColumnDefinition>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableModelBuilder"/> class.
@@ -19,24 +20,9 @@
         public TableModelBuilder(int tableId)
         {
             this.tableId = tableId;
-            columnIndexesToPids = new Dictionary<int, int>();
         }
 
-        /// <summary>
-        /// Gets a value indicating whether a key column exists.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if a key column exists; otherwise, <c>false</c>.
-        /// </value>
-        private bool KeyColumnExists { get; set; }
-
-        /// <summary>
-        /// Gets or sets the index of the key column.
-        /// </summary>
-        /// <value>
-        /// The index of the key column.
-        /// </value>
-        private int KeyColumnIdx { get; set; }
+        private ColumnDefinition KeyColumn { get; set; }
 
         /// <summary>
         /// Returns an empty table model.
@@ -45,32 +31,35 @@
         /// <returns>An empty table model.</returns>
         public static ITableModel EmptyTableModel(int tableId)
         {
-            return new TableModel(tableId);
+            return new TableModel(tableId, Enumerable.Empty<ColumnDefinition>(), primaryKeyColumn: null);
         }
 
         /// <summary>
         /// Adds a column with the specified column ID and index.
         /// </summary>
-        /// <param name="columnPid">The column pid.</param>
-        /// <param name="idx">The index.</param>
+        /// <param name="column">The column to add.</param>
         /// <param name="isKey">if set to <c>true</c> [is key].</param>
         /// <exception cref="InvalidOperationException">Another column has already been added as primary key column.</exception>
-        public void AddColumn(int columnPid, int idx, bool isKey = false)
+        public void AddColumn(ColumnDefinition column, bool isKey = false)
         {
-            columnIndexesToPids[idx] = columnPid;
-
-            if (!isKey)
+            if (column is null)
             {
-                return;
+                throw new ArgumentNullException(nameof(column));
             }
 
-            if (KeyColumnExists)
-            {
-                throw new InvalidOperationException($"Column with pid '{columnIndexesToPids[KeyColumnIdx]}' is already the primary key column.");
-            }
+            columns.Add(column);
 
-            KeyColumnExists = true;
-            KeyColumnIdx = idx;
+            if (isKey)
+            {
+                if (KeyColumn == null)
+                {
+                    KeyColumn = column;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Column {KeyColumn} is already the primary key column.");
+                }
+            }
         }
 
         /// <summary>
@@ -80,19 +69,12 @@
         /// <exception cref="InvalidOperationException">A primary key column must be added.</exception>
         public ITableModel Build()
         {
-            if (!KeyColumnExists)
+            if (KeyColumn == null)
             {
-                throw new InvalidOperationException("A primary key column must be added.");
+                throw new InvalidOperationException("No primary key column defined.");
             }
 
-            TableModel tableModel = new TableModel(tableId);
-
-            foreach (var kvp in columnIndexesToPids)
-            {
-                tableModel.AddColumn(kvp.Value, kvp.Key, KeyColumnIdx == kvp.Key);
-            }
-
-            return tableModel;
+           return new TableModel(tableId, columns, KeyColumn);
         }
     }
 }

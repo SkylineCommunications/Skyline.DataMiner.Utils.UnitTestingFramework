@@ -7,18 +7,18 @@
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    internal class FixedParameterHandler : GeneralParameterHandler
+    internal class FixedParameterModelCreator : ParameterModelCreatorBase
     {
         private static readonly Regex HexString = new Regex(@"^(0x[0-9a-fA-F]{2})+$");
         private static readonly string[] hexStringSeparator = new[] { "0x" };
         private readonly HashSet<int> excludedPids;
 
-        public FixedParameterHandler(HashSet<int> excludedPids)
+        public FixedParameterModelCreator(HashSet<int> excludedPids)
         {
             this.excludedPids = excludedPids ?? throw new ArgumentNullException(nameof(excludedPids));
         }
 
-        protected override void ProcessString(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessString(ElementData element, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -32,12 +32,16 @@
                 // Skip title parameters
                 return;
             }
+
+            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
             string fixedValueString = parameter.Interprete.ValueElement.Value;
-            cache.Parameters.SetParameter(parameterId, fixedValueString, checkIfExists: false);
+            var parameterModel = new ParameterModel(fixedValueString);
+
+            element.AddParameter(parameterDefinition, parameterModel);
         }
 
-        protected override void ProcessDouble(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessDouble(ElementData elementData, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -51,6 +55,8 @@
                 // Skip title parameters
                 return;
             }
+
+            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
             string fixedValueString = parameter.Interprete.ValueElement.Value;
             int fixedValueInt = -1;
@@ -61,7 +67,9 @@
                 fixedValueInt = Int32.Parse(parts[0], System.Globalization.NumberStyles.HexNumber);
             }
 
-            cache.Parameters.SetParameter(parameterId, fixedValueInt, checkIfExists: false);
+            var parameterModel = new ParameterModel(fixedValueInt);
+
+            elementData.AddParameter(parameterDefinition, parameterModel);
         }
 
         private bool IsTitleParameter(IParamsParam parameter)

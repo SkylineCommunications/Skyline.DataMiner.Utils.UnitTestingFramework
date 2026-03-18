@@ -34,7 +34,7 @@
             cache.LoadParameter(100, 20);
 
             // Act
-            var paramValue = cache.GetParameter(100);
+            var paramValue = cache.GetParameterValue(100);
 
             // Assert
             Assert.AreEqual(20, paramValue);
@@ -105,7 +105,7 @@
 
             // Act
             cache.SetParameter(1000, 20);
-            var value = cache.GetParameter(1000);
+            var value = cache.GetParameterValue(1000);
 
             // Assert
             Assert.AreEqual(20, value);
@@ -126,7 +126,7 @@
             // Act
             var outputFirstSet = cache.SetParameter(1000, 20);
             var outputSecondSet = cache.SetParameter(1000, 30);
-            var outputGet = cache.GetParameter(1000);
+            var outputGet = cache.GetParameterValue(1000);
 
             // Assert
             Assert.AreEqual((int)Constants.HRESULT_SUCCESS, outputFirstSet);
@@ -189,7 +189,7 @@
 
             // Act
             var outputSet = cache.SetParameter(1000, 10, date);
-            var outputGet = cache.GetParameter(1000);
+            var outputGet = cache.GetParameterValue(1000);
 
             // Assert
             Assert.AreEqual(0, outputSet);
@@ -213,7 +213,7 @@
             // Act
             var outputFirstSet = cache.SetParameter(1000, 20, date);
             var outputSecondSet = cache.SetParameter(1000, 10, date);
-            var outputGet = cache.GetParameter(1000);
+            var outputGet = cache.GetParameterValue(1000);
 
             // Assert
             Assert.AreEqual((int)Constants.HRESULT_SUCCESS, outputFirstSet);
@@ -235,9 +235,9 @@
 
             // Act
             var valueArray = (int[])cache.SetParameters(parameterIdsArray, valuesArray);
-            var value1 = cache.GetParameter(1000);
-            var value2 = cache.GetParameter(1001);
-            var value3 = cache.GetParameter(1002);
+            var value1 = cache.GetParameterValue(1000);
+            var value2 = cache.GetParameterValue(1001);
+            var value3 = cache.GetParameterValue(1002);
 
             // Assert
             Assert.AreEqual(10, value1);
@@ -263,7 +263,7 @@
 
             // Act
             var outputSet = cache.SetParameter(1000, 35);
-            var outputGet = cache.GetParameter(1000);
+            var outputGet = cache.GetParameterValue(1000);
 
             // Assert
             Assert.AreEqual(0, outputSet);
@@ -284,7 +284,7 @@
 
             // Act
             var outputSet = cache.SetParameter(1002, 0x0C);
-            var outputGet = cache.GetParameter(1002);
+            var outputGet = cache.GetParameterValue(1002);
 
             // Assert
             Assert.AreEqual(0, outputSet);
@@ -343,9 +343,9 @@
 
             // Act
             var outputSet = (int[])cache.SetParameters(parameterIdsArray, valuesArray, timestampsArray);
-            var value1 = cache.GetParameter(1);
-            var value2 = cache.GetParameter(2);
-            var value3 = cache.GetParameter(3);
+            var value1 = cache.GetParameterValue(1);
+            var value2 = cache.GetParameterValue(2);
+            var value3 = cache.GetParameterValue(3);
 
             // Assert
             Assert.AreEqual(10, value1);

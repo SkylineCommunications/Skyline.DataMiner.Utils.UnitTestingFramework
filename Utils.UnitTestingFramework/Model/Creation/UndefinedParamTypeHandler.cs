@@ -5,7 +5,7 @@
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    internal class UndefinedParamTypeHandler : IParameterHandler
+    internal class UndefinedParamTypeHandler : IDataModelCreator
     {
         private readonly HashSet<int> excludedPids;
 
@@ -14,7 +14,7 @@
             this.excludedPids = excludedPids;
         }
 
-        public void CreateModelAndAddToCache(IProtocolCache cache, IParamsParam parameter)
+        public void CreateModelAndAddToElementData(ElementData elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
         {
         }
     }

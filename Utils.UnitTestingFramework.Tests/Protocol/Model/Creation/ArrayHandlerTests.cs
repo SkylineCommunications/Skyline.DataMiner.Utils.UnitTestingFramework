@@ -23,7 +23,7 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
+            var arrayHandler = new TableModelCreator(excludedPids);
             var tableModel = arrayHandler.CreateTableModelFromArrayOptions(parameter);
 
             // Assert
@@ -33,10 +33,10 @@
             Assert.AreEqual(903, tableModel.ColumnIndexesToPids[2]);
             Assert.AreEqual(904, tableModel.ColumnIndexesToPids[3]);
             Assert.AreEqual(905, tableModel.ColumnIndexesToPids[4]);
-            Assert.AreEqual(5, tableModel.ColumnCount);
+            Assert.AreEqual(5, tableModel.GetColumnCount());
             Assert.AreEqual(900, tableModel.TableId);
-            Assert.AreEqual(0, tableModel.PrimaryKeyColumnIdx);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx]);
+            Assert.AreEqual(0, tableModel.PrimaryKeyColumn);
+            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumn]);
         }
 
         [TestMethod]
@@ -51,17 +51,17 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
+            var arrayHandler = new TableModelCreator(excludedPids);
             var tableModel = arrayHandler.CreateTableModelFromArrayOptions(parameter);
 
             // Assert
             Assert.AreEqual(2, tableModel.ColumnIndexesToPids.Count);
             Assert.AreEqual(901, tableModel.ColumnIndexesToPids[1]);
             Assert.AreEqual(901, tableModel.ColumnIndexesToPids[2]);
-            Assert.AreEqual(1, tableModel.ColumnCount);
+            Assert.AreEqual(1, tableModel.GetColumnCount());
             Assert.AreEqual(910, tableModel.TableId);
-            Assert.AreEqual(1, tableModel.PrimaryKeyColumnIdx);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx]);
+            Assert.AreEqual(1, tableModel.PrimaryKeyColumn);
+            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumn]);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
+            var arrayHandler = new TableModelCreator(excludedPids);
 
             // Act & Assert
             Assert.ThrowsExactly<InvalidOperationException>(
@@ -95,7 +95,7 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
+            var arrayHandler = new TableModelCreator(excludedPids);
 
             // Act & Assert
             Assert.ThrowsExactly<InvalidOperationException>(

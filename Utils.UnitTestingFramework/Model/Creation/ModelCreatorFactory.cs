@@ -6,21 +6,21 @@
 
     internal static class ModelCreatorFactory
     {
-        public static IParameterHandler Create(EnumParamType paramType, HashSet<int> excludedPids)
+        public static IDataModelCreator Create(EnumParamType paramType, HashSet<int> excludedPids)
         {
             switch (paramType)
             {
                 case EnumParamType.Read:
-                    return new ReadParameterHandler(excludedPids);
+                    return new ReadParameterModelCreator(excludedPids);
 
                 case EnumParamType.Fixed:
-                    return new FixedParameterHandler(excludedPids);
+                    return new FixedParameterModelCreator(excludedPids);
 
                 case EnumParamType.Write:
-                    return new WriteParameterHandler(excludedPids);
+                    return new WriteParameterModelCreator(excludedPids);
 
                 case EnumParamType.Array:
-                    return new ArrayHandler(excludedPids);
+                    return new TableModelCreator(excludedPids);
 
                 default:
                     return new UndefinedParamTypeHandler(excludedPids);

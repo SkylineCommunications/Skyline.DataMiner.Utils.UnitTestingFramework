@@ -71,8 +71,8 @@
         {
             var updatedTimestamp = timestamp ?? DateTime.Now;
             EventHandler<ParameterModelChangedEventArgs> handler;
-            object oldValue;
-            DateTime oldTimestamp;
+            var oldValue = this.value;
+            var oldTimestamp = this.timestamp;
 
             lock (syncRoot)
             {
@@ -80,9 +80,6 @@
                 {
                     return;
                 }
-
-                oldValue = this.value;
-                oldTimestamp = this.timestamp;
 
                 this.value = value;
                 this.timestamp = updatedTimestamp;

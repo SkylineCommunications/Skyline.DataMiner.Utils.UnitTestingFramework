@@ -6,18 +6,18 @@
 
     internal class Asserter : IAsserter
     {
-        private readonly IProtocolCache cache;
+        private readonly ElementData elementData;
 
-        public Asserter(IProtocolCache protocolCache)
+        public Asserter(ElementData elementData)
         {
-            cache = protocolCache ?? throw new ArgumentNullException(nameof(protocolCache));
+            this.elementData = elementData ?? throw new ArgumentNullException(nameof(elementData));
         }
 
         public IParameterModel Parameter(int parameterId)
         {
             try
             {
-                return cache.Parameters.GetParameterModel(parameterId);
+                return elementData.GetParameter(parameterId);
             }
             catch
             {
@@ -27,12 +27,12 @@
 
         public IParameterModel Parameter(string parameterName)
         {
-            return cache.Parameters.GetParameterModel(parameterName);
+            return elementData.GetParameter(parameterName);
         }
 
         public ITableAsserter Table(int tablePid)
         {
-            return new TableAsserter(cache.Tables.GetTable(tablePid));
+            return new TableAsserter(elementData.GetTable(tablePid));
         }
     }
 }

@@ -21,14 +21,14 @@
         public void AddRowTest_ValidPKRowArray_EqualRowNumber()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "notOne", "notTwo", 6, 7, 8 };
 
             // Act
-            var rowsNumber1 = tablesCache.AddRow(900, row1);
-            var rowsNumber2 = tablesCache.AddRow(900, row2);
+            var rowsNumber1 = tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            var rowsNumber2 = tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Assert
             Assert.AreEqual(1, rowsNumber1);
@@ -39,14 +39,14 @@
         public void AddRowTest_DuplicatedPKInRowArray_OnlyAddsFirst()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
             object[] row2 = new object[] { "one", "notTwo", 6, 7, 8 };
 
             // Act
-            var rowsNumber1 = tablesCache.AddRow(900, row1);
-            var rowsNumber2 = tablesCache.AddRow(900, row2);
+            var rowsNumber1 = tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            var rowsNumber2 = tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Assert
             Assert.AreEqual(1, rowsNumber1);
@@ -57,26 +57,26 @@
         public void AddRowTest_InexistentTableIdRowArray_DoesNotAdd()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
             // Act
-            Assert.Throws<Exception>(() => tablesCache.AddRow(800, row1));
+            Assert.Throws<Exception>(() => tablesCache.SetRowReturnOneBasedIndex(800, row1));
         }
 
         [TestMethod]
         public void AddRowTest_MoreEntriesThanColumnsRowArray_CorrectAdds()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two", 3, 4, 5, 6, 7 };
 
             // Act
-            var rowsNumber1 = tablesCache.AddRow(900, row);
+            var rowsNumber1 = tablesCache.SetRowReturnOneBasedIndex(900, row);
 
             // Assert
             Assert.AreEqual(1, rowsNumber1);
@@ -86,13 +86,13 @@
         public void AddRowTest_LessEntriesThanColumnsRowArray_CorrectAdds()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two" };
 
             // Act
-            var rowsNumber1 = tablesCache.AddRow(900, row);
+            var rowsNumber1 = tablesCache.SetRowReturnOneBasedIndex(900, row);
 
             // Assert
             Assert.AreEqual(1, rowsNumber1);
@@ -102,7 +102,7 @@
         public void AddRowTest_ValidOnlyPK_EqualRowNumber()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
 
@@ -119,7 +119,7 @@
         public void AddRowTest_DuplicatedPK_OnlyAddsFirst()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
 
@@ -136,7 +136,7 @@
         public void AddRowTest_InexistentTableId_DoesNotAdd()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
 
@@ -148,7 +148,7 @@
         public void ExistsTest_ValidAddRow_PKExists()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
 
@@ -165,7 +165,7 @@
         public void ExistsTest_ValidAddRow_InvalidTableId()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
 
@@ -177,7 +177,7 @@
         public void ExistsTest_ValidAddRow_PKDoesNotExist()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
 
@@ -194,7 +194,7 @@
         public void AddRowReturnKeyTest_ValidPK_EqualRowNumber()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
@@ -213,7 +213,7 @@
         public void AddRowReturnKeyTest_DuplicatedPK_OnlyAddsFirst()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
 
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
@@ -231,7 +231,7 @@
         public void AddRowReturnKeyTest_InexistentTableId_DoesNotAdd()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "two", 3, 4, 5 };
 
@@ -243,7 +243,7 @@
         public void AddRowReturnKeyTest_MoreEntriesThanColumns_CorrectAdds()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two", 3, 4, 5, 6, 7 };
 
@@ -260,7 +260,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "one", "two" };
 
@@ -277,7 +277,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -317,7 +317,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -359,7 +359,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -403,7 +403,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -480,7 +480,7 @@
         public void DeleteRowTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act &  Assert
@@ -493,7 +493,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -512,7 +512,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -552,7 +552,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -594,7 +594,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -638,7 +638,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -715,7 +715,7 @@
         public void DeleteRowPrimaryKeyTest_InexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act &  Assert
@@ -726,7 +726,7 @@
         public void DeleteRowPrimaryKeyTest_InexistentRowIndex_ReturnsZero()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
 
@@ -743,7 +743,7 @@
         public void DeleteRowPKArrayTest_DeleteTwoPK_EqualRowNumber()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -783,7 +783,7 @@
         public void DeleteRowPKArrayTest_DeleteInexistentTableId_ReturnsZero()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             string[] toDelete = new string[] { "one", "two", "seven" };
 
@@ -797,7 +797,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
@@ -829,14 +829,14 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "one", "one", 3, 4, 5 };
             object[] row2 = new object[] { "two", "two", 6, 7, 8 };
 
             // Act
-            var rowsNumber1 = tablesCache.AddRow(900, row1);
-            var rowsNumber2 = tablesCache.AddRow(900, row2);
+            var rowsNumber1 = tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            var rowsNumber2 = tablesCache.SetRowReturnOneBasedIndex(900, row2);
             var rowsLeft = tablesCache.ClearAllKeys(900);
 
             // Assert
@@ -849,7 +849,7 @@
         public void ClearAllKeysTest_InexistentTableId_ReturnsNegativeOne()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act &  Assert
@@ -860,7 +860,7 @@
         public void ClearAllKeysTest_EmptyTable_ReturnsZero()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -874,7 +874,7 @@
         public void GetKeyPositionTest_ValidOnlyPK_EqualKeyPosition()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -904,7 +904,7 @@
         public void GetKeyPositionTest_InvalidTableId_ReturnsZero()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act &  Assert
@@ -915,7 +915,7 @@
         public void GetKeyPositionTest_InexistentKey_ReturnsZero()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act
@@ -926,7 +926,7 @@
         public void SetRowWithIndexTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -940,7 +940,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -964,13 +964,13 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 10 };
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
             int[] changes = (int[])tablesCache.SetRow(900, 0, row2);
             object[] rowOutput = (object[])tablesCache.GetRow(900, 0);
 
@@ -991,14 +991,14 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline1", 10 };
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
             int[] changes = (int[])tablesCache.SetRow(900, 0, row2);
             object[] rowOutput = (object[])tablesCache.GetRow(900, 0);
 
@@ -1017,7 +1017,7 @@
         public void SetRowWithPKTest_InexistentTableId_ReturnsNull()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1029,7 +1029,7 @@
         public void SetRowWithPKTest_InexistentRowIndex_ReturnsArrayWithZeros()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
@@ -1041,14 +1041,14 @@
         public void SetRowWithPKTest_LessEntriesThanColumns_IsEqual()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 10 };
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
             int[] changes = (int[])tablesCache.SetRow(900, "skyline1", row2);
             object[] rowOutput = (object[])tablesCache.GetRow(900, 0);
 
@@ -1067,11 +1067,11 @@
         public void SetRowWithPrimaryKey_UseClearAndLeave_IsEqual()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             var row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
-            tablesCache.AddRow(900 , row1);
+            tablesCache.SetRowReturnOneBasedIndex(900 , row1);
 
             // Act
             tablesCache.SetRow(900, "skyline1", new object[5] { Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE, Constants.PROTOCOL_LEAVE }, useClearAndLeave: true);
@@ -1093,15 +1093,15 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             object[] rowOutput = (object[])tablesCache.GetRow(900, 2);
 
             // Assert
@@ -1118,15 +1118,15 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             object rowOutput = tablesCache.GetRow(800, 0);
 
             // Assert
@@ -1139,15 +1139,15 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             object[] rowOutput = (object[])tablesCache.GetRow(900, 1);
 
             // Assert
@@ -1164,15 +1164,15 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             object[] rowOutput = (object[])tablesCache.GetRow(900, "skyline3");
 
             // Assert
@@ -1187,7 +1187,7 @@
         public void GetRowWithPKTest_InexistentTableId_IsNull()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act &  Assert
@@ -1198,15 +1198,15 @@
         public void GetRowWithPKTest_ValidTaleIdAndIndex_IsEqual()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             object[] rowOutput = (object[])tablesCache.GetRow(900, "skyline2");
 
             // Assert
@@ -1223,7 +1223,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1242,9 +1242,9 @@
 
             tablesCache.FillArray(900, listOfRows, NotifyProtocol.SaveOption.Partial);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
-            tablesCache.AddRow(900, row5);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row5);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, 0);
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, 1);
@@ -1290,7 +1290,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1309,12 +1309,12 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             tablesCache.FillArray(900, listOfRows, NotifyProtocol.SaveOption.Partial);
 
-            tablesCache.AddRow(900, row5);
+            tablesCache.SetRowReturnOneBasedIndex(900, row5);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, 0);
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, 1);
@@ -1360,7 +1360,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1377,10 +1377,10 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             tablesCache.FillArray(900, listOfRows, NotifyProtocol.SaveOption.Partial);
-            tablesCache.AddRow(900, row5);
+            tablesCache.SetRowReturnOneBasedIndex(900, row5);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, 0);
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, 1);
@@ -1424,7 +1424,7 @@
         public void FillArrayPartialTest_FillArrayAfterAddRowChangesRow_IsEqual()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1443,10 +1443,10 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             tablesCache.FillArray(900, listOfRows, NotifyProtocol.SaveOption.Partial);
-            tablesCache.AddRow(900, row5);
+            tablesCache.SetRowReturnOneBasedIndex(900, row5);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, 0);
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, 1);
@@ -1490,7 +1490,7 @@
         public void FillArrayFullTest_FillArrayBeforeAddRow_IsEqual()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
@@ -1509,10 +1509,10 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             tablesCache.FillArray(900, listOfRows, NotifyProtocol.SaveOption.Full);
-            tablesCache.AddRow(900, row5);
+            tablesCache.SetRowReturnOneBasedIndex(900, row5);
 
             object[] rowOutput0 = (object[])tablesCache.GetRow(900, 0);
             object[] rowOutput1 = (object[])tablesCache.GetRow(900, 1);
@@ -1542,7 +1542,7 @@
         public void FillArray_FillArrayAfterAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1565,7 +1565,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArray(900, columns);
 
@@ -1604,7 +1604,7 @@
         public void FillArray_FillArrayAfterFillArray_UseClearAndLeave()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] col1 = new object[] { "skyline1", "skyline2", "skyline3", "skyline4" };
@@ -1661,7 +1661,7 @@
         public void FillArray_FillArrayAfterTwoAddRow_GetCorrectRows()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1685,8 +1685,8 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             tablesCache.FillArray(900, columns);
 
@@ -1720,7 +1720,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1744,8 +1744,8 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             tablesCache.FillArray(900, listOfCols);
 
@@ -1765,7 +1765,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             DateTime timestamps = new DateTime(2022, 7, 14);
@@ -1790,7 +1790,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArray(900, listOfCols, timestamps);
 
@@ -1831,7 +1831,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndColumnSkyline1", 10, 20, 30 };
@@ -1847,7 +1847,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArray(900, arrayOfCols);
 
@@ -1888,7 +1888,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -1911,7 +1911,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArrayNoDelete(900, listOfCols);
 
@@ -1959,7 +1959,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -1983,8 +1983,8 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             tablesCache.FillArrayNoDelete(900, listOfCols);
 
@@ -2032,7 +2032,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -2048,7 +2048,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArrayNoDelete(900, arrayOfCols);
 
@@ -2096,7 +2096,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "one", "2ndOne", 10, 20, 30 };
@@ -2113,8 +2113,8 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             tablesCache.FillArrayNoDelete(900, arrayOfCols);
 
@@ -2160,7 +2160,7 @@
         public void FillArrayWithColumn_FillArrayWithSameUniqueValue_GetCorrectRows()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             var primaryKeys = new[] { "skyline1", "skyline2" };
@@ -2193,7 +2193,7 @@
         public void FillArrayWithColumn_FillArraysWithDifferentLengths_Exception()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             var pk = new [] { "skyline1", "skyline2", "skyline3" };
@@ -2212,7 +2212,7 @@
         public void FillArrayWithColumn_FillArray_GetCorrectRows()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             var pk = new[] { "skyline1", "skyline2" };
@@ -2245,7 +2245,7 @@
         public void FillArrayWithColumn_FillArray_ReplaceRow()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
@@ -2257,7 +2257,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArrayWithColumn(900, 902, pk, values);
 
@@ -2282,7 +2282,7 @@
         public void FillArrayWithColumn_FillArray_ReplaceRowWithProtocolLeave()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
@@ -2294,7 +2294,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArrayWithColumn(900, 902, pk, values, useClearAndLeave: true);
 
@@ -2319,7 +2319,7 @@
         public void FillArrayWithColumn_FillArray_ReplaceRowWithProtocolClear()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
@@ -2331,7 +2331,7 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
 
             tablesCache.FillArrayWithColumn(900, 902, pk, values, useClearAndLeave: true);
 
@@ -2358,7 +2358,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             var pk = new[] { "skyline1", "skyline2" };
@@ -2391,7 +2391,7 @@
         public void FillArrayWithColumn_InexistentColumnPid_EmptyTable()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             var pk = new[] { "skyline1", "skyline2" };
@@ -2426,7 +2426,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableId = 900;
@@ -2449,7 +2449,7 @@
         public void FillArrayWithColumns_FillArraysWithColumnsDifferentLengths_Exception()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2478,7 +2478,7 @@
         public void FillArrayWithColumns_FillArray_GetCorrectRows()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2528,7 +2528,7 @@
         public void FillArrayWithColumns_FillArray_ReplaceRow()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2551,8 +2551,8 @@
             // Act
             tablesCache.ClearAllKeys(900);
 
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             tablesCache.FillArrayWithColumns(tableID, pk, columnPidsToValues);
 
@@ -2584,7 +2584,7 @@
         public void FillArrayWithColumns_NotConsecutiveRows_GetCorrectRows()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2634,7 +2634,7 @@
         public void FillArrayWithColumns_InexistentColumnPid_ThrowsException()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int tableID = 900;
@@ -2659,7 +2659,7 @@
         public void RowCount_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -2670,7 +2670,7 @@
         public void RowCount_GetCorrectCount()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2680,8 +2680,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             int actual = tablesCache.RowCount(900);
 
             // Assert
@@ -2694,7 +2694,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int expected = 0;
@@ -2713,7 +2713,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2724,9 +2724,9 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
-            tablesCache.AddRow(900, row3);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row3);
 
             tablesCache.DeleteRow(900, 1);
             int actual = tablesCache.RowCount(900);
@@ -2739,7 +2739,7 @@
         public void GetKeys_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -2752,7 +2752,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2762,8 +2762,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             string[] actual = tablesCache.GetKeys(900);
 
             // Assert
@@ -2776,7 +2776,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             string[] expected = new string[] { };
@@ -2793,7 +2793,7 @@
         public void GetParameterIndex_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -2806,15 +2806,15 @@
         public void GetParameterIndex_InvalidOneBasedRowIndex(int oneBasedRowIndexToGet)
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.GetParameterIndex(900, oneBasedRowIndexToGet, 0));
@@ -2826,15 +2826,15 @@
         public void GetParameterIndex_InvalidOneBasedColumnIndex(int oneBasedColumnIndex)
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.GetParameterIndex(900, 0, oneBasedColumnIndex));
@@ -2846,7 +2846,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2856,8 +2856,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             object actual = tablesCache.GetParameterIndex(900, 1, 2);
 
             // Assert
@@ -2868,7 +2868,7 @@
         public void GetParameterIndex_EmptyTable()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -2879,7 +2879,7 @@
         public void SetParameterIndex_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -2890,7 +2890,7 @@
         public void SetParameterIndex_EmptyTable()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -2903,15 +2903,15 @@
         public void SetParameterIndex_InvalidOneBasedRowIndex(int oneBasedRowIndexToSet)
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParameterIndex(900, oneBasedRowIndexToSet, 2, "change"));
@@ -2923,15 +2923,15 @@
         public void SetParameterIndex_Invalid_Y_Coordinate(int oneBasedColumnIndexToSet)
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParameterIndex(900, 1, oneBasedColumnIndexToSet, "change"));
@@ -2943,7 +2943,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -2954,8 +2954,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             bool actual_return = tablesCache.SetParameterIndex(900, 1, 2, "change");
             object[] changed_row = (object[])tablesCache.GetRow(900, 0);
             object actual_value = changed_row[1];
@@ -2969,7 +2969,7 @@
         public void SetParametersIndex_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] ids = new int[] { 901 };
@@ -2985,7 +2985,7 @@
         public void SetParametersIndex_EmptyTable()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] ids = new int[] { 900 };
@@ -3001,7 +3001,7 @@
         public void SetParametersIndex_InvalidOneBasedColumnIndex()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3012,8 +3012,8 @@
             int[] iYs = new int[] { 2, 2 };
             object[] values = new object[] { "change1", "change2" };
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParametersIndex(ids, iXs, iYs, values));
@@ -3023,7 +3023,7 @@
         public void SetParametersIndex_Invalid_Y_Coordinate()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3035,8 +3035,8 @@
             object[] values = new object[] { "change1", "change2" };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act  & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParametersIndex(ids, iXs, iYs, values));
@@ -3046,7 +3046,7 @@
         public void SetParametersIndex_DifferentSizeArrays()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3061,8 +3061,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             uint actual = Convert.ToUInt32(tablesCache.SetParametersIndex(ids, iXs, iYs, values));
 
             // Assert
@@ -3073,7 +3073,7 @@
         public void SetParametersIndex_SetCorrectValues()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3090,8 +3090,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             uint[] actual_return = (uint[])tablesCache.SetParametersIndex(ids, iXs, iYs, values);
             object[] actual_row1 = (object[])tablesCache.GetRow(900, iXs[0] - 1);
             object[] actual_row2 = (object[])tablesCache.GetRow(900, iXs[1] - 1);
@@ -3106,7 +3106,7 @@
         public void GetParameterIndexByKey_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -3117,7 +3117,7 @@
         public void GetParameterIndexByKey_Invalid_PrimaryKey()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3126,8 +3126,8 @@
             string key = "Ghost";
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.GetParameterIndexByKey(900, key, 2));
@@ -3139,15 +3139,15 @@
         public void GetParameterIndexByKey_InvalidOneBasedRowIndex(int oneBasedColumnIndexToGet)
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act
             Assert.Throws<Exception>(() => tablesCache.GetParameterIndexByKey(900, "skyline1", oneBasedColumnIndexToGet));
@@ -3157,7 +3157,7 @@
         public void GetParameterIndexByKey_GetCorrectCell()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3167,8 +3167,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             object actual = tablesCache.GetParameterIndexByKey(900, "skyline1", 2);
 
             // Assert
@@ -3179,7 +3179,7 @@
         public void GetParameterIndexByKey_UninitializedCells()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[3];
@@ -3191,7 +3191,7 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
             object actual = tablesCache.GetParameterIndexByKey(900, "key", 2);
 
             // Assert
@@ -3202,7 +3202,7 @@
         public void SetParameterIndexByKey_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -3213,7 +3213,7 @@
         public void SetParameterIndexByKey_EmptyTable()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -3224,7 +3224,7 @@
         public void SetParameterIndexByKey_Invalid_PrimaryKey()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3233,8 +3233,8 @@
             string key = "Ghost";
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParameterIndexByKey(900, key, 2, "change"));
@@ -3246,15 +3246,15 @@
         public void SetParameterIndexByKey_InvalidOneBasedColumnIndex(int oneBasedColumnIndexToSet)
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
             object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParameterIndexByKey(900, "skyline1", oneBasedColumnIndexToSet, "change"));
@@ -3264,7 +3264,7 @@
         public void SetParameterIndexByKey_SetCorrectValue()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3275,8 +3275,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             bool actual_return = tablesCache.SetParameterIndexByKey(900, "skyline1", 2, expected_value);
             object[] changed_row = (object[])tablesCache.GetRow(900, 0);
             object actual_value = changed_row[1];
@@ -3290,7 +3290,7 @@
         public void SetParametersIndexByKey_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] ids = new int[] { 901 };
@@ -3306,7 +3306,7 @@
         public void SetParametersIndexByKey_EmptyTable()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             int[] tablePids = new int[] { 900 };
@@ -3322,7 +3322,7 @@
         public void SetParametersIndexByKey_Invalid_PrimaryKey()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3334,8 +3334,8 @@
             object[] values = new object[] { "change1" };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParametersIndexByKey(ids, keys, iYs, values));
@@ -3345,7 +3345,7 @@
         public void SetParametersIndexByKey_InvalidOneBasedColumnIndex()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3357,8 +3357,8 @@
             object[] values = new object[] { "change1", "change2" };
 
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
 
             // Act & Assert
             Assert.Throws<Exception>(() => tablesCache.SetParametersIndexByKey(ids, keys, iYs, values));
@@ -3368,7 +3368,7 @@
         public void SetParametersIndexByKey_DifferentSizeArrays()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3383,8 +3383,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             uint actual = Convert.ToUInt32(tablesCache.SetParametersIndexByKey(ids, keys, iYs, values));
 
             // Assert
@@ -3395,7 +3395,7 @@
         public void SetParametersIndexByKey_SetCorrectValues()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
@@ -3412,8 +3412,8 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
             uint[] actual_return = (uint[])tablesCache.SetParametersIndexByKey(ids, keys, iYs, values);
             object[] actual_row1 = (object[])tablesCache.GetRow(900, 0);
             object[] actual_row2 = (object[])tablesCache.GetRow(900, 1);
@@ -3428,7 +3428,7 @@
         public void AddRowReturnKey_InexistentTableID()
         {
             // Arrange
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             // Act & Assert
@@ -3441,7 +3441,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             string expected = "1";
@@ -3463,7 +3463,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "1", null, null, null, null };
@@ -3473,7 +3473,7 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
             string actual = tablesCache.AddRowReturnKey(900);
             object[] actual_row = (object[])tablesCache.GetRow(900, "2");
 
@@ -3488,7 +3488,7 @@
             // Arrange
 
 
-            var protocolCache = ProtocolCacheBuilder.Build(path);
+            var protocolCache = ElementDataBuilder.Build(path);
             var tablesCache = protocolCache.Tables;
 
             object[] row1 = new object[] { "1", null, null, null, null };
@@ -3500,9 +3500,9 @@
 
             // Act
             tablesCache.ClearAllKeys(900);
-            tablesCache.AddRow(900, row1);
-            tablesCache.AddRow(900, row2);
-            tablesCache.AddRow(900, row5);
+            tablesCache.SetRowReturnOneBasedIndex(900, row1);
+            tablesCache.SetRowReturnOneBasedIndex(900, row2);
+            tablesCache.SetRowReturnOneBasedIndex(900, row5);
             string actual = tablesCache.AddRowReturnKey(900);
             object[] actual_row = (object[])tablesCache.GetRow(900, "6");
 

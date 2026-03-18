@@ -3,8 +3,8 @@
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    internal interface IParameterHandler
+    internal interface IDataModelCreator
     {
-        void CreateModelAndAddToCache(IProtocolCache cache, IParamsParam parameter);
+        void CreateModelAndAddToElementData(ElementData elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder);
     }
 }

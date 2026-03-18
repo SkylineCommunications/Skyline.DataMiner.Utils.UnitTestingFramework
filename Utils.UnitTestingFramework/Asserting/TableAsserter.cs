@@ -15,7 +15,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
             this.tableModel = tableModel;
         }
 
-        public int ColumnCount => tableModel?.ColumnCount ?? 0;
+        public int ColumnCount => tableModel?.GetColumnCount() ?? 0;
 
         public int RowCount => tableModel?.RowCount ?? 0;
 
@@ -28,7 +28,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
         {
             try
             {
-                return tableModel?.GetColumn(pid);
+                return tableModel?.GetColumnByPid(pid);
             }
             catch
             {

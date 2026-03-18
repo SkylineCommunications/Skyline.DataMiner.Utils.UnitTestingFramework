@@ -2,34 +2,25 @@
 {
     using System;
 
-    public sealed class Column
+    public class ParameterDefinition : IEquatable<ParameterDefinition>
     {
-        public Column(string name, Type type, int pid, int idx, bool allowNull = true)
+        public ParameterDefinition(string name, Type type, int pid, bool allowNull = true)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException($"'{nameof(name)}' cannot be null or whitespace.", nameof(name));
             }
-
             if (Type != typeof(string) && Type != typeof(double))
             {
-                throw new ArgumentException("Only 'string' and 'double' column types are supported.", nameof(type));
+                throw new ArgumentException("Only 'string' and 'double' parameter types are supported.", nameof(type));
             }
-
             if (pid <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(pid), pid, $"'{nameof(pid)}' cannot be negative or zero");
             }
-
-            if (idx < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(idx), idx, $"'{nameof(idx)}' cannot be negative");
-            }
-
             Name = name;
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Pid = pid;
-            Idx = idx;
             AllowNull = allowNull;
         }
 
@@ -37,11 +28,29 @@
 
         public Type Type { get; }
 
-        public int Pid { get; set; }
-
-        public int Idx { get; set; }
+        public int Pid { get; }
 
         public bool AllowNull { get; }
+
+        public bool Equals(ParameterDefinition other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Name == other.Name && Type == other.Type && Pid == other.Pid && AllowNull == other.AllowNull;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} (PID: {Pid}, Type: {Type.Name}, AllowNull: {AllowNull})";
+        }
 
         internal void Validate(object value)
         {
@@ -49,15 +58,14 @@
             {
                 if (!AllowNull)
                 {
-                    throw new InvalidOperationException($"Column '{Name}' does not allow nulls.");
+                    throw new InvalidOperationException($"Parameter '{Name}' does not allow nulls.");
                 }
-
                 return;
             }
 
             if (!Type.IsInstanceOfType(value))
             {
-                throw new InvalidOperationException($"Invalid value type for column '{Name}'. Expected {Type}, got {value.GetType()}.");
+                throw new InvalidOperationException($"Invalid value type for parameter '{Name}'. Expected {Type}, got {value.GetType()}.");
             }
         }
     }

@@ -258,7 +258,7 @@
                 });
             }
 
-            int keyColumnIdx = tableModel.PrimaryKeyColumnIdx;
+            int keyColumnIdx = tableModel.PrimaryKeyColumn;
             int keyColumnPid = tableModel.ColumnIndexesToPids[keyColumnIdx];
 
             cache.Parameters.TryGetParameterNameByPID(tableId, out string tableName);
@@ -322,7 +322,7 @@
                 });
             }
 
-            int keyColumnIdx = tableModel.PrimaryKeyColumnIdx;
+            int keyColumnIdx = tableModel.PrimaryKeyColumn;
             int keyColumnPid = tableModel.ColumnIndexesToPids[keyColumnIdx];
 
             cache.Parameters.TryGetParameterNameByPID(tableId, out string tableName);
@@ -390,7 +390,7 @@
                     });
                 }
 
-                int keyColumnIdx = tableModel.PrimaryKeyColumnIdx;
+                int keyColumnIdx = tableModel.PrimaryKeyColumn;
                 int keyColumnPid = tableModel.ColumnIndexesToPids[keyColumnIdx];
 
                 cache.Parameters.TryGetParameterNameByPID(id, out string tableName);

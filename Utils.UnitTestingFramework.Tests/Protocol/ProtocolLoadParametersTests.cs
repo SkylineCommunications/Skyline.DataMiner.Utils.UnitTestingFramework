@@ -55,7 +55,7 @@
 
             // Act & Assert
             Assert.ThrowsExactly<DirectoryNotFoundException>(
-                () => ProtocolCacheBuilder.Build(missingDirectoryPath));
+                () => ElementDataBuilder.Build(missingDirectoryPath));
         }
 
         [TestMethod]

@@ -5,16 +5,16 @@
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
 
-    internal class WriteParameterHandler : GeneralParameterHandler
+    internal class WriteParameterModelCreator : ParameterModelCreatorBase
     {
         private readonly HashSet<int> excludedPids;
 
-        public WriteParameterHandler(HashSet<int> excludedPids)
+        public WriteParameterModelCreator(HashSet<int> excludedPids)
         {
             this.excludedPids = excludedPids ?? throw new System.ArgumentNullException(nameof(excludedPids));
         }
 
-        protected override void ProcessString(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessString(ElementData elementData, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -23,10 +23,12 @@
                 return;
             }
 
-            cache.Parameters.SetParameter(parameterId, null, null, false);
+            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+
+            elementData.AddParameter(parameterDefinition);
         }
 
-        protected override void ProcessDouble(IProtocolCache cache, IParamsParam parameter)
+        protected override void ProcessDouble(ElementData elementData, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -35,7 +37,9 @@
                 return;
             }
 
-            cache.Parameters.SetParameter(parameterId, null, null, false);
+            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+
+            elementData.AddParameter(parameterDefinition);
         }
     }
 }

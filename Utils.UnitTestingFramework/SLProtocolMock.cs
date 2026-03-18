@@ -4,10 +4,12 @@
 [assembly: InternalsVisibleTo("Utils.UnitTestingFramework.SnapshotTools.Tests")]
 namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
 {
+    using System;
     using Moq;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     /// <summary>
     /// SLProtocol mock.
@@ -29,7 +31,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
     public partial class SLProtocolMock<T> : Mock<T>
         where T : class, SLProtocol
     {
-        private readonly ProtocolCache protocolCache;
+        private readonly ElementData elementData;
         private readonly NotifyProtocolHelper notifyProtocolHelper;
 
         /// <summary>
@@ -40,11 +42,26 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
         {
             var protocolModel = ProtocolModelBuilder.Build(customPathToProtocolXml);
 
-            this.protocolCache = ProtocolCacheBuilder.Build(protocolModel);
+            this.elementData = ElementDataBuilder.Build(protocolModel);
 
-            this.notifyProtocolHelper = new NotifyProtocolHelper(protocolCache);
+            this.notifyProtocolHelper = new NotifyProtocolHelper(elementData);
 
             ProtocolMockSetupHelper.Setup(this, protocolModel);
+        }
+
+        public IParameterModel GetParameter(int parameterId)
+        {
+            return elementData.GetParameter(parameterId) ?? throw new InvalidOperationException($"Parameter with ID {parameterId} does not exist");
+        }
+
+        public IParameterModel GetParameter(string parameterName)
+        {
+            return elementData.GetParameter(parameterName) ?? throw new InvalidOperationException($"Parameter with name '{parameterName}' does not exist");
+        }
+
+        public ITableModel GetTable(int tableId)
+        {
+            return elementData.GetTable(tableId) ?? throw new InvalidOperationException($"Table with ID {tableId} does not exist");
         }
 
         /// <summary>
@@ -53,7 +70,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
         /// <returns><see cref="IAsserter"/> interface.</returns>
         public IAsserter Assert()
         {
-            return new Asserter(protocolCache);
+            return new Asserter(elementData);
         }
     }
 }

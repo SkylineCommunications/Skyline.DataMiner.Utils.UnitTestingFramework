@@ -4,8 +4,11 @@
     using System.Collections.Generic;
     using System.Linq;
     using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using ElementData = Data.ElementData;
 
     public partial class SLProtocolMock<T> where T : class, SLProtocol
     {
@@ -36,11 +39,11 @@
             };
 
             private readonly Dictionary<NotifyType, Func<object, object, object>> notifyToActionMapper = new Dictionary<NotifyType, Func<object, object, object>>();
-            private readonly ProtocolCache protocolCache;
+            private readonly ElementData elementData;
 
-            public NotifyProtocolHelper(ProtocolCache protocolCache)
+            public NotifyProtocolHelper(ElementData elementData)
             {
-                this.protocolCache = protocolCache;
+                this.elementData = elementData ?? throw new ArgumentNullException(nameof(elementData));
 
                 notifyToActionMapper = new Dictionary<NotifyType, Func<object, object, object>>
                 {
@@ -122,7 +125,7 @@
                     throw new ArgumentException($"NotifyType.SetParameterIndex expects first argument to contain an int as third object, but got {value1AsArray[2]?.GetType()} instead.");
                 }
 
-                protocolCache.Tables.SetParameterIndex(tablePid, oneBasedRowIndex, oneBasedColumnIndex, value2);
+                elementData.GetTable(tablePid).SetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex, value2);
                 return null; // Irrelevant return value.
             }
 
@@ -148,7 +151,7 @@
                     throw new ArgumentException($"NotifyType.GetRow expects first argument to contain a string as second object, but got {rowInfo[1]?.GetType()} instead.");
                 }
 
-                return protocolCache.Tables.GetRow(tablePid, primaryKey);
+                return elementData.GetTable(tablePid).GetRow(primaryKey).Select(cell => cell.Value).ToArray();
             }
 
             internal object SetParameter(object value1, object value2)
@@ -163,7 +166,7 @@
                     throw new ArgumentException($"NotifyType.SetParameter expects first argument to contain three uint values, but got {value1AsArray.Length} values instead.");
                 }
 
-                protocolCache.Parameters.SetParameter((int)value1AsArray[2], value2);
+                elementData.GetParameter((int)value1AsArray[2]).Update(value2);
                 return null; // Irrelevant return value.
             }
 
@@ -174,7 +177,7 @@
                     throw new ArgumentException($"NotifyType.SetParameterByName expects first argument to be of type string, but got {value1?.GetType()} instead.");
                 }
 
-                protocolCache.Parameters.SetParameterByName(parameterName, value2);
+                elementData.GetParameter(parameterName).Update(value2);
                 return null; // Irrelevant return value.
             }
 
@@ -185,7 +188,7 @@
                     throw new ArgumentException($"NotifyType.GetParameterByName expects first argument to be of type string, but got {value1?.GetType()} instead.");
                 }
 
-                return protocolCache.Parameters.GetParameterByName(parameterName);
+                return elementData.GetParameter(parameterName).Value;
             }
 
             internal object GetParameter(object value1, object value2)
@@ -195,7 +198,7 @@
                     throw new ArgumentException($"NotifyType.GetParameter expects first argument to be of type int, but got {value1?.GetType()} instead.");
                 }
 
-                return protocolCache.Parameters.GetParameter(parameterId);
+                return elementData.GetParameter(parameterId).Value;
             }
 
             internal object RowCount(object value1, object value2)
@@ -205,7 +208,7 @@
                     throw new ArgumentException($"NotifyType.RowCount expects first argument to be of type int, but got {value1?.GetType()} instead.");
                 }
 
-                return protocolCache.Tables.RowCount(tablePid);
+                return elementData.GetTable(tablePid).RowCount;
             }
 
             internal object GetKeyPosition(object value1, object value2)
@@ -220,7 +223,7 @@
                     throw new ArgumentException($"NotifyType.GetKeyPosition expects second argument to be of type string, but got {value2?.GetType()} instead.");
                 }
 
-                return protocolCache.Tables.GetOneBasedRowIndex(tablePid, primaryKey);
+                return elementData.GetTable(tablePid).GetRowIndex(primaryKey) + 1;
             }
 
             internal object Exists(object value1, object value2)
@@ -235,7 +238,7 @@
                     throw new ArgumentException($"NotifyType.Exists expects second argument to be of type string, but got {value2?.GetType()} instead.");
                 }
 
-                return protocolCache.Tables.Exists(tablePid, primaryKey);
+                return elementData.GetTable(tablePid).RowExists(primaryKey);
             }
 
             internal string AddRowReturnKey(object value1, object value2)
@@ -250,7 +253,7 @@
                     throw new ArgumentException($"NotifyType.AddRowReturnKey expects second argument to be of type string, but got {value2?.GetType()} instead.");
                 }
 
-                return protocolCache.Tables.AddRowReturnKey(tablePid, primaryKey);
+                return elementData.GetTable(tablePid).AddRowReturnKey(primaryKey);
             }
 
             internal object SetRow(object value1, object value2)
@@ -307,22 +310,22 @@
                     throw new ArgumentException($"NotifyType.SetRow expects second argument to be of type object[], but got {value2?.GetType()} instead.");
                 }
 
-                protocolCache.Tables.SetRow(tablePid, primaryKey, rowValues, timestamp, useClearAndLeave);
+                elementData.GetTable(tablePid).SetRowReturnChanges(primaryKey, rowValues, timestamp, useClearAndLeave);
 
                 return new object[rowValues.Length];
             }
 
             internal object FillArrayNoDelete(object value1, object value2)
             {
-                return FillArrayInternal(value1, value2, protocolCache.Tables.FillArrayNoDelete);
+                return FillArrayInternal(value1, value2, TableModelExtensionsForProtocol.FillArrayNoDelete);
             }
             
             internal object FillArray(object value1, object value2)
             {
-                return FillArrayInternal(value1, value2, protocolCache.Tables.FillArray);
+                return FillArrayInternal(value1, value2, TableModelExtensionsForProtocol.FillArray);
             }
 
-            private object FillArrayInternal(object value1, object value2, Action<int, object[][], DateTime?, bool> fillArrayMethod)
+            private object FillArrayInternal(object value1, object value2, Action<ITableModel, object[][], DateTime?, bool> fillArrayMethod)
             {
                 int tablePid;
                 bool useClearAndLeave = false;
@@ -365,7 +368,7 @@
 
                 var arrayOfObjectArrays = CastItemsOrThrow<object[]>(arrayOfColumnValues);
 
-                fillArrayMethod.Invoke(tablePid, arrayOfObjectArrays, timestamp, useClearAndLeave);
+                fillArrayMethod.Invoke(elementData.GetTable(tablePid), arrayOfObjectArrays, timestamp, useClearAndLeave);
 
                 return null; // Irrelevant return value.
             }
@@ -399,7 +402,7 @@
                     throw new ArgumentException($"NotifyType.GetTableColumns expects second argument to be of type uint[], but got {value2?.GetType()} instead.");
                 }
 
-                return protocolCache.Tables.GetTableColumns(tablePid, columnIndices);
+                return elementData.GetTable(tablePid).GetTableColumns(columnIndices);
             }
 
             internal object AddRow(object value1, object value2)
@@ -411,17 +414,17 @@
 
                 if (value2 is string primaryKey)
                 {
-                    return protocolCache.Tables.AddRow(tablePid, primaryKey);
+                    return elementData.GetTable(tablePid).AddRowReturnKey(primaryKey);
                 }
                 else if(value2 is object[] objectArray)
                 {    
                     if (objectArray[0] is object[] rowData && objectArray[1] is DateTime timestamp && objectArray.Length == 2)
                     {
-                        return protocolCache.Tables.AddRow(tablePid, rowData, timestamp);
+                        return elementData.GetTable(tablePid).SetRowReturnOneBasedIndex(rowData, timestamp);
                     }
                     else
                     {
-                        return protocolCache.Tables.AddRow(tablePid, objectArray);
+                        return elementData.GetTable(tablePid).SetRowReturnOneBasedIndex(objectArray);
                     }
                 }
                 else
@@ -439,16 +442,17 @@
 
                 if (value2 is string primaryKey)
                 {
-                    return protocolCache.Tables.DeleteRow(tablePid, primaryKey);
+                    var table = elementData.GetTable(tablePid);
+                    table.RemoveRows(primaryKey);
+                    return table.RowCount;
                 }
                 else if (value2 is string[] primaryKeys)
                 {
-                    foreach (string pk in primaryKeys)
-                    {
-                        protocolCache.Tables.DeleteRow(tablePid, pk);
-                    }
+                    var table = elementData.GetTable(tablePid);
 
-                    return protocolCache.Tables.RowCount(tablePid);
+                    table.RemoveRows(primaryKeys);
+
+                    return table.RowCount;
                 }
                 else
                 {
@@ -525,7 +529,7 @@
                 {
                     int columnPid = Convert.ToInt32(columnInfo[1]);
 
-                    protocolCache.Tables.FillArrayWithColumn(tablePid, columnPid, primaryKeys, columnValues.Single(), timestamp, useClearAndLeave);
+                    elementData.GetTable(tablePid).FillArrayWithColumn(columnPid, primaryKeys, columnValues.Single(), timestamp, useClearAndLeave);
                 }
                 else
                 {
@@ -533,7 +537,7 @@
 
                     var columnPidsToValues = columnPids.ToDictionary(pid => pid, pid => columnValues[Array.IndexOf(columnPids, pid)]);
 
-                    protocolCache.Tables.FillArrayWithColumns(tablePid, primaryKeys, columnPidsToValues, timestamp, useClearAndLeave);
+                    elementData.GetTable(tablePid).FillArrayWithColumns(primaryKeys, columnPidsToValues, timestamp, useClearAndLeave);
                 }
 
                 return null; // Irrelevant return value.
@@ -563,11 +567,11 @@
 
                 if (value1AsArray[1] is int oneBasedRowIndex)
                 {
-                    return protocolCache.Tables.GetParameterIndex(tablePid, oneBasedRowIndex, oneBasedColumnIndex);
+                    return elementData.GetTable(tablePid).GetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex);
                 }
                 else if (value1AsArray[1] is string rowPrimaryKey)
                 {
-                    return protocolCache.Tables.GetParameterIndexByKey(tablePid, rowPrimaryKey, oneBasedColumnIndex);
+                    return elementData.GetTable(tablePid).GetParameterIndexByKey(rowPrimaryKey, oneBasedColumnIndex);
                 }
                 else
                 {
