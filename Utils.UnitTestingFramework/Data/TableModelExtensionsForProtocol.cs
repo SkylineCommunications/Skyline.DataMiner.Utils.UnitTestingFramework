@@ -159,7 +159,7 @@
         /// <returns>The row.</returns>
         public static TRow GetRow<TRow>(this ITableModel tableModel, int index) where TRow : QActionTableRow
         {
-            var row = tableModel.GetRow(index).Select(cell => cell.Value).ToArray();
+            var row = tableModel.GetRow(tableModel.GetRowPrimaryKey(index)).Select(cell => cell.Value).ToArray();
 
             return GetRow<TRow>(tableModel, row);
         }
@@ -298,7 +298,7 @@
                 rowToSet = ConvertProtocolClearAndleaveToActualValuesForRow(rowIndex, rowToSet, tableModel);
             }
 
-            var oldRow = tableModel.GetRow(rowIndex);
+            var oldRow = tableModel.GetRow(tableModel.GetRowPrimaryKey(rowIndex));
             if (oldRow == null)
             {
                 return new int[tableModel.Schema.ColumnDefinitions.Count];
@@ -550,7 +550,7 @@
 
         private static object[] ConvertProtocolClearAndleaveToActualValuesForRow(int rowIndex, object[] row, ITableModel tableModel)
         {
-            var existingRow = tableModel.GetRow(rowIndex).Select(cell => cell.Value).ToArray();
+            var existingRow = tableModel.GetRow(tableModel.GetRowPrimaryKey(rowIndex)).Select(cell => cell.Value).ToArray();
             
             return ConvertProtocolClearAndLeaveToActualValuesForRow(row, existingRow);
         }
@@ -616,7 +616,7 @@
                 throw new ArgumentException("Row index exceeds number of rows", nameof(oneBasedRowIndex));
             }
 
-            return tableModel.GetCell(tableModel.GetRowKey(oneBasedRowIndex - 1), tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1).Pid).Value;
+            return tableModel.GetCell(tableModel.GetRowPrimaryKey(oneBasedRowIndex - 1), tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1).Pid).Value;
         }
 
         /// <summary>
@@ -650,7 +650,7 @@
                 throw new ArgumentException("Row index exceeds number of rows", nameof(oneBasedRowIndex));
             }
 
-            string primaryKey = tableModel.GetRowKey(oneBasedRowIndex - 1);
+            string primaryKey = tableModel.GetRowPrimaryKey(oneBasedRowIndex - 1);
 
             var columnDefinition = tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1);
 

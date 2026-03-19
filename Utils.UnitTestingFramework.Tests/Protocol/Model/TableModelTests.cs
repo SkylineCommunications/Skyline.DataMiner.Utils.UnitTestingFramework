@@ -123,8 +123,8 @@
             tableModel.SetRow(row1);
 
             // Assert
-            var row0Output = tableModel.GetRow(0);
-            var row1Output = tableModel.GetRow(1);
+            var row0Output = tableModel.GetRow(tableModel.GetRowPrimaryKey(0));
+            var row1Output = tableModel.GetRow(tableModel.GetRowPrimaryKey(1));
 
             Assert.AreEqual("skyline2", row0Output[0].Value);
             Assert.AreEqual("value2", row0Output[1].Value);
@@ -228,7 +228,7 @@
             tableModel.SetRow(row);
 
             // Act
-            var result = tableModel.GetRow(0);
+            var result = tableModel.GetRow(tableModel.GetRowPrimaryKey(0));
 
             // Assert
             Assert.IsNotNull(result);
@@ -268,7 +268,7 @@
             tableModel.SetRow(row);
 
             // Act
-            var result = tableModel.GetRow(5);
+            var result = tableModel.GetRow(tableModel.GetRowPrimaryKey(5));
 
             // Assert
             Assert.IsNull(result);
@@ -298,8 +298,8 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(
-                () => tableModel.GetRow(-1));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(
+                () => tableModel.GetRow(tableModel.GetRowPrimaryKey(-1)));
         }
 
         [TestMethod]
@@ -661,7 +661,7 @@
             tableModel.SetRow(row);
 
             // Act
-            string key = tableModel.GetRowKey(0);
+            string key = tableModel.GetRowPrimaryKey(0);
 
             // Assert
             Assert.AreEqual("key1", key);
@@ -677,10 +677,10 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act
-            string key = tableModel.GetRowKey(5);
+            string key = tableModel.GetRowPrimaryKey(5);
 
             // Assert
-            Assert.IsNull(key);
+            Assert.AreEqual(String.Empty, key);
         }
 
         [TestMethod]
@@ -694,7 +694,7 @@
 
             // Act & Assert
             Assert.ThrowsException<ArgumentOutOfRangeException>(
-                () => tableModel.GetRowKey(-1));
+                () => tableModel.GetRowPrimaryKey(-1));
         }
 
         #endregion
@@ -772,8 +772,8 @@
             // Assert
             Assert.AreEqual(0, tableModel.GetRowIndex("key2"));
             Assert.AreEqual(1, tableModel.GetRowIndex("key3"));
-            Assert.AreEqual("key2", tableModel.GetRowKey(0));
-            Assert.AreEqual("key3", tableModel.GetRowKey(1));
+            Assert.AreEqual("key2", tableModel.GetRowPrimaryKey(0));
+            Assert.AreEqual("key3", tableModel.GetRowPrimaryKey(1));
         }
 
         [TestMethod]

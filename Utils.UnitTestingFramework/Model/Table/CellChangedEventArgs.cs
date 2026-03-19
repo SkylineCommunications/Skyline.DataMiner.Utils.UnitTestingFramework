@@ -24,6 +24,5 @@
         public object OldValue { get; }
 
         public object NewValue { get; }
-
     }
 }

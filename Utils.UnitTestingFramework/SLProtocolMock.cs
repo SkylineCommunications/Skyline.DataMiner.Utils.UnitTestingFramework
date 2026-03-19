@@ -55,9 +55,37 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
             return elementData.GetParameter(parameterId) ?? throw new InvalidOperationException($"Parameter with ID {parameterId} does not exist");
         }
 
+        internal bool TryGetParameter(int parameterId, out IParameterModel parameterModel)
+        {
+            if (elementData.ParameterExists(parameterId))
+            {
+                parameterModel = elementData.GetParameter(parameterId);
+                return true;
+            }
+            else
+            {
+                parameterModel = null;
+                return false;
+            }
+        }
+
         public IParameterModel GetParameter(string parameterName)
         {
             return elementData.GetParameter(parameterName) ?? throw new InvalidOperationException($"Parameter with name '{parameterName}' does not exist");
+        }
+
+        internal bool TryGetParameter(string parameterName, out IParameterModel parameterModel)
+        {
+            if (elementData.ParameterExists(parameterName))
+            {
+                parameterModel = elementData.GetParameter(parameterName);
+                return true;
+            }
+            else
+            {
+                parameterModel = null;
+                return false;
+            }
         }
 
         public ITableModel GetTable(int tableId)

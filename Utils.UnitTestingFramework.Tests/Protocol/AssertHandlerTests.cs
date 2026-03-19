@@ -226,9 +226,9 @@
 
             // Assert
             mock.Assert().Table(900).Row(0).Should().Equal(row1);
-            mock.Assert().Table(900).Row(1).Should().Equal(row5);
-            mock.Assert().Table(900).Row(2).Should().Equal(row3);
-            mock.Assert().Table(900).Row(3).Should().Equal(row4);
+            mock.Assert().Table(900).Row(1).Should().Equal(row3);
+            mock.Assert().Table(900).Row(2).Should().Equal(row4);
+            mock.Assert().Table(900).Row(3).Should().Equal(row5);
         }
 
         [TestMethod]
@@ -255,9 +255,9 @@
 
             // Assert
             mock.Assert().Table(900).Row(0).Should().Equal(row1);
-            mock.Assert().Table(900).Row(1).Should().Equal(row5);
-            mock.Assert().Table(900).Row(2).Should().Equal(row3);
-            mock.Assert().Table(900).Row(3).Should().Equal(row4);
+            mock.Assert().Table(900).Row(1).Should().Equal(row3);
+            mock.Assert().Table(900).Row(2).Should().Equal(row4);
+            mock.Assert().Table(900).Row(3).Should().Equal(row5);
         }
 
         [TestMethod]
@@ -284,9 +284,9 @@
             mock.Object.DeleteRow(900, rowsToDelete);
 
             // Assert
-            mock.Assert().Table(900).Row(0).Should().Equal(row5);
+            mock.Assert().Table(900).Row(0).Should().Equal(row3);
             mock.Assert().Table(900).Row(1).Should().Equal(row4);
-            mock.Assert().Table(900).Row(2).Should().Equal(row3);
+            mock.Assert().Table(900).Row(2).Should().Equal(row5);
         }
 
         [TestMethod]

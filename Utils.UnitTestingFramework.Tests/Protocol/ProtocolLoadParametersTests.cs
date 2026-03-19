@@ -27,7 +27,7 @@
             var value4 = mock.Object.GetParameter(1003);
 
             // Assert
-            Assert.AreEqual(10, value1);
+            Assert.AreEqual(10.0, value1);
             Assert.AreEqual("15", value2);
             Assert.AreEqual(0x0A, value3);
             Assert.AreEqual("parameterValue", value4);
@@ -70,7 +70,7 @@
             var value2 = mock.Object.GetParameterByName("NumericParameterFixed");
 
             // Assert
-            Assert.AreEqual(10, value1);
+            Assert.AreEqual(10.0, value1);
             Assert.AreEqual(0x0A, value2);
         }
 

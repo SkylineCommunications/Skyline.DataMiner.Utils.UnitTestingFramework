@@ -42,23 +42,23 @@
         /// <summary>
         /// Gets a value indicating whether the table contains the row with the specified key.
         /// </summary>
-        /// <param name="key">The key for which to check existence.</param>
+        /// <param name="primaryKey">The key for which to check existence.</param>
         /// <returns>A value indicating whether the row exists.</returns>
-        bool RowExists(string key);
+        bool RowExists(string primaryKey);
 
         /// <summary>
         /// Gets the row index for the row with the specified key, or -1 if no such row exists.
         /// </summary>
-        /// <param name="key">The key for which to retrieve the row index.</param>
+        /// <param name="primaryKey">The key for which to retrieve the row index.</param>
         /// <returns>The row index, or -1 if no such row exists.</returns>
-        int GetRowIndex(string key);
+        int GetRowIndex(string primaryKey);
 
         /// <summary>
         /// Gets the row key for the row with the specified index, or <see langword="null"/> if no such row exists.
         /// </summary>
         /// <param name="rowIndex">The row index.</param>
         /// <returns>The row key, or <see langword="null"/> if no such row exists.</returns>
-        string GetRowKey(int rowIndex);
+        string GetRowPrimaryKey(int rowIndex);
 
         /// <summary>
         /// Gets the cell data for the cell with the specified primary key and column PID, or <see langword="null"/> if no such cell exists.
@@ -80,17 +80,10 @@
         /// <summary>
         /// Rows the row data of the row with the specified key, or <see langword="null"/> if no such row exists.
         /// </summary>
-        /// <param name="key">The key.</param>
+        /// <param name="primaryKey">The key.</param>
         /// <returns>The row data, or <see langword="null"/> if no such row exists.</returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        IParameterValue[] GetRow(string key);
-
-        /// <summary>
-        /// Retrieves the row data of the row with the specified row index, or <see langword="null"/> if no such row exists.
-        /// </summary>
-        /// <param name="rowIndex">Index of the row.</param>
-        /// <returns>The row data, or <see langword="null"/> if no such row exists.</returns>
-        IParameterValue[] GetRow(int rowIndex);
+        /// <exception cref="System.ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/>.</exception>
+        IParameterValue[] GetRow(string primaryKey);
 
         /// <summary>
         /// Gets all rows.

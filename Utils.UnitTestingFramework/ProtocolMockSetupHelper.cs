@@ -51,14 +51,14 @@
                     .Returns(
                     (int pid) =>
                     {
-                        return protocolMock.GetParameter(pid).Value;
+                        return protocolMock.TryGetParameter(pid, out var parameterModel) ? parameterModel.Value : null;
                     });
 
                 protocolMock.Setup(p => p.GetParameterByName(It.IsAny<string>()))
                     .Returns(
                     (string parameterName) =>
                     {
-                        return protocolMock.GetParameter(parameterName).Value;
+                        return protocolMock.TryGetParameter(parameterName, out var parameterModel) ? parameterModel.Value : null;
                     });
 
                 protocolMock.Setup(p => p.GetParameters(It.IsAny<object>()))
@@ -70,14 +70,14 @@
                             throw new ArgumentException("Argument should be of type uint[]");
                         }
 
-                        return parameters.Select(pid => protocolMock.GetParameter((int)pid).Value).ToArray();
+                        return parameters.Select(pid => protocolMock.TryGetParameter((int)pid, out var parameterModel) ? parameterModel.Value : null).ToArray();
                     });
 
                 protocolMock.Setup(p => p.IsEmpty(It.IsAny<int>()))
                     .Returns(
                     (int pid) =>
                     {
-                        return protocolMock.GetParameter(pid).Value == null;
+                        return (protocolMock.TryGetParameter(pid, out var parameterModel) ? parameterModel.Value : null) == null;
                     });
             }
 
@@ -87,24 +87,41 @@
                     .Returns(
                     (int pid, object value) =>
                     {
-                        mock.GetParameter(pid).Update(value);
-                        return 0;
+                        if (mock.TryGetParameter(pid, out var parameterModel))
+                        {
+                            parameterModel.Update(value);
+                            return 0;
+                        }
+
+                        return Constants.Constants.HRESULT_FAIL_IDINEXISTENT;
                     });
 
                 mock.Setup(p => p.SetParameter(It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>()))
                     .Returns(
                     (int pid, object value, DateTime timestamp) =>
                     {
-                        mock.GetParameter(pid).Update(value, timestamp);
-                        return 0;
+                        if (mock.TryGetParameter(pid, out var parameterModel))
+                        {
+                            parameterModel.Update(value, timestamp);
+                            return 0;
+                        }
+
+                        return Constants.Constants.HRESULT_FAIL_IDINEXISTENT;
                     });
 
                 mock.Setup(p => p.SetParameterByName(It.IsAny<string>(), It.IsAny<object>()))
                     .Returns(
                     (string name, object value) =>
                     {
-                        mock.GetParameter(name).Update(value);
-                        return 0;
+                        if (mock.TryGetParameter(name, out var parameterModel))
+                        {
+                            parameterModel.Update(value);
+                            return 0;
+                        }
+                        else
+                        {
+                            return Constants.Constants.HRESULT_FAIL_IDINEXISTENT;
+                        }
                     });
 
                 mock.Setup(p => p.SetParametersByName(It.IsAny<string[]>(), It.IsAny<object[]>()))
@@ -116,12 +133,21 @@
                             return Constants.Constants.HRESULT_FAIL_DIFFLEN;
                         }
 
+                        var result = new int[names.Length];
                         for (int i = 0; i < names.Length; i++)
                         {
-                            mock.GetParameter(names[i]).Update(values[i]);
+                            if (mock.TryGetParameter(names[i], out var parameterModel))
+                            {
+                                parameterModel.Update(values[i]);
+                                result[i] = 0;
+                            }
+                            else
+                            {
+                                result[i] = Constants.Constants.HRESULT_FAIL_IDINEXISTENT;
+                            }
                         }
 
-                        return names.Select(n => 0).ToArray();
+                        return result;
                     });
 
                 mock.Setup(p => p.SetParameters(It.IsAny<int[]>(), It.IsAny<object[]>()))
@@ -133,12 +159,21 @@
                             return Constants.Constants.HRESULT_FAIL_DIFFLEN;
                         }
 
+                        var result = new int[parameterIDs.Length];
                         for (int i = 0; i < parameterIDs.Length; i++)
                         {
-                            mock.GetParameter(parameterIDs[i]).Update(values[i]);
+                            if (mock.TryGetParameter(parameterIDs[i], out var parameterModel))
+                            {
+                                parameterModel.Update(values[i]);
+                                result[i] = 0;
+                            }
+                            else
+                            {
+                                result[i] = Constants.Constants.HRESULT_FAIL_IDINEXISTENT;
+                            }
                         }
 
-                        return parameterIDs.Select(n => 0).ToArray();
+                        return result;
                     });
 
                 mock.Setup(p => p.SetParameters(It.IsAny<int[]>(), It.IsAny<object[]>(), It.IsAny<DateTime[]>()))
@@ -150,12 +185,21 @@
                             return Constants.Constants.HRESULT_FAIL_DIFFLEN;
                         }
 
+                        var result = new int[parameterIDs.Length];
                         for (int i = 0; i < parameterIDs.Length; i++)
                         {
-                            mock.GetParameter(parameterIDs[i]).Update(values[i], timestamps[i]);
+                            if (mock.TryGetParameter(parameterIDs[i], out var parameterModel))
+                            {
+                                parameterModel.Update(values[i], timestamps[i]);
+                                result[i] = 0;
+                            }
+                            else
+                            {
+                                result[i] = (int)Constants.Constants.HRESULT_FAIL_IDINEXISTENT;
+                            }
                         }
 
-                        return parameterIDs.Select(n => 0).ToArray();
+                        return result;
                     });
             }
 
@@ -219,10 +263,10 @@
                    {
                        var tableModel = element.GetTable(tableId);
 
-                       string rowkey = tableModel.GetRowKey(rowIndex);
+                       string rowkey = tableModel.GetRowPrimaryKey(rowIndex);
                        if (!String.IsNullOrWhiteSpace(rowkey))
                        {
-                           tableModel.RemoveRows(tableModel.GetRowKey(rowIndex));
+                           tableModel.RemoveRows(tableModel.GetRowPrimaryKey(rowIndex));
                        }
     
                        return tableModel.RowCount;
@@ -259,7 +303,7 @@
                    (int tableId, int rowIndex) =>
                    {
                        var table = elementData.GetTable(tableId);
-                       var row = table.GetRow(rowIndex);
+                       var row = table.GetRow(table.GetRowPrimaryKey(rowIndex));
                        if (row == null)
                        {
                             return new object[table.Schema.ColumnDefinitions.Count];

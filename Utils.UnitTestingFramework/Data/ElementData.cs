@@ -13,6 +13,16 @@
 
         private readonly Dictionary<int, ITableModel> tablesPerTablePid = new Dictionary<int, ITableModel>();
 
+        public bool ParameterExists(int parameterId)
+        {
+            return parameterIdToDefinition.ContainsKey(parameterId);
+        }
+
+        public bool ParameterExists(string parameterName)
+        {
+            return parameterNameToDefinition.ContainsKey(parameterName);
+        }
+
         /// <summary>
         /// Gets the parameter model.
         /// </summary>
@@ -81,6 +91,17 @@
             if (parameterModel is null)
             {
                 throw new ArgumentNullException(nameof(parameterModel));
+            }
+
+            if (parameterIdToDefinition.ContainsKey(parameterModel.Definition.Pid))
+            {
+                throw new ArgumentException($"There is already a parameter with ID '{parameterModel.Definition.Pid}'", nameof(parameterModel));
+            }
+
+
+            if (parameterNameToDefinition.ContainsKey(parameterModel.Definition.Name))
+            {
+                throw new ArgumentException($"There is already a parameter with name '{parameterModel.Definition.Name}'", nameof(parameterModel));
             }
 
             parameterNameToDefinition.Add(parameterModel.Definition.Name, parameterModel.Definition);

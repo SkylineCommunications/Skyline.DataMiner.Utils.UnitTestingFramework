@@ -41,7 +41,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
         {
             try
             {
-                return tableModel?.GetRow(key);
+                return tableModel?.GetRow(key)?.Select(cell => cell.Value).ToArray();
             }
             catch
             {
@@ -53,7 +53,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
         {
             try
             {
-                return tableModel?.GetRow(rowIndex);
+                return tableModel?.GetRow(tableModel?.GetRowPrimaryKey(rowIndex))?.Select(cell => cell.Value).ToArray();
             }
             catch
             {

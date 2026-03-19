@@ -60,26 +60,26 @@
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        public bool RowExists(string key)
+        /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/>.</exception>
+        public bool RowExists(string primaryKey)
         {
-            if (String.IsNullOrWhiteSpace(key))
+            if (String.IsNullOrWhiteSpace(primaryKey))
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentNullException(nameof(primaryKey));
             }
 
             using (@lock.Read())
             {
-                return keyToRowIndex.ContainsKey(key);
+                return keyToRowIndex.ContainsKey(primaryKey);
             }
         }
 
         /// <inheritdoc/>
-        public int GetRowIndex(string key)
+        public int GetRowIndex(string primaryKey)
         {
             using (@lock.Read())
             {
-                if (!keyToRowIndex.TryGetValue(key, out int rowIndex))
+                if (!keyToRowIndex.TryGetValue(primaryKey, out int rowIndex))
                 {
                     // Return -1 if the row does not exist.
                     // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
@@ -92,7 +92,7 @@
 
         /// <inheritdoc/>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="rowIndex"/> is negative.</exception>
-        public string GetRowKey(int rowIndex)
+        public string GetRowPrimaryKey(int rowIndex)
         {
             if (rowIndex < 0)
             {
@@ -103,9 +103,9 @@
             {
                 if (rowIndex >= rows.Count)
                 {
-                    // Return null if the row does not exist.
+                    // Return empty string if the row does not exist.
                     // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
-                    return null;
+                    return string.Empty;
                 }
 
                 var primaryKey = Convert.ToString(rows[rowIndex][Schema.PrimaryKeyColumn.Idx].Value);
@@ -146,24 +146,24 @@
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
-        public IParameterValue[] GetRow(string key)
+        /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/>.</exception>
+        public IParameterValue[] GetRow(string primaryKey)
         {
-            if (key == null)
+            if (primaryKey == null)
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new ArgumentNullException(nameof(primaryKey));
             }
 
             using(@lock.Read())
             {
-                if (!keyToRowIndex.TryGetValue(key, out int rowIndex))
+                if (!keyToRowIndex.TryGetValue(primaryKey, out int rowIndex))
                 {
                     // Return null if the row does not exist.
                     // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
                     return null;
                 }
 
-                return GetRow(rowIndex);
+                return rows[rowIndex];
             }
         }
 
@@ -191,28 +191,6 @@
                 var cell = rows[rowIndex][column.Idx];
 
                 return cell;
-            }
-        }
-
-        /// <inheritdoc/>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="rowIndex"/> is negative.</exception>
-        public IParameterValue[] GetRow(int rowIndex)
-        {
-            if (rowIndex < 0)
-            {
-                throw new ArgumentException("Row index cannot be negative.", nameof(rowIndex));
-            }
-
-            using (@lock.Read())
-            {
-                if (rowIndex >= rows.Count)
-                {
-                    // Return null if the row does not exist.
-                    // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
-                    return null;
-                }
-
-                return rows[rowIndex];
             }
         }
 
