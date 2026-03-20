@@ -24,7 +24,7 @@
 
         public override string ToString()
         {
-            return $"{Name} (PID: {Pid}, IDX: {Idx})";
+            return $"column {Name} (PID: {Pid}, IDX: {Idx})";
         }
     }
 }

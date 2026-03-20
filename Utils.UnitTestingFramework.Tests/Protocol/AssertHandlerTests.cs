@@ -362,14 +362,14 @@
 
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
-            object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", "4", "5", "6" };
+            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+            object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
 
             object[] col1 = new object[] { "skyline3", "skyline4" };
             object[] col2 = new object[] { "2ndSkyline3", "2ndSkyline4" };
-            object[] col3 = new object[] { "7", "10" };
-            object[] col4 = new object[] { "8", "11" };
-            object[] col5 = new object[] { "9", "12" };
+            object[] col3 = new object[] { 7, 10 };
+            object[] col4 = new object[] { 8, 11 };
+            object[] col5 = new object[] { 9, 12 };
 
             List<object[]> listOfCols = new List<object[]>
             {
@@ -389,9 +389,9 @@
             // Assert
             string[] expectedCol1 = { "skyline1", "skyline2", "skyline3", "skyline4" };
             string[] expectedCol2 = { "2ndColumnSkyline1", "2ndColumnSkyline2", "2ndSkyline3", "2ndSkyline4" };
-            string[] expectedCol3 = { "1", "4", "7", "10" };
-            string[] expectedCol4 = { "2", "5", "8", "11" };
-            string[] expectedCol5 = { "3", "6", "9", "12" };
+            object[] expectedCol3 = { 1, 4, 7, 10 };
+            object[] expectedCol4 = { 2, 5, 8, 11 };
+            object[] expectedCol5 = { 3, 6, 9, 12 };
 
             mock.Assert().Table(900).Column(901).Should().Equal(expectedCol1);
             mock.Assert().Table(900).Column(902).Should().Equal(expectedCol2);
@@ -407,14 +407,14 @@
 
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
-            object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", "10", "11", "12" };
+            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+            object[] row2 = new object[] { "skyline2", "2ndColumnSkyline2", 10, 11, 12 };
 
             object[] col1 = new object[] { "skyline3", "skyline4" };
             object[] col2 = new object[] { "2ndSkyline3", "2ndSkyline4" };
-            object[] col3 = new object[] { "7", "10" };
-            object[] col4 = new object[] { "8", "11" };
-            object[] col5 = new object[] { "9", "12" };
+            object[] col3 = new object[] { 7, 10 };
+            object[] col4 = new object[] { 8, 11 };
+            object[] col5 = new object[] { 9, 12 };
 
             List<object[]> listOfCols = new List<object[]>
             {
@@ -432,11 +432,11 @@
             mock.Object.FillArray(900, listOfCols);
 
             // Assert
-            object[] expectedColumn1 = new object[] { "skyline4", "skyline3" };
-            object[] expectedColumn2 = new object[] { "2ndSkyline4", "2ndSkyline3" };
-            object[] expectedColumn3 = new object[] { "10", "7" };
-            object[] expectedColumn4 = new object[] { "11", "8" };
-            object[] expectedColumn5 = new object[] { "12", "9" };
+            object[] expectedColumn1 = new object[] { "skyline3", "skyline4" };
+            object[] expectedColumn2 = new object[] { "2ndSkyline3", "2ndSkyline4" };
+            object[] expectedColumn3 = new object[] { 7, 10 };
+            object[] expectedColumn4 = new object[] { 8, 11 };
+            object[] expectedColumn5 = new object[] { 9, 12 };
             mock.Assert().Table(900).Column(901).Should().Equal(expectedColumn1);
             mock.Assert().Table(900).Column(902).Should().Equal(expectedColumn2);
             mock.Assert().Table(900).Column(903).Should().Equal(expectedColumn3);
@@ -453,9 +453,9 @@
 
             object[] col1 = new object[] { "skyline3", "skyline4" };
             object[] col2 = new object[] { "2ndSkyline3", "2ndSkyline4" };
-            object[] col3 = new object[] { "7", "10" };
-            object[] col4 = new object[] { "8", "11" };
-            object[] col5 = new object[] { "9", "12" };
+            object[] col3 = new object[] { 7, 10 };
+            object[] col4 = new object[] { 8, 11 };
+            object[] col5 = new object[] { 9, 12 };
 
             List<object[]> listOfCols = new List<object[]>
             {
@@ -503,7 +503,7 @@
             var mock = new SLProtocolMock(path);
 
             object[] pk = new object[] { "skyline1", "skyline2" };
-            object[] values = new object[] { "3rdColValue1", "3rdColValue2" };
+            object[] values = new object[] { 1, 2 };
 
             // Act
             mock.Object.ClearAllKeys(900);
@@ -520,7 +520,7 @@
 
             mock.Assert().Table(900).Column(902).Should().Equal(colNull);
 
-            mock.Assert().Table(900).Column(903).Should().Contain("3rdColValue1").And.Contain("3rdColValue2");
+            mock.Assert().Table(900).Column(903).Should().Contain(1).And.Contain(2);
 
             mock.Assert().Table(900).Column(904).Should().Equal(colNull);
 

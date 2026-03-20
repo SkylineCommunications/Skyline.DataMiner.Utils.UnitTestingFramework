@@ -1,7 +1,6 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone
 {
     using System;
-    using System.Security.AccessControl;
 
     public class ParameterDefinition : IEquatable<ParameterDefinition>
     {
@@ -48,7 +47,7 @@
 
         public override string ToString()
         {
-            return $"{Name} (PID: {Pid})";
+            return $"parameter {Name} (PID: {Pid})";
         }
 
         internal void Validate(object value)
@@ -57,7 +56,7 @@
             {
                 if (!AllowNull)
                 {
-                    throw new InvalidOperationException($"Parameter '{Name}' does not allow nulls.");
+                    throw new InvalidOperationException($"Parameter '{Name}' does not allow null.");
                 }
 
                 return;
@@ -71,7 +70,7 @@
 
             if (!Type.IsInstanceOfType(value))
             {
-                throw new InvalidOperationException($"Invalid value type for parameter '{this}'. Expected {Type} but got {value.GetType()}.");
+                throw new InvalidOperationException($"Invalid value type for {this}: expected {Type} but got {value.GetType()}.");
             }
         }
     }
