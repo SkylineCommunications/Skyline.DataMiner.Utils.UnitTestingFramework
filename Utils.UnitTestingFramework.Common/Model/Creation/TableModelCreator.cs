@@ -14,7 +14,7 @@
             this.excludedPids = excludedPids ?? throw new ArgumentNullException(nameof(excludedPids));
         }
 
-        public void CreateModelAndAddToDataCollection(ParametersAndTables elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
+        public void CreateModelAndAddToDataCollection(ParametersAndTables dataCollection, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
         {
             var tableModel = CreateTableModelFromArrayOptions(parameter, protocolModelParameterFinder);
 
@@ -23,7 +23,7 @@
                 return;
             }
 
-            elementData.AddTable(tableModel);
+            dataCollection.AddTable(tableModel);
         }
 
         public ITableModel CreateTableModelFromArrayOptions(IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
@@ -48,9 +48,11 @@
 
                 var columnParameter = protocolModelParameterFinder.FindParameter((int)columnPid) ?? throw new InvalidOperationException($"Parameter with ID {columnPid} not found.");
 
-                var column = new ColumnDefinition(columnParameter.Name.Value, GetTypeForDefinition(columnParameter), (int)columnPid, (int)columnIdx, allowNull: true);
+                bool isKeyColumn = columnIdx == keyColumnIdx;
 
-                tableModelBuilder.AddColumn(column, isKey: columnIdx == keyColumnIdx);
+                var column = new ColumnDefinition(columnParameter.Name.Value, GetTypeForDefinition(columnParameter), (int)columnPid, (int)columnIdx, allowNull: !isKeyColumn);
+
+                tableModelBuilder.AddColumn(column, isKey: isKeyColumn);
 
                 excludedPids.Add((int)columnPid);
             }

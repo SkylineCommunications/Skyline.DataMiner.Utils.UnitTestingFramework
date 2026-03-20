@@ -1704,7 +1704,7 @@
             Assert.AreEqual(6, rowOutput1[4]);
 
             Assert.AreEqual("skyline3", rowOutput2[0]);
-            Assert.AreEqual(null, rowOutput2[1]);
+            Assert.IsNull(rowOutput2[1]);
             Assert.AreEqual(7, rowOutput2[2]);
             Assert.AreEqual(8, rowOutput2[3]);
             Assert.AreEqual(9, rowOutput2[4]);

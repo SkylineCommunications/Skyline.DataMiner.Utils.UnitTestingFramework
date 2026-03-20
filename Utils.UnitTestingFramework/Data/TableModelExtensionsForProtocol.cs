@@ -154,6 +154,7 @@
         /// Retrieves the row with the specified key.
         /// </summary>
         /// <typeparam name="TRow">The type of the row.</typeparam>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="key">The key.</param>
         /// <returns>The row.</returns>
         public static TRow GetRow<TRow>(this ITableModel tableModel, string key) where TRow : QActionTableRow
@@ -171,6 +172,7 @@
         /// <summary>
         /// Retrieves the row at the specified key.
         /// </summary>
+        /// <param name="tableModel">The table model.</param>
         /// <typeparam name="TRow">The type of the row.</typeparam>
         /// <param name="index">The index.</param>
         /// <returns>The row.</returns>

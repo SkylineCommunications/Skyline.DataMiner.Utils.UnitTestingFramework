@@ -186,7 +186,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => tableModel.SetRow(null));
         }
 
@@ -284,7 +284,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => tableModel.GetRow((string)null));
         }
 
@@ -298,7 +298,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentOutOfRangeException>(
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                 () => tableModel.GetRow(tableModel.GetRowPrimaryKey(-1)));
         }
 
@@ -427,7 +427,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => tableModel.GetCell(null, 1202));
         }
 
@@ -444,7 +444,7 @@
             tableModel.SetRow(row);
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => tableModel.GetCell("key1", 9999));
         }
 
@@ -501,7 +501,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => tableModel.SetCell(null, 1202, "value"));
         }
 
@@ -518,7 +518,7 @@
             tableModel.SetRow(row);
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => tableModel.SetCell("key1", 9999, "value"));
         }
 
@@ -532,7 +532,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => tableModel.SetCell("nonExistentKey", 1202, "value"));
         }
 
@@ -585,7 +585,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => tableModel.RowExists(null));
         }
 
@@ -599,7 +599,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => tableModel.RowExists(string.Empty));
         }
 
@@ -693,7 +693,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentOutOfRangeException>(
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                 () => tableModel.GetRowPrimaryKey(-1));
         }
 
@@ -805,7 +805,7 @@
             var tableModel = tableModelBuilder.Build();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => tableModel.RemoveRows(null));
         }
 
@@ -869,7 +869,7 @@
             tableModelBuilder.AddColumn(1201, 0, true);
 
             // Act & Assert
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => tableModelBuilder.AddColumn(1202, 1, true));
         }
 
