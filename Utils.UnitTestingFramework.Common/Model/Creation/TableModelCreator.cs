@@ -50,7 +50,7 @@
 
                 bool isKeyColumn = columnIdx == keyColumnIdx;
 
-                var column = new ColumnDefinition(columnParameter.Name.Value, GetTypeForDefinition(columnParameter), (int)columnPid, (int)columnIdx, allowNull: !isKeyColumn, description: columnParameter.Description.Value);
+                var column = new ColumnDefinition(columnParameter.Name.Value, GetTypeForDefinition(columnParameter), (int)columnPid, (int)columnIdx, allowNull: !isKeyColumn, description: columnParameter.Description?.Value);
 
                 tableModelBuilder.AddColumn(column, isKey: isKeyColumn);
 

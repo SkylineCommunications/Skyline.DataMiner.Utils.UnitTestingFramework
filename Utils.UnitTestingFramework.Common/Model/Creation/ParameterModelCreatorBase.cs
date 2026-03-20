@@ -46,7 +46,7 @@
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
-            return new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId, description: parameter.Description.Value);
+            return new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId, description: parameter.Description?.Value);
         }
 
         protected abstract void ProcessString(ParametersAndTables dataCollection, IParamsParam parameter);
