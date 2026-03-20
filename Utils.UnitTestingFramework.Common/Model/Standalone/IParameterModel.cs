@@ -16,5 +16,11 @@
         /// Gets the parameter definition.
         /// </summary>
         ParameterDefinition Definition { get; }
+
+        /// <summary>
+        /// No longer raises any notifications until the returned <see cref="IDisposable"/> is disposed.
+        /// </summary>
+        /// <returns>An <see cref="IDisposable"/> that, when disposed, resumes notifications.</returns>
+        IDisposable SuspendNotifications();
     }
 }

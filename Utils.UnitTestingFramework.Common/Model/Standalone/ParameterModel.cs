@@ -1,6 +1,9 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone
 {
     using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     /// <summary>
     /// Parameter model.
@@ -11,6 +14,7 @@
         private readonly object syncRoot = new object();
         private object value;
         private DateTime timestamp;
+        private int suspendNotifications;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParameterModel"/> class.
@@ -92,10 +96,32 @@
 
             if (handler != null)
             {
-                handler(this, new ParameterModelChangedEventArgs(oldValue, value, oldTimestamp, updatedTimestamp));
+                handler(this, new ParameterModelChangedEventArgs(Definition, oldValue, value, oldTimestamp, updatedTimestamp));
             }
 
             return true;
+        }
+
+        /// <inheritdoc/>
+        public IDisposable SuspendNotifications()
+        {
+            Interlocked.Increment(ref suspendNotifications);
+            return new NotificationScope(this);
+        }
+
+        private sealed class NotificationScope : IDisposable
+        {
+            private readonly ParameterModel parameter;
+
+            public NotificationScope(ParameterModel parameterModel)
+            {
+                parameter = parameterModel ?? throw new ArgumentNullException(nameof(parameterModel));
+            }
+
+            public void Dispose()
+            {
+                Interlocked.Decrement(ref parameter.suspendNotifications);
+            }
         }
     }
 }

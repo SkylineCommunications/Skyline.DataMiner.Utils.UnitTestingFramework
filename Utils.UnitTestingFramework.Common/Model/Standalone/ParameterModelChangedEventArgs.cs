@@ -5,7 +5,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone
     /// <summary>
     /// Provides data for parameter model change notifications.
     /// </summary>
-    public class ParameterModelChangedEventArgs : EventArgs
+    public class ParameterModelChangedEventArgs : ParameterValueChangedEventArgs<ParameterDefinition>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ParameterModelChangedEventArgs"/> class.
@@ -14,32 +14,10 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone
         /// <param name="newValue">The new value.</param>
         /// <param name="oldTimestamp">The old timestamp.</param>
         /// <param name="newTimestamp">The new timestamp.</param>
-        public ParameterModelChangedEventArgs(object oldValue, object newValue, DateTime oldTimestamp, DateTime newTimestamp)
+        public ParameterModelChangedEventArgs(ParameterDefinition parameterDefinition, object oldValue, object newValue, DateTime oldTimestamp, DateTime newTimestamp)
+            :base(parameterDefinition, oldValue, newValue, oldTimestamp, newTimestamp)
         {
-            OldValue = oldValue;
-            NewValue = newValue;
-            OldTimestamp = oldTimestamp;
-            NewTimestamp = newTimestamp;
+
         }
-
-        /// <summary>
-        /// Gets the old value.
-        /// </summary>
-        public object OldValue { get; }
-
-        /// <summary>
-        /// Gets the new value.
-        /// </summary>
-        public object NewValue { get; }
-
-        /// <summary>
-        /// Gets the old timestamp.
-        /// </summary>
-        public DateTime OldTimestamp { get; }
-
-        /// <summary>
-        /// Gets the new timestamp.
-        /// </summary>
-        public DateTime NewTimestamp { get; }
     }
 }

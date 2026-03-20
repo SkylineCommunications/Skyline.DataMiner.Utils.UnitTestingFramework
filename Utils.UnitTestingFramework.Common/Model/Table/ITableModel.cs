@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     /// <summary>
     /// Table model interface.

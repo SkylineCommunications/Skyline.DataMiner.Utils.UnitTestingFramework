@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Skyline.DataMiner.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,7 +11,6 @@
 
   <ItemGroup>
     <Folder Include="Model\Creation\" />
-    <Folder Include="Model\Table\" />
     <Folder Include="Model\Standalone\" />
   </ItemGroup>
 

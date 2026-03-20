@@ -6,6 +6,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 {
     using System;
     using System.Collections.Generic;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 

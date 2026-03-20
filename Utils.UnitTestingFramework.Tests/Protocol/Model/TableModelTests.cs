@@ -902,7 +902,7 @@
             // Assert
             Assert.IsNotNull(cellChangedEventArgs);
             Assert.AreEqual("key1", cellChangedEventArgs.PrimaryKey);
-            Assert.AreEqual(1202, cellChangedEventArgs.ColumnDefinition.Pid);
+            Assert.AreEqual(1202, cellChangedEventArgs.ParameterDefinition.Pid);
             Assert.AreEqual("value1", cellChangedEventArgs.OldValue);
             Assert.AreEqual("newValue", cellChangedEventArgs.NewValue);
         }
@@ -957,7 +957,7 @@
             // Assert
             Assert.IsNotNull(cellChangedEventArgs);
             Assert.AreEqual("key1", cellChangedEventArgs.PrimaryKey);
-            Assert.AreEqual(1202, cellChangedEventArgs.ColumnDefinition.Pid);
+            Assert.AreEqual(1202, cellChangedEventArgs.ParameterDefinition.Pid);
             Assert.AreEqual("originalValue", cellChangedEventArgs.OldValue);
             Assert.AreEqual("updatedValue", cellChangedEventArgs.NewValue);
         }

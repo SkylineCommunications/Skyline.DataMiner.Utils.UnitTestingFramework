@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model
 {
     using System;
 

@@ -1,7 +1,6 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table
 {
     using System;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     public sealed class ColumnDefinition : ParameterDefinition, IEquatable<ColumnDefinition>
     {
