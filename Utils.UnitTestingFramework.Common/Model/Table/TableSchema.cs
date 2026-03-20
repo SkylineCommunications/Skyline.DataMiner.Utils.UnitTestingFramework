@@ -19,6 +19,8 @@
 
         public IReadOnlyList<ColumnDefinition> ColumnDefinitions { get; }
 
+        public int ColumnCount => ColumnDefinitions.Count;
+
         public ColumnDefinition FindColumnDefinitionByName(string name)
         {
             return ColumnDefinitions.FirstOrDefault(columnDefinition => columnDefinition.Name == name);
@@ -32,6 +34,11 @@
         public ColumnDefinition FindColumnDefinitionByPid(int pid)
         {
             return ColumnDefinitions.FirstOrDefault(columnDefinition => columnDefinition.Pid == pid);
+        }
+
+        public RowBuilder CreateRowBuilder()
+        {
+            return new RowBuilder(this);
         }
     }
 }

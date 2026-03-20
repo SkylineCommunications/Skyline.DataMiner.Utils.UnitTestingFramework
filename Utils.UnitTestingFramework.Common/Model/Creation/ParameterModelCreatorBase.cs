@@ -42,6 +42,13 @@
             }
         }
 
+        protected ParameterDefinition BuildDefinitionFromProtocolParameter(IParamsParam parameter, bool allowNull = true)
+        {
+            int parameterId = (int)parameter.Id.Value.Value;
+
+            return new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId, description: parameter.Description.Value);
+        }
+
         protected abstract void ProcessString(ParametersAndTables dataCollection, IParamsParam parameter);
 
         protected abstract void ProcessDouble(ParametersAndTables dataCollection, IParamsParam parameter);
@@ -50,7 +57,7 @@
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
 
             dataCollection.AddParameter(new ParameterModel(parameterDefinition, null));
         }

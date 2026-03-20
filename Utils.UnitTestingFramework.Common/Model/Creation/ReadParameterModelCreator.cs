@@ -24,7 +24,7 @@
                 return;
             }
 
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
 
             string defaultValue = parameter.Interprete.DefaultValue?.Value;
             var parameterModel = new ParameterModel(parameterDefinition, defaultValue);
@@ -41,7 +41,7 @@
                 return;
             }
 
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
 
             string defaultValueString = parameter.Interprete.DefaultValue?.Value;
             var parameterModel = Double.TryParse(defaultValueString, out double defaultValue) ? new ParameterModel(parameterDefinition, defaultValue) : new ParameterModel(parameterDefinition, null);

@@ -67,8 +67,7 @@
                 throw new ArgumentException($"'{nameof(primaryKey)}' cannot be null or whitespace.", nameof(primaryKey));
             }
 
-            var row = new object[tableModel.Schema.ColumnDefinitions.Count];
-            row[tableModel.Schema.PrimaryKeyColumn.Idx] = primaryKey;
+            var row = tableModel.Schema.CreateRowBuilder().SetPrimaryKey(primaryKey).Build();
 
             return SetRowReturnOneBasedIndex(tableModel, row);
         }
@@ -126,10 +125,9 @@
                 primaryKey = (Array.ConvertAll(keys, Convert.ToInt32).Max() + 1).ToString();
             }
 
-            object[] newRow = new object[tableModel.Schema.ColumnDefinitions.Count];
-            newRow[tableModel.Schema.PrimaryKeyColumn.Idx] = primaryKey;
+            var row = tableModel.Schema.CreateRowBuilder().SetPrimaryKey(primaryKey).Build();
 
-            tableModel.SetRow(newRow);
+            tableModel.SetRow(row);
 
             return primaryKey;
         }

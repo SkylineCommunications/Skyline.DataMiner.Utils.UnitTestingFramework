@@ -1,10 +1,11 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model
 {
     using System;
+    using System.Security.Policy;
 
     public class ParameterDefinition : IEquatable<ParameterDefinition>
     {
-        public ParameterDefinition(string name, Type type, int pid, bool allowNull = true)
+        public ParameterDefinition(string name, Type type, int pid, bool allowNull = true, string description = null)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -20,9 +21,12 @@
             Type = type ?? throw new ArgumentNullException(nameof(type));
             Pid = pid;
             AllowNull = allowNull;
+            Description = description;
         }
 
         public string Name { get; }
+
+        public string Description { get; }
 
         public Type Type { get; }
 
@@ -47,7 +51,7 @@
 
         public override string ToString()
         {
-            return $"parameter {Name} (PID: {Pid})";
+            return $"parameter {(String.IsNullOrWhiteSpace(Description) ? Name : Description)} (PID: {Pid})";
         }
 
         internal void Validate(object value)

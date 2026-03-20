@@ -33,7 +33,7 @@
                 return;
             }
 
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
 
             string fixedValueString = parameter.Interprete.ValueElement.Value;
             var parameterModel = new ParameterModel(parameterDefinition, fixedValueString);
@@ -56,7 +56,7 @@
                 return;
             }
 
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
 
             string fixedValueString = parameter.Interprete.ValueElement.Value;
             int fixedValueInt = -1;

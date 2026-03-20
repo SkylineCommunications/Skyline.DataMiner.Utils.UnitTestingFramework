@@ -33,7 +33,8 @@
                 return;
             }
 
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
+
             dataCollection.AddParameter(new ParameterModel(parameterDefinition, null));
         }
     }

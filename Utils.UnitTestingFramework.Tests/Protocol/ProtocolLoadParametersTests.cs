@@ -52,7 +52,7 @@
             string missingDirectoryPath = path + "\\..\\";
 
             // Act & Assert
-            Assert.ThrowsExactly<DirectoryNotFoundException>(
+            Assert.ThrowsExactly<FileNotFoundException>(
                 () => ParametersAndTablesBuilder.Build(missingDirectoryPath));
         }
 

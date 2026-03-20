@@ -4,7 +4,7 @@
 
     public sealed class ColumnDefinition : ParameterDefinition, IEquatable<ColumnDefinition>
     {
-        public ColumnDefinition(string name, Type type, int pid, int idx, bool allowNull = true) : base(name, type, pid, allowNull)
+        public ColumnDefinition(string name, Type type, int pid, int idx, bool allowNull = true, string description = null) : base(name, type, pid, allowNull, description)
         {
             if (idx < 0)
             {
@@ -23,7 +23,7 @@
 
         public override string ToString()
         {
-            return $"column {Name} (PID: {Pid}, IDX: {Idx})";
+            return $"column {(String.IsNullOrWhiteSpace(Description) ? Name : Description)} (PID: {Pid}, IDX: {Idx})";
         }
     }
 }
