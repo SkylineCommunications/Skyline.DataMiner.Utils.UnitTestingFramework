@@ -1,5 +1,6 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 {
+    using System;
     using System.IO;
     using System.Linq;
     using Skyline.DataMiner.CICD.Models.Protocol.Read;
@@ -9,18 +10,14 @@
     {
         internal static IProtocolModel Build(string customPathToProtocolXml)
         {
-            IProtocolModel protocolModel;
-            if (customPathToProtocolXml == null)
-            {
-                var solutionDirectory = GetSolutionDirectory();
-                string protocolPath = solutionDirectory.FullName + "\\protocol.xml";
+            string pathToProtocolXml = String.IsNullOrEmpty(customPathToProtocolXml) ? GetSolutionDirectory().FullName + "\\protocol.xml" : customPathToProtocolXml;
 
-                protocolModel = new ProtocolModel(File.ReadAllText(protocolPath));
-            }
-            else
+            if (!File.Exists(pathToProtocolXml))
             {
-                protocolModel = new ProtocolModel(File.ReadAllText(customPathToProtocolXml));
+                throw new FileNotFoundException($"Protocol XML file not found at path: '{pathToProtocolXml}'");
             }
+
+            var protocolModel = new ProtocolModel(File.ReadAllText(pathToProtocolXml));
 
             return protocolModel;
         }
@@ -29,12 +26,17 @@
         {
             var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
 
-            while (directory != null && !directory.GetFiles("*.sln").Any())
+            while (directory != null && !directory.ContainsSolutionFile())
             {
                 directory = directory.Parent;
             }
 
             return directory;
+        }
+
+        private static bool ContainsSolutionFile(this DirectoryInfo directory)
+        {
+            return directory.GetFiles("*.sln").Any() || directory.GetFiles("*.slnx").Any();
         }
     }
 }
