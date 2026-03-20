@@ -48,7 +48,7 @@
 
         public override string ToString()
         {
-            return $"{Name} (PID: {Pid}, Type: {Type.Name}, AllowNull: {AllowNull})";
+            return $"{Name} (PID: {Pid})";
         }
 
         internal void Validate(object value)
@@ -71,7 +71,7 @@
 
             if (!Type.IsInstanceOfType(value))
             {
-                throw new InvalidOperationException($"Invalid value type for parameter '{Name}' (PID {Pid}). Expected {Type} but got {value.GetType()}.");
+                throw new InvalidOperationException($"Invalid value type for parameter '{this}'. Expected {Type} but got {value.GetType()}.");
             }
         }
     }

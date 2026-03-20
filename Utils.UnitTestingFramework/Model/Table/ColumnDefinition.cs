@@ -24,7 +24,7 @@
 
         public override string ToString()
         {
-            return $"{Name} (PID: {Pid}, IDX: {Idx}, Type: {Type.Name}, AllowNull: {AllowNull})";
+            return $"{Name} (PID: {Pid}, IDX: {Idx})";
         }
     }
 }

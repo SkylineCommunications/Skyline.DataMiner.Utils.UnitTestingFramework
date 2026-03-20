@@ -151,7 +151,9 @@
                     throw new ArgumentException($"NotifyType.GetRow expects first argument to contain a string as second object, but got {rowInfo[1]?.GetType()} instead.");
                 }
 
-                return elementData.GetTable(tablePid).GetRow(primaryKey).Select(cell => cell.Value).ToArray();
+                var table = elementData.GetTable(tablePid);
+
+                return table.GetRow(primaryKey)?.Select(cell => cell.Value)?.ToArray() ?? new object[table.Schema.ColumnDefinitions.Count];
             }
 
             internal object SetParameter(object value1, object value2)

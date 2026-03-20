@@ -1,6 +1,7 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
 
@@ -92,11 +93,18 @@
         ReadOnlyDictionary<string, IParameterValue[]> GetAllRows();
 
         /// <summary>
-        /// Sets the row data for the row with the specified key, adding a new row if no such row exists.
+        /// Sets the row with the specified key, adding a new row if no such row exists.
         /// </summary>
-        /// <param name="rowData"></param>
-        /// <param name="timestamp"></param>
-        void SetRow(object[] rowData, DateTime? timestamp = null);
+        /// <param name="row">The row to set.</param>
+        /// <param name="timestamp">Optional timestamp for the row.</param>
+        void SetRow(object[] row, DateTime? timestamp = null);
+
+        /// <summary>
+        /// Sets the rows, adding new rows if no such rows exist and updating existing rows if a row with the same primary key already exists.
+        /// </summary>
+        /// <param name="rows">The rows to set.</param>
+        /// <param name="timestamp">Optional timestamp for the row.</param>
+        void SetRows(IEnumerable<object[]> rows, DateTime? timestamp = null);
 
         /// <summary>
         /// Removes rows with the specified primary keys, ignoring any keys for which no such row exists.

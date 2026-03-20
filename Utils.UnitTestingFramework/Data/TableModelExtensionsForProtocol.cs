@@ -188,9 +188,9 @@
                 throw new ArgumentException($"'{nameof(primaryKey)}' cannot be null or whitespace.", nameof(primaryKey));
             }
 
-            if (oneBasedColumnIndex < 2 || oneBasedColumnIndex > tableModel.Schema.ColumnDefinitions.Count)
+            if (oneBasedColumnIndex < 1 || oneBasedColumnIndex > tableModel.Schema.ColumnDefinitions.Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(oneBasedColumnIndex), $"'{nameof(oneBasedColumnIndex)}' must be between 2 and the number of columns in the table ({tableModel.Schema.ColumnDefinitions.Count}).");
+                throw new ArgumentOutOfRangeException(nameof(oneBasedColumnIndex), $"'{nameof(oneBasedColumnIndex)}' must be between 1 and the number of columns in the table ({tableModel.Schema.ColumnDefinitions.Count}).");
             }
 
             var columnDefinition = tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1);
@@ -214,9 +214,9 @@
                 throw new ArgumentNullException(nameof(tableModel));
             }
 
-            if (oneBasedColumnIndex < 2 || oneBasedColumnIndex > tableModel.Schema.ColumnDefinitions.Count)
+            if (oneBasedColumnIndex < 1 || oneBasedColumnIndex > tableModel.Schema.ColumnDefinitions.Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(oneBasedColumnIndex), $"'{nameof(oneBasedColumnIndex)}' must be between 2 and the number of columns in the table ({tableModel.Schema.ColumnDefinitions.Count}).");
+                throw new ArgumentOutOfRangeException(nameof(oneBasedColumnIndex), $"'{nameof(oneBasedColumnIndex)}' must be between 1 and the number of columns in the table ({tableModel.Schema.ColumnDefinitions.Count}).");
             }
 
             var columnDefinition = tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1);

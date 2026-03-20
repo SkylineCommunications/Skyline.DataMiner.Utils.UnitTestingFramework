@@ -135,11 +135,12 @@
                 var cell = row[columnDefinition.Idx];
 
                 var oldCellValue = cell.Value;
+                var oldCellTimestamp = cell.Timestamp;
 
                 bool cellChanged = cell.Update(value, timestamp);
                 if (cellChanged)
                 {
-                    eventDispatcher.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldCellValue, cell.Value));
+                    eventDispatcher.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldCellValue, cell.Value, oldCellTimestamp, cell.Timestamp));
                     eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Updated));
                 }
             }
@@ -195,34 +196,54 @@
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ArgumentNullException"><paramref name="rowData"/> is <see langword="null"/>.</exception>
-        public void SetRow(object[] rowData, DateTime? timestamp = null)
+        /// <exception cref="ArgumentNullException"><paramref name="row"/> is <see langword="null"/>.</exception>
+        public void SetRow(object[] row, DateTime? timestamp = null)
         {
-            if (rowData is null)
+            if (row is null)
             {
-                throw new ArgumentNullException(nameof(rowData));
+                throw new ArgumentNullException(nameof(row));
             }
 
-            if (rowData.Length != Schema.ColumnDefinitions.Count)
+            SetRows(new[] { row }, timestamp);
+        }
+
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentNullException"><paramref name="rows"/> is or contains <see langword="null"/>.</exception>
+        public void SetRows(IEnumerable<object[]> rows, DateTime? timestamp = null)
+        {
+            if (rows is null)
             {
-                throw new ArgumentException($"Argument must contain exactly {Schema.ColumnDefinitions.Count} values, one for each column.", nameof(rowData));
+                throw new ArgumentNullException(nameof(rows));
             }
 
-            using(var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
+            if (rows.Any(row => row is null))
+            {
+                throw new ArgumentException("Row cannot be null.", nameof(rows));
+            }
+
+            using (var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
             using (@lock.Write())
             {
-                string primaryKey = Convert.ToString(rowData[Schema.PrimaryKeyColumn.Idx]);
-
-                var existingRow = GetRow(primaryKey);
-
-                if (existingRow == null)
+                foreach (var row in rows)
                 {
-                    AddNewRow(rowData, timestamp);
-                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Added));
-                }
-                else
-                {
-                    UpdateExistingRow(rowData, timestamp, existingRow, eventDispatcher);
+                    if (row.Length != Schema.ColumnDefinitions.Count)
+                    {
+                        throw new ArgumentException($"Each row must contain exactly {Schema.ColumnDefinitions.Count} values, one for each column.", nameof(rows));
+                    }
+
+                    string primaryKey = Convert.ToString(row[Schema.PrimaryKeyColumn.Idx]);
+
+                    var existingRow = GetRow(primaryKey);
+
+                    if (existingRow == null)
+                    {
+                        AddNewRow(row, timestamp);
+                        eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Added));
+                    }
+                    else
+                    {
+                        UpdateExistingRow(row, timestamp, existingRow, eventDispatcher);
+                    }
                 }
             }
         }
@@ -326,14 +347,17 @@
             {
                 columnDefinition.Validate(rowData[columnDefinition.Idx]);
 
-                object oldValue = existingRow[columnDefinition.Idx].Value;
-                object newValue = rowData[columnDefinition.Idx];
+                var cell = existingRow[columnDefinition.Idx];
 
-                bool changed = existingRow[columnDefinition.Idx].Update(newValue, timestamp);
+                var oldValue = cell.Value;
+                var oldTimestamp = cell.Timestamp;
+                var newValue = rowData[columnDefinition.Idx];
+
+                bool changed = cell.Update(newValue, timestamp);
 
                 if (changed)
                 {
-                    eventDispatchScope.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldValue, newValue));
+                    eventDispatchScope.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldValue, newValue, oldTimestamp, cell.Timestamp));
                     oneOrMoreCellsChanged = true;
                 }
             }
@@ -369,10 +393,10 @@
             return new EventDispatchScope(this);
         }
 
-        private void RaiseCellChanged(string primaryKey, ColumnDefinition column, object oldValue, object newValue)
+        private void RaiseCellChanged(string primaryKey, ColumnDefinition column, object oldValue, object newValue, DateTime oldTimestamp, DateTime newTimestamp)
         {
             if (suspendNotifications > 0) return;
-            CellChanged?.Invoke(this, new CellChangedEventArgs(primaryKey, column, oldValue, newValue));
+            CellChanged?.Invoke(this, new CellChangedEventArgs(primaryKey, column, oldValue, newValue, oldTimestamp, newTimestamp));
         }
 
         private void RaiseRowChanged(string primaryKey, RowChangeType changeType)
