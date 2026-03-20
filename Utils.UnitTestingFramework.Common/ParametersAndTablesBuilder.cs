@@ -36,7 +36,7 @@
                 {
                     var parameterType = parameter.Type.Value.Value;
 
-                    var modelCreator = ModelCreatorFactory.Create(parameterType, excludedPids);
+                    var modelCreator = DataModelCreatorFactory.Create(parameterType, excludedPids);
                     modelCreator.CreateModelAndAddToDataCollection(elementData, parameter, protocolModelParameterFinder);
                 }
                 catch(Exception ex)

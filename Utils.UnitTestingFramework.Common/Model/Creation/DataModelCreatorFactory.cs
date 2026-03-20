@@ -4,7 +4,7 @@
 
     using Skyline.DataMiner.CICD.Models.Protocol.Enums;
 
-    internal static class ModelCreatorFactory
+    internal static class DataModelCreatorFactory
     {
         public static IDataModelCreator Create(EnumParamType paramType, HashSet<int> excludedPids)
         {
@@ -23,7 +23,7 @@
                     return new TableModelCreator(excludedPids);
 
                 default:
-                    return new UndefinedParamTypeHandler(excludedPids);
+                    return new DummyDataModelCreator();
             }
         }
     }
