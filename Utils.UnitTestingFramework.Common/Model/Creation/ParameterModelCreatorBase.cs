@@ -7,11 +7,11 @@
 
     internal abstract class ParameterModelCreatorBase : DataModelCreatorBase, IDataModelCreator
     {
-        public void CreateModelAndAddToElementData(ParametersAndTables elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
+        public void CreateModelAndAddToDataCollection(ParametersAndTables dataCollection, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
         {
-            if (elementData is null)
+            if (dataCollection is null)
             {
-                throw new ArgumentNullException(nameof(elementData));
+                throw new ArgumentNullException(nameof(dataCollection));
             }
 
             if (parameter is null)
@@ -29,43 +29,30 @@
             switch (interpreteType)
             {
                 case EnumParamInterpretType.String:
-                    ProcessString(elementData, parameter);
+                    ProcessString(dataCollection, parameter);
                     break;
 
                 case EnumParamInterpretType.Double:
-                    ProcessDouble(elementData, parameter);
-                    break;
-
-                case EnumParamInterpretType.HighNibble:
-                    ProcessHighNibble(elementData, parameter);
+                    ProcessDouble(dataCollection, parameter);
                     break;
 
                 default:
-                    ProcessUndefinedType(elementData, parameter);
+                    ProcessOtherTypes(dataCollection, parameter);
                     break;
             }
         }
 
-        protected abstract void ProcessString(ParametersAndTables elementData, IParamsParam parameter);
+        protected abstract void ProcessString(ParametersAndTables dataCollection, IParamsParam parameter);
 
-        protected abstract void ProcessDouble(ParametersAndTables elementData, IParamsParam parameter);
+        protected abstract void ProcessDouble(ParametersAndTables dataCollection, IParamsParam parameter);
 
-        protected virtual void ProcessHighNibble(ParametersAndTables elementData, IParamsParam parameter)
+        protected virtual void ProcessOtherTypes(ParametersAndTables dataCollection, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
             var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
 
-            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
-        }
-
-        protected virtual void ProcessUndefinedType(ParametersAndTables elementData, IParamsParam parameter)
-        {
-            int parameterId = (int)parameter.Id.Value.Value;
-            
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
-
-            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
+            dataCollection.AddParameter(new ParameterModel(parameterDefinition, null));
         }
     }
 }

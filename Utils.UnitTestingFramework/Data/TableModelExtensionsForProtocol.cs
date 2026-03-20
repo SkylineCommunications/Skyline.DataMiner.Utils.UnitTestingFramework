@@ -11,9 +11,9 @@
     internal static class TableModelExtensionsForProtocol
     {
         /// <summary>
-        /// Adds the specified row.
+        /// Adds or upatesd the specified row and returns the 1-based row index.
         /// </summary>
-        /// <param name="tableModel"></param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="row">The row data.</param>
         /// <param name="timestamp"></param>
         /// <returns>The 1-based row number or 0 if the cache does not contain a table model for the specified table ID.</returns>
@@ -53,6 +53,13 @@
             return rowToSet;
         }
 
+        /// <summary>
+        /// Adds a new row with the specified primary key and returns the 1-based row index.
+        /// </summary>
+        /// <param name="tableModel">The table model.</param>
+        /// <param name="primaryKey">The primary key of the row.</param>
+        /// <returns>The 1-based row index of the added row.</returns>
+        /// <exception cref="ArgumentException"></exception>
         public static int SetRowReturnOneBasedIndex(this ITableModel tableModel, string primaryKey)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
@@ -66,6 +73,12 @@
             return SetRowReturnOneBasedIndex(tableModel, row);
         }
 
+        /// <summary>
+        /// Adds a new row to the specified table and returns the primary key. Only used for auto-increment key tables.
+        /// </summary>
+        /// <param name="tableModel">The table model.</param>
+        /// <param name="row">The row data.</param>
+        /// <returns>The primary key of the added row.</returns>
         public static string AddRowReturnKey(this ITableModel tableModel, object[] row)
         {
             if (row == null)
@@ -83,7 +96,7 @@
         /// <summary>
         /// Adds a row with the specified primary key to the table with the specified ID.
         /// </summary>
-        /// <param name="tableModel"></param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="primaryKey">The primary key of the row.</param>
         /// <returns>The primary key of the added row or <see langword="null"/> if the cache does not contain a table model for the specified table ID.</returns>
         public static string AddRowReturnKey(this ITableModel tableModel, string primaryKey)
@@ -121,6 +134,12 @@
             return primaryKey;
         }
 
+        /// <summary>
+        /// Deletes the rows with the specified primary keys and returns the number of remaining rows in the table.
+        /// </summary>
+        /// <param name="tableModel">The table model.</param>
+        /// <param name="primaryKeys">The primary keys of the rows to delete.</param>
+        /// <returns>The number of remaining rows in the table.</returns>
         public static int DeleteRowReturnRemainingRows(this ITableModel tableModel, params string[] primaryKeys)
         {
             foreach (var primaryKey in primaryKeys)
@@ -174,6 +193,16 @@
             return (TRow)Activator.CreateInstance(typeof(TRow), rowAsConstructorArgument) ?? throw new InvalidOperationException($"Unable to create a {typeof(TRow).Name} of row");
         }
 
+        /// <summary>
+        /// Gets the value of a cell in the table specified by the primary key of the row and one based column index.
+        /// </summary>
+        /// <param name="tableModel">The table model.</param>
+        /// <param name="primaryKey">The primary key of the row.</param>
+        /// <param name="oneBasedColumnIndex">The 1-based index of the column.</param>
+        /// <returns>The value of the cell.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static object GetParameterIndexByKey(this ITableModel tableModel, string primaryKey, int oneBasedColumnIndex)
         {
             if (tableModel == null)
@@ -338,7 +367,7 @@
         /// <summary>
         /// Sets the content of the table to the provided content.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="rows">The rows.</param>
         /// <param name="option">The save option.</param>
         /// <param name="timeInfo">The time information.</param>
@@ -375,7 +404,7 @@
         /// <summary>
         /// Sets the content of the table to the provided content.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
         /// <param name="useClearAndLeave"></param>
@@ -396,7 +425,7 @@
         /// <summary>
         /// Gets the table columns.
         /// </summary>
-        /// <param name="tableModel"></param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="columnIndexes">The column indexes.</param>
         /// <returns>A jagged array where each entry represents a column.</returns>
         public static object[][] GetTableColumns(this ITableModel tableModel, uint[] columnIndexes)
@@ -424,6 +453,12 @@
             return columns.ToArray();
         }
 
+        /// <summary>
+        /// Gets the content of a column specified by its PID.
+        /// </summary>
+        /// <param name="tableModel">The table model.</param>
+        /// <param name="columnPid">The PID of the column.</param>
+        /// <returns>An array of objects representing the column's content.</returns>
         public static object[] GetColumnByPid(this ITableModel tableModel, int columnPid)
         {
             var column = tableModel.Schema.FindColumnDefinitionByPid(columnPid);
@@ -434,7 +469,7 @@
         /// <summary>
         /// Adds the provided rows to the specified table.
         /// </summary>
-        /// <param name="tableId">The table identifier.</param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="columns">The columns.</param>
         /// <param name="timeInfo">The time information.</param>
         /// <param name="useClearAndLeave"></param>
@@ -476,7 +511,7 @@
         /// <summary>
         /// Sets the specified cells of a column with the provided values.
         /// </summary>
-        /// <param name="tablePid">The table identifier.</param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="columnPid">The column identifier.</param>
         /// <param name="primaryKeys">The primary keys.</param>
         /// <param name="columnValues">The values.</param>
@@ -588,7 +623,7 @@
         /// <summary>
         /// Retrieves the value of a cell in the table specified by the 1-based row and column position.
         /// </summary>
-        /// <param name="tableModel"></param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="oneBasedRowIndex">The 1-based position of the row.</param>
         /// <param name="oneBasedColumnIndex">The 1-based position of the column.</param>
         /// <returns>The value of the cell.</returns>
@@ -620,7 +655,7 @@
         /// <summary>
         /// Sets the value of a cell in a table, identified by its 1-based row and column position, with the specified value.
         /// </summary>
-        /// <param name="tableModel"></param>
+        /// <param name="tableModel">The table model.</param>
         /// <param name="oneBasedRowIndex">The 1-based position of the row.</param>
         /// <param name="oneBasedColumnIndex">The 1-based position of the column.</param>
         /// <param name="value">The value to set.</param>

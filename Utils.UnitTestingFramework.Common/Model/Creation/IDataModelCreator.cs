@@ -4,6 +4,6 @@
 
     internal interface IDataModelCreator
     {
-        void CreateModelAndAddToElementData(ParametersAndTables elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder);
+        void CreateModelAndAddToDataCollection(ParametersAndTables dataCollection, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder);
     }
 }

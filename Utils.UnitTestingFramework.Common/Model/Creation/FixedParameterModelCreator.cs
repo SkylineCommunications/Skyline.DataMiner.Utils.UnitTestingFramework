@@ -18,7 +18,7 @@
             this.excludedPids = excludedPids ?? throw new ArgumentNullException(nameof(excludedPids));
         }
 
-        protected override void ProcessString(ParametersAndTables element, IParamsParam parameter)
+        protected override void ProcessString(ParametersAndTables dataCollection, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -38,10 +38,10 @@
             string fixedValueString = parameter.Interprete.ValueElement.Value;
             var parameterModel = new ParameterModel(parameterDefinition, fixedValueString);
 
-            element.AddParameter(parameterModel);
+            dataCollection.AddParameter(parameterModel);
         }
 
-        protected override void ProcessDouble(ParametersAndTables elementData, IParamsParam parameter)
+        protected override void ProcessDouble(ParametersAndTables dataCollection, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -69,7 +69,7 @@
 
             var parameterModel = new ParameterModel(parameterDefinition, fixedValueInt);
 
-            elementData.AddParameter(parameterModel);
+            dataCollection.AddParameter(parameterModel);
         }
 
         private bool IsTitleParameter(IParamsParam parameter)

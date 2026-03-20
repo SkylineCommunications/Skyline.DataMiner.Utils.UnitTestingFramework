@@ -14,21 +14,17 @@
             this.excludedPids = excludedPids ?? throw new System.ArgumentNullException(nameof(excludedPids));
         }
 
-        protected override void ProcessString(ParametersAndTables elementData, IParamsParam parameter)
+        protected override void ProcessString(ParametersAndTables dataCollection, IParamsParam parameter)
         {
-            int parameterId = (int)parameter.Id.Value.Value;
-
-            if (excludedPids.Contains(parameterId))
-            {
-                return;
-            }
-
-            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
-
-            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
+            ProcessAny(dataCollection, parameter);
         }
 
-        protected override void ProcessDouble(ParametersAndTables elementData, IParamsParam parameter)
+        protected override void ProcessDouble(ParametersAndTables dataCollection, IParamsParam parameter)
+        {
+            ProcessAny(dataCollection, parameter);
+        }
+
+        private void ProcessAny(ParametersAndTables dataCollection, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -38,8 +34,7 @@
             }
 
             var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
-
-            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
+            dataCollection.AddParameter(new ParameterModel(parameterDefinition, null));
         }
     }
 }

@@ -12,10 +12,10 @@
 
         public ReadParameterModelCreator(HashSet<int> excludedPids)
         {
-            this.excludedPids = excludedPids ?? throw new System.ArgumentNullException(nameof(excludedPids));
+            this.excludedPids = excludedPids ?? throw new ArgumentNullException(nameof(excludedPids));
         }
 
-        protected override void ProcessString(ParametersAndTables element, IParamsParam parameter)
+        protected override void ProcessString(ParametersAndTables dataCollection, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -29,10 +29,10 @@
             string defaultValue = parameter.Interprete.DefaultValue?.Value;
             var parameterModel = new ParameterModel(parameterDefinition, defaultValue);
 
-            element.AddParameter(parameterModel);
+            dataCollection.AddParameter(parameterModel);
         }
 
-        protected override void ProcessDouble(ParametersAndTables elementData, IParamsParam parameter)
+        protected override void ProcessDouble(ParametersAndTables dataCollection, IParamsParam parameter)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
@@ -46,7 +46,7 @@
             string defaultValueString = parameter.Interprete.DefaultValue?.Value;
             var parameterModel = Double.TryParse(defaultValueString, out double defaultValue) ? new ParameterModel(parameterDefinition, defaultValue) : new ParameterModel(parameterDefinition, null);
 
-            elementData.AddParameter(parameterModel);
+            dataCollection.AddParameter(parameterModel);
         }
     }
 }

@@ -14,7 +14,7 @@
             this.excludedPids = excludedPids ?? throw new ArgumentNullException(nameof(excludedPids));
         }
 
-        public void CreateModelAndAddToElementData(ParametersAndTables elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
+        public void CreateModelAndAddToDataCollection(ParametersAndTables elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
         {
             var tableModel = CreateTableModelFromArrayOptions(parameter, protocolModelParameterFinder);
 

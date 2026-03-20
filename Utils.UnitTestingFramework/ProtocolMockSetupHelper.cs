@@ -641,19 +641,6 @@
                    });
             }
 
-            /// <summary>
-            /// Sets the value of a cell in a table, identified by its 1-based row and column position, with the specified value.
-            /// </summary>
-            /// <param name="tableIds">The IDs of the table parameters.</param>
-            /// <param name="oneBasedRowIndexes">The 1-based positions of the rows.</param>
-            /// <param name="oneBasedColumnIndexes">The 1-based positions of the columns.</param>
-            /// <param name="values">The values to set.</param>
-            /// <param name="timeInfos">Time stamps.</param>
-            /// <returns>This method call can return an unsigned integer error code, e.g. when the size of the ids array does not
-            /// match the size of the values array. Otherwise a uint[] is returned that has the same size as the ids array containing
-            /// the HRESULT value.At each position, this array contains the result value as would be returned when performing a
-            /// SetParameterIndex call on the individual cell.In case the value in the array is 262730 (0x0004024AL), this indicates
-            /// the cell value changed.</returns>
             private static object SetParametersIndex(ParametersAndTables elementData, int[] tableIds, int[] oneBasedRowIndexes, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
             {
                 if (!(tableIds.Length == oneBasedRowIndexes.Length
@@ -687,18 +674,6 @@
                 return results;
             }
 
-            /// <summary>
-            /// Sets the value of cells in tables, identified by their primary key and 1-based column position, with the specified values.
-            /// </summary>
-            /// <param name="tableIds">The IDs of the table parameters.</param>
-            /// <param name="keys">The primary keys of the rows.</param>
-            /// <param name="oneBasedColumnIndexes">The 1-based positions of the columns.</param>
-            /// <param name="values">The values to set.</param>
-            /// <param name="timeInfos">Time stamps.</param>
-            /// <returns>This method call can return an unsigned integer error code, e.g. when the size of the ids array does not match the
-            /// size of the values array.Otherwise a uint[] is returned that has the same size as the ids array containing the HRESULT value.
-            /// At each position, this array contains the result value as would be returned when performing a SetParameterIndexByKey call on
-            /// the individual cell.In case the value in the array is 262730 (0x0004024AL), this indicates the cell value changed.</returns>
             private static object SetParametersIndexByKey(ParametersAndTables elementData, int[] tableIds, string[] keys, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
             {
                 if (!(tableIds.Length == keys.Length
