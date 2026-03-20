@@ -1,0 +1,71 @@
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Creation
+{
+    using System;
+    using Skyline.DataMiner.CICD.Models.Protocol.Enums;
+    using Skyline.DataMiner.CICD.Models.Protocol.Read;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
+
+    internal abstract class ParameterModelCreatorBase : DataModelCreatorBase, IDataModelCreator
+    {
+        public void CreateModelAndAddToElementData(ParametersAndTables elementData, IParamsParam parameter, IProtocolModelParameterFinder protocolModelParameterFinder)
+        {
+            if (elementData is null)
+            {
+                throw new ArgumentNullException(nameof(elementData));
+            }
+
+            if (parameter is null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
+
+            if (parameter.Interprete?.Type?.Value == null)
+            {
+                return;
+            }
+
+            var interpreteType = parameter.Interprete.Type.Value.Value;
+
+            switch (interpreteType)
+            {
+                case EnumParamInterpretType.String:
+                    ProcessString(elementData, parameter);
+                    break;
+
+                case EnumParamInterpretType.Double:
+                    ProcessDouble(elementData, parameter);
+                    break;
+
+                case EnumParamInterpretType.HighNibble:
+                    ProcessHighNibble(elementData, parameter);
+                    break;
+
+                default:
+                    ProcessUndefinedType(elementData, parameter);
+                    break;
+            }
+        }
+
+        protected abstract void ProcessString(ParametersAndTables elementData, IParamsParam parameter);
+
+        protected abstract void ProcessDouble(ParametersAndTables elementData, IParamsParam parameter);
+
+        protected virtual void ProcessHighNibble(ParametersAndTables elementData, IParamsParam parameter)
+        {
+            int parameterId = (int)parameter.Id.Value.Value;
+
+            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+
+            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
+        }
+
+        protected virtual void ProcessUndefinedType(ParametersAndTables elementData, IParamsParam parameter)
+        {
+            int parameterId = (int)parameter.Id.Value.Value;
+            
+            var parameterDefinition = new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId);
+
+            elementData.AddParameter(new ParameterModel(parameterDefinition, null));
+        }
+    }
+}

@@ -1,14 +1,14 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
 {
     using System;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     internal class Asserter : IAsserter
     {
-        private readonly ElementData elementData;
+        private readonly ParametersAndTables elementData;
 
-        public Asserter(ElementData elementData)
+        public Asserter(ParametersAndTables elementData)
         {
             this.elementData = elementData ?? throw new ArgumentNullException(nameof(elementData));
         }

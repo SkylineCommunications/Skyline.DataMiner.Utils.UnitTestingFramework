@@ -3,10 +3,8 @@
     using System.IO;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -55,7 +53,7 @@
 
             // Act & Assert
             Assert.ThrowsExactly<DirectoryNotFoundException>(
-                () => ElementDataBuilder.Build(missingDirectoryPath));
+                () => ParametersAndTablesBuilder.Build(missingDirectoryPath));
         }
 
         [TestMethod]

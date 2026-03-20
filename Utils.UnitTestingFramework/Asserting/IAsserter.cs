@@ -1,6 +1,6 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
 {
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     /// <summary>
     /// Assertion interface.

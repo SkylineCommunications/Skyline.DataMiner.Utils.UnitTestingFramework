@@ -5,8 +5,8 @@
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Creation;
 
     [TestClass]
     public class ArrayHandlerTests

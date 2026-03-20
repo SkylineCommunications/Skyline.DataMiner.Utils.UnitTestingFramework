@@ -5,7 +5,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
     using System.Threading.Tasks;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     [TestClass]
     public class ParameterModelTests

@@ -3,12 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Moq;
-    using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Scripting;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
 
     internal static class TableModelExtensionsForProtocol
     {

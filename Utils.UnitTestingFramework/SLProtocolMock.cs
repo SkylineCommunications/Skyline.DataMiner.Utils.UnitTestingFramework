@@ -1,16 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Utils.UnitTestingFramework.Tests")]
-[assembly: InternalsVisibleTo("Utils.UnitTestingFramework.SnapshotTools.Tests")]
 namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
 {
-    using System;
     using Moq;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Standalone;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
 
     /// <summary>
     /// SLProtocol mock.
@@ -32,7 +28,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
     public partial class SLProtocolMock<T> : Mock<T>
         where T : class, SLProtocol
     {
-        private readonly ElementData elementData;
+        private readonly ParametersAndTables parametersAndTables;
         private readonly NotifyProtocolHelper notifyProtocolHelper;
 
         /// <summary>
@@ -43,54 +39,11 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
         {
             var protocolModel = ProtocolModelBuilder.Build(customPathToProtocolXml);
 
-            this.elementData = ElementDataBuilder.Build(protocolModel);
+            this.parametersAndTables = ParametersAndTablesBuilder.Build(protocolModel);
 
-            this.notifyProtocolHelper = new NotifyProtocolHelper(elementData);
+            this.notifyProtocolHelper = new NotifyProtocolHelper(parametersAndTables);
 
             ProtocolMockSetupHelper.Setup(this, protocolModel);
-        }
-
-        public IParameterModel GetParameter(int parameterId)
-        {
-            return elementData.GetParameter(parameterId) ?? throw new InvalidOperationException($"Parameter with ID {parameterId} does not exist");
-        }
-
-        internal bool TryGetParameter(int parameterId, out IParameterModel parameterModel)
-        {
-            if (elementData.ParameterExists(parameterId))
-            {
-                parameterModel = elementData.GetParameter(parameterId);
-                return true;
-            }
-            else
-            {
-                parameterModel = null;
-                return false;
-            }
-        }
-
-        public IParameterModel GetParameter(string parameterName)
-        {
-            return elementData.GetParameter(parameterName) ?? throw new InvalidOperationException($"Parameter with name '{parameterName}' does not exist");
-        }
-
-        internal bool TryGetParameter(string parameterName, out IParameterModel parameterModel)
-        {
-            if (elementData.ParameterExists(parameterName))
-            {
-                parameterModel = elementData.GetParameter(parameterName);
-                return true;
-            }
-            else
-            {
-                parameterModel = null;
-                return false;
-            }
-        }
-
-        public ITableModel GetTable(int tableId)
-        {
-            return elementData.GetTable(tableId) ?? throw new InvalidOperationException($"Table with ID {tableId} does not exist");
         }
 
         /// <summary>
@@ -99,7 +52,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
         /// <returns><see cref="IAsserter"/> interface.</returns>
         public IAsserter Assert()
         {
-            return new Asserter(elementData);
+            return new Asserter(parametersAndTables);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
     using System.Linq;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     internal class TableAsserter : ITableAsserter
     {

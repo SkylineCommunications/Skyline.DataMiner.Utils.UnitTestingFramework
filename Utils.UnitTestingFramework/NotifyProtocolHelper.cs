@@ -7,8 +7,8 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
-    using ElementData = Data.ElementData;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     public partial class SLProtocolMock<T> where T : class, SLProtocol
     {
@@ -39,11 +39,11 @@
             };
 
             private readonly Dictionary<NotifyType, Func<object, object, object>> notifyToActionMapper = new Dictionary<NotifyType, Func<object, object, object>>();
-            private readonly ElementData elementData;
+            private readonly ParametersAndTables parametersAndTables;
 
-            public NotifyProtocolHelper(ElementData elementData)
+            public NotifyProtocolHelper(ParametersAndTables parametersAndTables)
             {
-                this.elementData = elementData ?? throw new ArgumentNullException(nameof(elementData));
+                this.parametersAndTables = parametersAndTables ?? throw new ArgumentNullException(nameof(parametersAndTables));
 
                 notifyToActionMapper = new Dictionary<NotifyType, Func<object, object, object>>
                 {
@@ -125,7 +125,7 @@
                     throw new ArgumentException($"NotifyType.SetParameterIndex expects first argument to contain an int as third object, but got {value1AsArray[2]?.GetType()} instead.");
                 }
 
-                elementData.GetTable(tablePid).SetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex, value2);
+                parametersAndTables.GetTable(tablePid).SetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex, value2);
                 return null; // Irrelevant return value.
             }
 
@@ -151,7 +151,7 @@
                     throw new ArgumentException($"NotifyType.GetRow expects first argument to contain a string as second object, but got {rowInfo[1]?.GetType()} instead.");
                 }
 
-                var table = elementData.GetTable(tablePid);
+                var table = parametersAndTables.GetTable(tablePid);
 
                 return table.GetRow(primaryKey)?.Select(cell => cell.Value)?.ToArray() ?? new object[table.Schema.ColumnDefinitions.Count];
             }
@@ -168,7 +168,7 @@
                     throw new ArgumentException($"NotifyType.SetParameter expects first argument to contain three uint values, but got {value1AsArray.Length} values instead.");
                 }
 
-                elementData.GetParameter((int)value1AsArray[2]).Update(value2);
+                parametersAndTables.GetParameter((int)value1AsArray[2]).Update(value2);
                 return null; // Irrelevant return value.
             }
 
@@ -179,7 +179,7 @@
                     throw new ArgumentException($"NotifyType.SetParameterByName expects first argument to be of type string, but got {value1?.GetType()} instead.");
                 }
 
-                elementData.GetParameter(parameterName).Update(value2);
+                parametersAndTables.GetParameter(parameterName).Update(value2);
                 return null; // Irrelevant return value.
             }
 
@@ -190,7 +190,7 @@
                     throw new ArgumentException($"NotifyType.GetParameterByName expects first argument to be of type string, but got {value1?.GetType()} instead.");
                 }
 
-                return elementData.GetParameter(parameterName).Value;
+                return parametersAndTables.GetParameter(parameterName).Value;
             }
 
             internal object GetParameter(object value1, object value2)
@@ -200,7 +200,7 @@
                     throw new ArgumentException($"NotifyType.GetParameter expects first argument to be of type int, but got {value1?.GetType()} instead.");
                 }
 
-                return elementData.GetParameter(parameterId).Value;
+                return parametersAndTables.GetParameter(parameterId).Value;
             }
 
             internal object RowCount(object value1, object value2)
@@ -210,7 +210,7 @@
                     throw new ArgumentException($"NotifyType.RowCount expects first argument to be of type int, but got {value1?.GetType()} instead.");
                 }
 
-                return elementData.GetTable(tablePid).RowCount;
+                return parametersAndTables.GetTable(tablePid).RowCount;
             }
 
             internal object GetKeyPosition(object value1, object value2)
@@ -225,7 +225,7 @@
                     throw new ArgumentException($"NotifyType.GetKeyPosition expects second argument to be of type string, but got {value2?.GetType()} instead.");
                 }
 
-                return elementData.GetTable(tablePid).GetRowIndex(primaryKey) + 1;
+                return parametersAndTables.GetTable(tablePid).GetRowIndex(primaryKey) + 1;
             }
 
             internal object Exists(object value1, object value2)
@@ -240,7 +240,7 @@
                     throw new ArgumentException($"NotifyType.Exists expects second argument to be of type string, but got {value2?.GetType()} instead.");
                 }
 
-                return elementData.GetTable(tablePid).RowExists(primaryKey);
+                return parametersAndTables.GetTable(tablePid).RowExists(primaryKey);
             }
 
             internal string AddRowReturnKey(object value1, object value2)
@@ -255,7 +255,7 @@
                     throw new ArgumentException($"NotifyType.AddRowReturnKey expects second argument to be of type string, but got {value2?.GetType()} instead.");
                 }
 
-                return elementData.GetTable(tablePid).AddRowReturnKey(primaryKey);
+                return parametersAndTables.GetTable(tablePid).AddRowReturnKey(primaryKey);
             }
 
             internal object SetRow(object value1, object value2)
@@ -312,7 +312,7 @@
                     throw new ArgumentException($"NotifyType.SetRow expects second argument to be of type object[], but got {value2?.GetType()} instead.");
                 }
 
-                elementData.GetTable(tablePid).SetRowReturnChanges(primaryKey, rowValues, timestamp, useClearAndLeave);
+                parametersAndTables.GetTable(tablePid).SetRowReturnChanges(primaryKey, rowValues, timestamp, useClearAndLeave);
 
                 return new object[rowValues.Length];
             }
@@ -370,7 +370,7 @@
 
                 var arrayOfObjectArrays = CastItemsOrThrow<object[]>(arrayOfColumnValues);
 
-                fillArrayMethod.Invoke(elementData.GetTable(tablePid), arrayOfObjectArrays, timestamp, useClearAndLeave);
+                fillArrayMethod.Invoke(parametersAndTables.GetTable(tablePid), arrayOfObjectArrays, timestamp, useClearAndLeave);
 
                 return null; // Irrelevant return value.
             }
@@ -404,7 +404,7 @@
                     throw new ArgumentException($"NotifyType.GetTableColumns expects second argument to be of type uint[], but got {value2?.GetType()} instead.");
                 }
 
-                return elementData.GetTable(tablePid).GetTableColumns(columnIndices);
+                return parametersAndTables.GetTable(tablePid).GetTableColumns(columnIndices);
             }
 
             internal object AddRow(object value1, object value2)
@@ -416,17 +416,17 @@
 
                 if (value2 is string primaryKey)
                 {
-                    return elementData.GetTable(tablePid).SetRowReturnOneBasedIndex(primaryKey);
+                    return parametersAndTables.GetTable(tablePid).SetRowReturnOneBasedIndex(primaryKey);
                 }
                 else if(value2 is object[] objectArray)
                 {    
                     if (objectArray[0] is object[] rowData && objectArray[1] is DateTime timestamp && objectArray.Length == 2)
                     {
-                        return elementData.GetTable(tablePid).SetRowReturnOneBasedIndex(rowData, timestamp);
+                        return parametersAndTables.GetTable(tablePid).SetRowReturnOneBasedIndex(rowData, timestamp);
                     }
                     else
                     {
-                        return elementData.GetTable(tablePid).SetRowReturnOneBasedIndex(objectArray);
+                        return parametersAndTables.GetTable(tablePid).SetRowReturnOneBasedIndex(objectArray);
                     }
                 }
                 else
@@ -444,13 +444,13 @@
 
                 if (value2 is string primaryKey)
                 {
-                    var table = elementData.GetTable(tablePid);
+                    var table = parametersAndTables.GetTable(tablePid);
                     table.RemoveRows(primaryKey);
                     return table.RowCount;
                 }
                 else if (value2 is string[] primaryKeys)
                 {
-                    var table = elementData.GetTable(tablePid);
+                    var table = parametersAndTables.GetTable(tablePid);
 
                     table.RemoveRows(primaryKeys);
 
@@ -531,7 +531,7 @@
                 {
                     int columnPid = Convert.ToInt32(columnInfo[1]);
 
-                    elementData.GetTable(tablePid).FillArrayWithColumn(columnPid, primaryKeys, columnValues.Single(), timestamp, useClearAndLeave);
+                    parametersAndTables.GetTable(tablePid).FillArrayWithColumn(columnPid, primaryKeys, columnValues.Single(), timestamp, useClearAndLeave);
                 }
                 else
                 {
@@ -539,7 +539,7 @@
 
                     var columnPidsToValues = columnPids.ToDictionary(pid => pid, pid => columnValues[Array.IndexOf(columnPids, pid)]);
 
-                    elementData.GetTable(tablePid).FillArrayWithColumns(primaryKeys, columnPidsToValues, timestamp, useClearAndLeave);
+                    parametersAndTables.GetTable(tablePid).FillArrayWithColumns(primaryKeys, columnPidsToValues, timestamp, useClearAndLeave);
                 }
 
                 return null; // Irrelevant return value.
@@ -569,11 +569,11 @@
 
                 if (value1AsArray[1] is int oneBasedRowIndex)
                 {
-                    return elementData.GetTable(tablePid).GetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex);
+                    return parametersAndTables.GetTable(tablePid).GetParameterIndex(oneBasedRowIndex, oneBasedColumnIndex);
                 }
                 else if (value1AsArray[1] is string rowPrimaryKey)
                 {
-                    return elementData.GetTable(tablePid).GetParameterIndexByKey(rowPrimaryKey, oneBasedColumnIndex);
+                    return parametersAndTables.GetTable(tablePid).GetParameterIndexByKey(rowPrimaryKey, oneBasedColumnIndex);
                 }
                 else
                 {

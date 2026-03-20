@@ -6,6 +6,7 @@
     using Moq;
     using Skyline.DataMiner.CICD.Models.Protocol.Read.Interfaces;
     using Skyline.DataMiner.Scripting;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Data;
     using static Skyline.DataMiner.Scripting.NotifyProtocol;
 
@@ -20,14 +21,14 @@
                 SetupParameterGets(mock);
                 SetupParameterSets(mock);
 
-                SetupTableAddsAndExists(mock, mock.elementData);
-                SetupTableDeleteAndClearKeys(mock, mock.elementData);
-                SetupParametersIndexByKeys(mock, mock.elementData);
-                SetupParametersIndexByCoordinates(mock, mock.elementData);
-                SetupGetRowsAndKeyPosition(mock, mock.elementData);
-                SetupSetRows(mock, mock.elementData);
-                SetupFillArray(mock, mock.elementData);
-                SetupCounts(mock, mock.elementData);
+                SetupTableAddsAndExists(mock, mock.parametersAndTables);
+                SetupTableDeleteAndClearKeys(mock, mock.parametersAndTables);
+                SetupParametersIndexByKeys(mock, mock.parametersAndTables);
+                SetupParametersIndexByCoordinates(mock, mock.parametersAndTables);
+                SetupGetRowsAndKeyPosition(mock, mock.parametersAndTables);
+                SetupSetRows(mock, mock.parametersAndTables);
+                SetupFillArray(mock, mock.parametersAndTables);
+                SetupCounts(mock, mock.parametersAndTables);
 
                 mock.Setup(p => p.NotifyProtocol(It.IsAny<int>(), It.IsAny<object>(), It.IsAny<object>()))
                     .Returns(
@@ -51,14 +52,14 @@
                     .Returns(
                     (int pid) =>
                     {
-                        return protocolMock.TryGetParameter(pid, out var parameterModel) ? parameterModel.Value : null;
+                        return protocolMock.parametersAndTables.TryGetParameter(pid, out var parameterModel) ? parameterModel.Value : null;
                     });
 
                 protocolMock.Setup(p => p.GetParameterByName(It.IsAny<string>()))
                     .Returns(
                     (string parameterName) =>
                     {
-                        return protocolMock.TryGetParameter(parameterName, out var parameterModel) ? parameterModel.Value : null;
+                        return protocolMock.parametersAndTables.TryGetParameter(parameterName, out var parameterModel) ? parameterModel.Value : null;
                     });
 
                 protocolMock.Setup(p => p.GetParameters(It.IsAny<object>()))
@@ -70,14 +71,14 @@
                             throw new ArgumentException("Argument should be of type uint[]");
                         }
 
-                        return parameters.Select(pid => protocolMock.TryGetParameter((int)pid, out var parameterModel) ? parameterModel.Value : null).ToArray();
+                        return parameters.Select(pid => protocolMock.parametersAndTables.TryGetParameter((int)pid, out var parameterModel) ? parameterModel.Value : null).ToArray();
                     });
 
                 protocolMock.Setup(p => p.IsEmpty(It.IsAny<int>()))
                     .Returns(
                     (int pid) =>
                     {
-                        return (protocolMock.TryGetParameter(pid, out var parameterModel) ? parameterModel.Value : null) == null;
+                        return (protocolMock.parametersAndTables.TryGetParameter(pid, out var parameterModel) ? parameterModel.Value : null) == null;
                     });
             }
 
@@ -87,7 +88,7 @@
                     .Returns(
                     (int pid, object value) =>
                     {
-                        if (mock.TryGetParameter(pid, out var parameterModel))
+                        if (mock.parametersAndTables.TryGetParameter(pid, out var parameterModel))
                         {
                             parameterModel.Update(value);
                             return 0;
@@ -100,7 +101,7 @@
                     .Returns(
                     (int pid, object value, DateTime timestamp) =>
                     {
-                        if (mock.TryGetParameter(pid, out var parameterModel))
+                        if (mock.parametersAndTables.TryGetParameter(pid, out var parameterModel))
                         {
                             parameterModel.Update(value, timestamp);
                             return 0;
@@ -113,7 +114,7 @@
                     .Returns(
                     (string name, object value) =>
                     {
-                        if (mock.TryGetParameter(name, out var parameterModel))
+                        if (mock.parametersAndTables.TryGetParameter(name, out var parameterModel))
                         {
                             parameterModel.Update(value);
                             return 0;
@@ -136,7 +137,7 @@
                         var result = new int[names.Length];
                         for (int i = 0; i < names.Length; i++)
                         {
-                            if (mock.TryGetParameter(names[i], out var parameterModel))
+                            if (mock.parametersAndTables.TryGetParameter(names[i], out var parameterModel))
                             {
                                 parameterModel.Update(values[i]);
                                 result[i] = 0;
@@ -162,7 +163,7 @@
                         var result = new int[parameterIDs.Length];
                         for (int i = 0; i < parameterIDs.Length; i++)
                         {
-                            if (mock.TryGetParameter(parameterIDs[i], out var parameterModel))
+                            if (mock.parametersAndTables.TryGetParameter(parameterIDs[i], out var parameterModel))
                             {
                                 parameterModel.Update(values[i]);
                                 result[i] = 0;
@@ -188,7 +189,7 @@
                         var result = new int[parameterIDs.Length];
                         for (int i = 0; i < parameterIDs.Length; i++)
                         {
-                            if (mock.TryGetParameter(parameterIDs[i], out var parameterModel))
+                            if (mock.parametersAndTables.TryGetParameter(parameterIDs[i], out var parameterModel))
                             {
                                 parameterModel.Update(values[i], timestamps[i]);
                                 result[i] = 0;
@@ -203,7 +204,7 @@
                     });
             }
 
-            private static void SetupTableAddsAndExists(Mock<T> mock, ElementData elementData)
+            private static void SetupTableAddsAndExists(Mock<T> mock, ParametersAndTables elementData)
             {
                 mock.Setup(p => p.AddRow(It.IsAny<int>(), It.IsAny<object[]>(), It.IsAny<bool[]>()))
                     .Callback(
@@ -248,7 +249,7 @@
                     });
             }
 
-            private static void SetupTableDeleteAndClearKeys(Mock<T> mock, ElementData element)
+            private static void SetupTableDeleteAndClearKeys(Mock<T> mock, ParametersAndTables element)
             {
                 mock.Setup(p => p.DeleteRow(It.IsAny<int>(), It.IsAny<string[]>()))
                    .Returns(
@@ -289,7 +290,7 @@
                    });
             }
 
-            private static void SetupGetRowsAndKeyPosition(Mock<T> mock, ElementData elementData)
+            private static void SetupGetRowsAndKeyPosition(Mock<T> mock, ParametersAndTables elementData)
             {
                 mock.Setup(p => p.GetKeyPosition(It.IsAny<int>(), It.IsAny<string>()))
                    .Returns(
@@ -337,7 +338,7 @@
                    });
             }
 
-            private static void SetupSetRows(Mock<T> mock, ElementData elementData)
+            private static void SetupSetRows(Mock<T> mock, ParametersAndTables elementData)
             {
                 mock.Setup(p => p.SetRow(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<object>(), It.IsAny<DateTime>(), It.IsAny<bool>()))
                    .Returns(
@@ -436,7 +437,7 @@
                    });
             }
 
-            private static void SetupFillArray(Mock<T> mock, ElementData elementData)
+            private static void SetupFillArray(Mock<T> mock, ParametersAndTables elementData)
             {
                 mock.Setup(p => p.FillArray(It.IsAny<int>(), It.IsAny<List<object[]>>(), It.IsAny<SaveOption>(), It.IsAny<DateTime?>()))
                    .Returns(
@@ -554,7 +555,7 @@
                     });
             }
 
-            private static void SetupParametersIndexByKeys(Mock<T> mock, ElementData elementData)
+            private static void SetupParametersIndexByKeys(Mock<T> mock, ParametersAndTables elementData)
             {
                 mock.Setup(p => p.GetParameterIndexByKey(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
                     .Returns(
@@ -592,7 +593,7 @@
                    });
             }
 
-            private static void SetupParametersIndexByCoordinates(Mock<T> mock, ElementData elementData)
+            private static void SetupParametersIndexByCoordinates(Mock<T> mock, ParametersAndTables elementData)
             {
                 mock.Setup(p => p.GetParameterIndex(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
                    .Returns(
@@ -630,7 +631,7 @@
                    });
             }
 
-            private static void SetupCounts(Mock<T> mock, ElementData elementData)
+            private static void SetupCounts(Mock<T> mock, ParametersAndTables elementData)
             {
                 mock.Setup(p => p.RowCount(It.IsAny<int>()))
                    .Returns(
@@ -653,7 +654,7 @@
             /// the HRESULT value.At each position, this array contains the result value as would be returned when performing a
             /// SetParameterIndex call on the individual cell.In case the value in the array is 262730 (0x0004024AL), this indicates
             /// the cell value changed.</returns>
-            private static object SetParametersIndex(ElementData elementData, int[] tableIds, int[] oneBasedRowIndexes, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
+            private static object SetParametersIndex(ParametersAndTables elementData, int[] tableIds, int[] oneBasedRowIndexes, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
             {
                 if (!(tableIds.Length == oneBasedRowIndexes.Length
                         && tableIds.Length == oneBasedColumnIndexes.Length
@@ -698,7 +699,7 @@
             /// size of the values array.Otherwise a uint[] is returned that has the same size as the ids array containing the HRESULT value.
             /// At each position, this array contains the result value as would be returned when performing a SetParameterIndexByKey call on
             /// the individual cell.In case the value in the array is 262730 (0x0004024AL), this indicates the cell value changed.</returns>
-            private static object SetParametersIndexByKey(ElementData elementData, int[] tableIds, string[] keys, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
+            private static object SetParametersIndexByKey(ParametersAndTables elementData, int[] tableIds, string[] keys, int[] oneBasedColumnIndexes, object[] values, DateTime?[] timeInfos = null)
             {
                 if (!(tableIds.Length == keys.Length
                         && tableIds.Length == oneBasedColumnIndexes.Length

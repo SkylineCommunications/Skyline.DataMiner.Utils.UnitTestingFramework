@@ -2,8 +2,8 @@
 {
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Table;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Creation;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     [TestClass]
     public class TableModelTests
