@@ -80,10 +80,10 @@
         /// <summary>
         /// Sets the cells for the the specified primary key and column PID.
         /// </summary>
-        /// <param name="primaryKeyToValue">A dictionary mapping primary keys to their corresponding cell values.</param>
+        /// <param name="primaryKeysToValues">A dictionary mapping primary keys to their corresponding cell values.</param>
         /// <param name="columnPid">The column PID.</param>
         /// <param name="timestamp">The timestamp.</param>
-        void SetCells(IDictionary<string, object> primaryKeyToValue, int columnPid, DateTime? timestamp = null);
+        void SetCells(IDictionary<string, object> primaryKeysToValues, int columnPid, DateTime? timestamp = null);
 
         /// <summary>
         /// Gets the row with the specified key, or <see langword="null"/> if no such row exists.
