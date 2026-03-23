@@ -80,10 +80,10 @@
 
             var mock = new SLProtocolMock(path);
             int[] parameterIds = { 1000, 1001, 1002 };
-            object[] values = { 40, 50, 60 };
+            object[] values = { 40, "50", 60 };
             uint[] uintParameterIds = { 1000, 1001, 1002 };
 
-            object[] expected = { 40, 50, 60 };
+            object[] expected = { 40, "50", 60 };
 
             // Act
             mock.Object.SetParameters(parameterIds, values);
@@ -92,7 +92,7 @@
             // Assert
             paramValue.Should().Equal(expected);
             mock.Assert().Parameter(1000).Value.Should().BeEquivalentTo(40);
-            mock.Assert().Parameter(1001).Value.Should().BeEquivalentTo(50);
+            mock.Assert().Parameter(1001).Value.Should().BeEquivalentTo("50");
             mock.Assert().Parameter(1002).Value.Should().BeEquivalentTo(60);
         }
 

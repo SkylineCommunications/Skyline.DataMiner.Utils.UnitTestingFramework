@@ -43,7 +43,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
             const int iterations = 100;
             var baseTimestamp = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var parameterDefinition = new ParameterDefinition("TestParameter", typeof(string), 1);
-            var parameter = new ParameterModel(parameterDefinition, 0, baseTimestamp);
+            var parameter = new ParameterModel(parameterDefinition, "0", baseTimestamp);
 
             int eventCount = 0;
             parameter.Changed += (sender, args) => Interlocked.Increment(ref eventCount);
@@ -51,7 +51,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
             // Act
             Parallel.For(0, iterations, i =>
             {
-                parameter.Update(i, baseTimestamp.AddTicks(i + 1));
+                parameter.Update(i.ToString(), baseTimestamp.AddTicks(i + 1));
                 _ = parameter.Value;
                 _ = parameter.Timestamp;
             });

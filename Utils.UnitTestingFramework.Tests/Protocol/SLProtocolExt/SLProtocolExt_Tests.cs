@@ -17,11 +17,11 @@
             var protocolMock = new SLProtocolMock<ConcreteSLProtocolExt>(path);
 
             // Act
-            protocolMock.Object.StringParameter = 42;
+            protocolMock.Object.StringParameter = "42";
 
             // Assert
-            Assert.AreEqual(42, protocolMock.Object.StringParameter);
-            Assert.AreEqual(42, protocolMock.Object.GetParameter(1001));
+            Assert.AreEqual("42", protocolMock.Object.StringParameter);
+            Assert.AreEqual("42", protocolMock.Object.GetParameter(1001));
         }
 
         [TestMethod]
@@ -31,11 +31,11 @@
             var protocolMock = new SLProtocolMock<ConcreteSLProtocolExt>(path);
 
             // Act
-            protocolMock.Object.SetParameter(1001, 42);
+            protocolMock.Object.SetParameter(1001, "42");
 
             // Assert
-            Assert.AreEqual(42, protocolMock.Object.StringParameter);
-            Assert.AreEqual(42, protocolMock.Object.GetParameter(1001));
+            Assert.AreEqual("42", protocolMock.Object.StringParameter);
+            Assert.AreEqual("42", protocolMock.Object.GetParameter(1001));
         }
 
         [TestMethod]
@@ -44,13 +44,13 @@
             // Arrange
             var protocolMock = new SLProtocolMock<ConcreteSLProtocolExt>(path);
 
-            protocolMock.Object.SetParameter(1001, 42);
+            protocolMock.Object.SetParameter(1001, "42");
 
             // Act
             var parameterValue = protocolMock.Object.StringParameter;
 
             // Assert
-            parameterValue.Should().Be(42);
+            parameterValue.Should().Be("42");
         }
 
         [TestMethod]
@@ -59,13 +59,13 @@
             // Arrange
             var protocolMock = new SLProtocolMock<ConcreteSLProtocolExt>(path);
 
-            protocolMock.Object.SetParameter(1001, 42);
+            protocolMock.Object.SetParameter(1001, "42");
 
             // Act
             var parameterValue = protocolMock.Object.GetParameter(1001);
 
             // Assert
-            parameterValue.Should().Be(42);
+            parameterValue.Should().Be("42");
         }
 
         [TestMethod]

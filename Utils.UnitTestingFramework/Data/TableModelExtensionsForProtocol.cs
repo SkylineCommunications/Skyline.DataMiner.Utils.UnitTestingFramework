@@ -162,7 +162,7 @@
                 throw new ArgumentNullException(nameof(key));
             }
 
-            var row = tableModel.GetRow(key).Select(cell => cell.Value).ToArray();
+            var row = tableModel.GetRow(key);
 
             return GetRow<TRow>(tableModel, row);
         }
@@ -176,7 +176,7 @@
         /// <returns>The row.</returns>
         public static TRow GetRow<TRow>(this ITableModel tableModel, int index) where TRow : QActionTableRow
         {
-            var row = tableModel.GetRow(tableModel.GetRowPrimaryKey(index)).Select(cell => cell.Value).ToArray();
+            var row = tableModel.GetRow(tableModel.GetRowPrimaryKey(index));
 
             return GetRow<TRow>(tableModel, row);
         }
@@ -222,7 +222,7 @@
 
             var columnDefinition = tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1);
 
-            return tableModel.GetCell(primaryKey, columnDefinition.Pid).Value;
+            return tableModel.GetCell(primaryKey, columnDefinition.Pid);
         }
 
         /// <summary>
@@ -277,13 +277,15 @@
             return UpdateCellsAndReturnChanges(tableModel, timestamp, rowToSet, oldRow);
         }
 
-        private static object UpdateCellsAndReturnChanges(ITableModel tableModel, DateTime? timestamp, object[] rowToSet, IParameterValue[] oldRow)
+        private static object UpdateCellsAndReturnChanges(ITableModel tableModel, DateTime? timestamp, object[] row, object[] oldRow)
         {
-            var changes = new int[rowToSet.Length];
+            var changes = new int[row.Length];
+
+            string primaryKey = Convert.ToString(oldRow[tableModel.Schema.PrimaryKeyColumn.Idx]);
 
             foreach (var columnDefinition in tableModel.Schema.ColumnDefinitions)
             {
-                if (rowToSet.Length <= columnDefinition.Idx)
+                if (row.Length <= columnDefinition.Idx)
                 {
                     // If the provided row has fewer columns than the current column index, we skip
                     continue;
@@ -295,13 +297,13 @@
                     continue;
                 }
 
-                var newValue = rowToSet[columnDefinition.Idx];
+                var newValue = row[columnDefinition.Idx];
 
-                var oldCell = oldRow[columnDefinition.Idx];
-                var oldValue = oldCell.Value;
+                var oldValue = oldRow[columnDefinition.Idx];
 
                 changes[columnDefinition.Idx] = Equals(newValue, oldValue) ? 2 : 1;
-                oldCell.Update(newValue, timestamp);
+
+                tableModel.SetCell(primaryKey, columnDefinition.Pid, newValue, timestamp);
             }
 
             return changes;
@@ -336,7 +338,7 @@
 
         private static object[] ConvertProtocolClearAndLeaveToActualValuesForRow(string primaryKey, object[] row, ITableModel tableModel)
         {
-            var existingRow = tableModel.GetRow(primaryKey).Select(cell => cell.Value).ToArray();
+            var existingRow = tableModel.GetRow(primaryKey);
 
             return ConvertProtocolClearAndLeaveToActualValuesForRow(row, existingRow);
         }
@@ -463,7 +465,7 @@
         {
             var column = tableModel.Schema.FindColumnDefinitionByPid(columnPid);
 
-            return tableModel.GetAllRows().Values.Select(row => row[column.Idx].Value).ToArray();        
+            return tableModel.GetAllRows().Values.Select(row => row[column.Idx]).ToArray();        
         }
 
         /// <summary>
@@ -583,7 +585,7 @@
 
         private static object[] ConvertProtocolClearAndleaveToActualValuesForRow(int rowIndex, object[] row, ITableModel tableModel)
         {
-            var existingRow = tableModel.GetRow(tableModel.GetRowPrimaryKey(rowIndex)).Select(cell => cell.Value).ToArray();
+            var existingRow = tableModel.GetRow(tableModel.GetRowPrimaryKey(rowIndex));
             
             return ConvertProtocolClearAndLeaveToActualValuesForRow(row, existingRow);
         }
@@ -608,7 +610,7 @@
                     }
                     else
                     {
-                        convertedColumn[i] = existingRow[columnIndex].Value;
+                        convertedColumn[i] = existingRow[columnIndex];
                     }
                 }
                 else
@@ -649,7 +651,7 @@
                 throw new ArgumentException("Row index exceeds number of rows", nameof(oneBasedRowIndex));
             }
 
-            return tableModel.GetCell(tableModel.GetRowPrimaryKey(oneBasedRowIndex - 1), tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1).Pid).Value;
+            return tableModel.GetCell(tableModel.GetRowPrimaryKey(oneBasedRowIndex - 1), tableModel.Schema.FindColumnDefinitionByIdx(oneBasedColumnIndex - 1).Pid);
         }
 
         /// <summary>

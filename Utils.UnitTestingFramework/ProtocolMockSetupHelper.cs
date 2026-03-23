@@ -311,7 +311,7 @@
                        }
                        else
                        {
-                            return row.Select(cell => cell.Value).ToArray();
+                            return row;
                        }
                    });
 
@@ -327,7 +327,7 @@
                        }
                        else
                        {
-                           return row.Select(cell => cell.Value).ToArray();
+                           return row;
                        }
                    });
                 mock.Setup(p => p.GetKeys(It.IsAny<int>()))

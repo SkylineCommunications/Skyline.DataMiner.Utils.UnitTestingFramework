@@ -100,8 +100,8 @@
             // Assert
             var rowOutput = tableModel.GetRow("skyline1");
 
-            Assert.AreEqual("skyline1", rowOutput[0].Value);
-            Assert.AreEqual("value2", rowOutput[1].Value);
+            Assert.AreEqual("skyline1", rowOutput[0]);
+            Assert.AreEqual("value2", rowOutput[1]);
         }
 
         [TestMethod]
@@ -126,10 +126,10 @@
             var row0Output = tableModel.GetRow(tableModel.GetRowPrimaryKey(0));
             var row1Output = tableModel.GetRow(tableModel.GetRowPrimaryKey(1));
 
-            Assert.AreEqual("skyline2", row0Output[0].Value);
-            Assert.AreEqual("value2", row0Output[1].Value);
-            Assert.AreEqual("skyline3", row1Output[0].Value);
-            Assert.AreEqual("value3", row1Output[1].Value);
+            Assert.AreEqual("skyline2", row0Output[0]);
+            Assert.AreEqual("value2", row0Output[1]);
+            Assert.AreEqual("skyline3", row1Output[0]);
+            Assert.AreEqual("value3", row1Output[1]);
         }
 
         [TestMethod]
@@ -150,8 +150,8 @@
 
             // Assert
             var row = tableModel.GetRow("key1");
-            Assert.AreEqual("key1", row[0].Value);
-            Assert.AreEqual("updatedValue", row[1].Value);
+            Assert.AreEqual("key1", row[0]);
+            Assert.AreEqual("updatedValue", row[1]);
             Assert.AreEqual(1, tableModel.RowCount);
         }
 
@@ -171,9 +171,10 @@
             tableModel.SetRow(row, timestamp);
 
             // Assert
-            var rowOutput = tableModel.GetRow("key1");
-            Assert.AreEqual(timestamp, rowOutput[0].Timestamp);
-            Assert.AreEqual(timestamp, rowOutput[1].Timestamp);
+            var rowOutput1 = tableModel.GetLastWriteTimestamp("key1", 1201);
+            var rowOutput2 = tableModel.GetLastWriteTimestamp("key1", 1202);
+            Assert.AreEqual(timestamp, rowOutput1);
+            Assert.AreEqual(timestamp, rowOutput2);
         }
 
         [TestMethod]
@@ -211,8 +212,8 @@
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("key1", result[0].Value);
-            Assert.AreEqual("value1", result[1].Value);
+            Assert.AreEqual("key1", result[0]);
+            Assert.AreEqual("value1", result[1]);
         }
 
         [TestMethod]
@@ -232,8 +233,8 @@
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("key1", result[0].Value);
-            Assert.AreEqual("value1", result[1].Value);
+            Assert.AreEqual("key1", result[0]);
+            Assert.AreEqual("value1", result[1]);
         }
 
         [TestMethod]
@@ -302,30 +303,6 @@
                 () => tableModel.GetRow(tableModel.GetRowPrimaryKey(-1)));
         }
 
-        [TestMethod]
-        public void Row_ModifyingDoesNotModifyTable()
-        {
-            // Arrange
-            var tableModelBuilder = new TableModelBuilder(900);
-
-            tableModelBuilder.AddColumn(1201, 0, true);
-            tableModelBuilder.AddColumn(1202, 1, false);
-
-            var tableModel = tableModelBuilder.Build();
-
-            object[] row = { "skyline1", "value2" };
-            tableModel.SetRow(row);
-
-            // Act
-            var rowOutput1 = tableModel.GetRow("skyline1");
-            rowOutput1[1].Update("modifiedValue", null);
-
-            // Assert
-            var rowOutput2 = tableModel.GetRow("skyline1");
-            Assert.AreEqual("skyline1", rowOutput2[0].Value);
-            Assert.AreEqual("modifiedValue", rowOutput2[1].Value); // The actual row IS modified because we get a reference
-        }
-
         #endregion
 
         #region GetAllRows Tests
@@ -372,9 +349,9 @@
             Assert.IsTrue(allRows.ContainsKey("key1"));
             Assert.IsTrue(allRows.ContainsKey("key2"));
             Assert.IsTrue(allRows.ContainsKey("key3"));
-            Assert.AreEqual("value1", allRows["key1"][1].Value);
-            Assert.AreEqual("value2", allRows["key2"][1].Value);
-            Assert.AreEqual("value3", allRows["key3"][1].Value);
+            Assert.AreEqual("value1", allRows["key1"][1]);
+            Assert.AreEqual("value2", allRows["key2"][1]);
+            Assert.AreEqual("value3", allRows["key3"][1]);
         }
 
         #endregion
@@ -398,7 +375,7 @@
 
             // Assert
             Assert.IsNotNull(cell);
-            Assert.AreEqual("value1", cell.Value);
+            Assert.AreEqual("value1", cell);
         }
 
         [TestMethod]
@@ -465,7 +442,7 @@
 
             // Assert
             var cell = tableModel.GetCell("key1", 1202);
-            Assert.AreEqual("updatedValue", cell.Value);
+            Assert.AreEqual("updatedValue", cell);
         }
 
         [TestMethod]
@@ -486,9 +463,8 @@
             tableModel.SetCell("key1", 1202, "newValue", timestamp);
 
             // Assert
-            var cell = tableModel.GetCell("key1", 1202);
-            Assert.AreEqual("newValue", cell.Value);
-            Assert.AreEqual(timestamp, cell.Timestamp);
+            var cellTimestamp = tableModel.GetLastWriteTimestamp("key1", 1202);
+            Assert.AreEqual(timestamp, cellTimestamp);
         }
 
         [TestMethod]

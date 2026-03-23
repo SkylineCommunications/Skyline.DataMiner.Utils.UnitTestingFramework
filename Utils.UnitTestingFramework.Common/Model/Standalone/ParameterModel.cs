@@ -1,19 +1,15 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
 
     /// <summary>
     /// Parameter model.
     /// </summary>
     /// <seealso cref="IParameterModel" />
-    public class ParameterModel : IParameterModel
+    public class ParameterModel : ParameterModelBase<ParameterDefinition>, IParameterModel
     {
-        private readonly object syncRoot = new object();
-        private object value;
-        private DateTime timestamp;
         private int suspendNotifications;
 
         /// <summary>
@@ -23,10 +19,9 @@
         /// <param name="value">The value.</param>
         /// <param name="timestamp">The timestamp.</param>
         public ParameterModel(ParameterDefinition parameterDefinition, object value, DateTime? timestamp = null)
+            : base(parameterDefinition, value, timestamp)
         {
-            this.value = value;
-            this.timestamp = timestamp ?? DateTime.Now;
-            Definition = parameterDefinition ?? throw new ArgumentNullException(nameof(parameterDefinition));
+
         }
 
         /// <summary>
@@ -34,72 +29,24 @@
         /// </summary>
         public event EventHandler<ParameterModelChangedEventArgs> Changed;
 
-        public ParameterDefinition Definition { get; }
-
-        /// <summary>
-        /// Gets the parameter value.
-        /// </summary>
-        /// <value>
-        /// The parameter value.
-        /// </value>
-        public object Value
-        {
-            get
-            {
-                lock (syncRoot)
-                {
-                    return value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the timestamp.
-        /// </summary>
-        /// <value>
-        /// The timestamp.
-        /// </value>
-        public DateTime Timestamp
-        {
-            get
-            {
-                lock (syncRoot)
-                {
-                    return timestamp;
-                }
-            }
-        }
-
         /// <summary>
         /// Updates the parameter value and timestamp.
         /// </summary>
         /// <param name="value">The new value.</param>
         /// <param name="timestamp">The timestamp.</param>
-        public bool Update(object value, DateTime? timestamp = null)
+        public override bool Update(object value, DateTime? timestamp = null)
         {
-            var updatedTimestamp = timestamp ?? DateTime.Now;
-            EventHandler<ParameterModelChangedEventArgs> handler;
-            var oldValue = this.value;
-            var oldTimestamp = this.timestamp;
+            var oldValue = Value;
+            var oldTimestamp = Timestamp;
 
-            lock (syncRoot)
+            bool changed = base.Update(value, timestamp);
+
+            if (changed && suspendNotifications == 0)
             {
-                if (Equals(this.value, value) && this.timestamp == updatedTimestamp)
-                {
-                    return false;
-                }
-
-                this.value = value;
-                this.timestamp = updatedTimestamp;
-                handler = Changed;
+                Changed?.Invoke(this, new ParameterModelChangedEventArgs(Definition, oldValue, Value, oldTimestamp, Timestamp));
             }
 
-            if (handler != null)
-            {
-                handler(this, new ParameterModelChangedEventArgs(Definition, oldValue, value, oldTimestamp, updatedTimestamp));
-            }
-
-            return true;
+            return changed;
         }
 
         /// <inheritdoc/>

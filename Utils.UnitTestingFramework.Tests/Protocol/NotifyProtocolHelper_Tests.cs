@@ -351,9 +351,9 @@
             string primaryKey1 = "Row 1 PK";
 
             string col2 = "Row 1 2nd Col";
-            string col3 = "Row 1 3rd Col";
-            string col4 = "Row 1 4th Col";
-            string col5 = "Row 1 5th Col";
+            int col3 = 1;
+            int col4 = 2;
+            int col5 = 3;
 
             object[] rowDetails = new object[] { tableID, primaryKey1, DateTime.Now, true };
 
@@ -365,7 +365,7 @@
             // Act
             rowData[1] = Constants.PROTOCOL_CLEAR;
             rowData[2] = Constants.PROTOCOL_LEAVE;
-            rowData[3] = "Row 1 4th Col new value";
+            rowData[3] = 10;
 
             mock.Object.NotifyProtocol((int)NotifyType.NT_SET_ROW, rowDetails, rowData);
 
@@ -374,7 +374,7 @@
 
             Assert.AreEqual(1, outputAddRow1);
 
-            string[] row = { "Row 1 PK", null, "Row 1 3rd Col", "Row 1 4th Col new value", "Row 1 5th Col" };
+            object[] row = { "Row 1 PK", null /*clear*/, 1 /*leave*/, 10 /*new value*/, 3 };
 
             outputGetRow1.Should().BeEquivalentTo(row);
         }
@@ -405,7 +405,7 @@
 
             var tableContent = new object[] { column1, column2, column3, column4, column5 };
 
-            var rowData = new object[] { primaryKey0, "Row 1.2", "Row 1.3", "Row 1.4", "Row 1.5" };
+            var rowData = new object[] { primaryKey0, "Row 1.2", 10, 11, 12 };
 
             // Act
             mock.Object.NotifyProtocol(149, tableID, primaryKey0); // AddRow
@@ -450,7 +450,7 @@
 
             var tableContent = new object[] { column1, column2, column3, column4, column5 };
 
-            var rowData = new object[] { primaryKey0, "Row 1.2", "Row 1.3", "Row 1.4", "Row 1.5" };
+            var rowData = new object[] { primaryKey0, "Row 1.2", 10, 11, 12 };
 
             // Act
             mock.Object.NotifyProtocol(149, tableID, primaryKey0); // AddRow
@@ -461,7 +461,7 @@
             var outputGetRow2 = (object[])mock.Object.NotifyProtocol(215, rowDetails2, null); // GetRow
 
             // Assert
-            object[] row0 = { "Row 1.1", "Row 1.2", "Row 1.3", "Row 1.4", "Row 1.5" };
+            object[] row0 = { "Row 1.1", "Row 1.2", 10, 11, 12 };
             outputGetRow0.Should().BeEquivalentTo(row0);
 
             object[] row1 = { "Row 1 PK", "A", 2, 4, 6 };
@@ -524,11 +524,11 @@
 
             uint[] columnIndexes = new uint[] { 0, 1 };
 
-            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
-            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", "4", "5", "6" };
-            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", "7", "8", "9" };
-            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", "10", "11", "12" };
-            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", "13", "14", "15" };
+            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
+            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", 7, 8, 9 };
+            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", 10, 11, 12 };
+            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", 13, 14, 15 };
 
             var rowDetails0 = new object[] { tableID, "skyline1" };
             var rowDetails1 = new object[] { tableID, "skyline2" };
@@ -571,11 +571,11 @@
 
             uint[] columnIndexes = new uint[] { 0, 10 };
 
-            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
-            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", "4", "5", "6" };
-            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", "7", "8", "9" };
-            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", "10", "11", "12" };
-            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", "13", "14", "15" };
+            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
+            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", 7, 8, 9 };
+            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", 10, 11, 12 };
+            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", 13, 14, 15 };
 
             var rowDetails0 = new object[] { tableID, "skyline1" };
             var rowDetails1 = new object[] { tableID, "skyline2" };

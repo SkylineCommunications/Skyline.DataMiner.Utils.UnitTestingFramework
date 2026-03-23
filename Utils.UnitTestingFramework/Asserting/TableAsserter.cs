@@ -22,7 +22,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
 
         public IDictionary<string, object[]> AllRows()
         {
-            return tableModel?.GetAllRows()?.ToDictionary(x => x.Key, x => x.Value.Select(cell => cell.Value).ToArray());
+            return tableModel?.GetAllRows();
         }
 
         public object[] Column(int pid)
@@ -41,7 +41,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
         {
             try
             {
-                return tableModel?.GetRow(key)?.Select(cell => cell.Value).ToArray();
+                return tableModel?.GetRow(key);
             }
             catch
             {
@@ -53,7 +53,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
         {
             try
             {
-                return tableModel?.GetRow(tableModel?.GetRowPrimaryKey(rowIndex))?.Select(cell => cell.Value).ToArray();
+                return tableModel?.GetRow(tableModel?.GetRowPrimaryKey(rowIndex));
             }
             catch
             {

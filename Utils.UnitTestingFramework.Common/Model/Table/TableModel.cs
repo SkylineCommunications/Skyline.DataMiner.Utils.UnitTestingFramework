@@ -5,7 +5,6 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Threading;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     /// <summary>
     /// Table model.
@@ -17,7 +16,7 @@
         private readonly ReaderWriterLockSlim @lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         // List type to allow keep track of row indexes.
-        private readonly List<IParameterModel[]> rows = new List<IParameterModel[]>();
+        private readonly List<CellModel[]> rows = new List<CellModel[]>();
 
         private int suspendNotifications;
 
@@ -130,7 +129,7 @@
             {
                 columnDefinition.Validate(value);
 
-                var row = GetRow(primaryKey) ?? throw new ArgumentException($"No row with primary key '{primaryKey}' exists.", nameof(primaryKey));
+                var row = GetRowInternal(primaryKey) ?? throw new ArgumentException($"No row with primary key '{primaryKey}' exists.", nameof(primaryKey));
 
                 var cell = row[columnDefinition.Idx];
 
@@ -148,14 +147,55 @@
 
         /// <inheritdoc/>
         /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/>.</exception>
-        public IParameterValue[] GetRow(string primaryKey)
+        public object[] GetRow(string primaryKey)
+        {
+            return GetValues(GetRowInternal(primaryKey));
+        }
+
+        public ReadOnlyDictionary<string, object[]> GetRows(IEnumerable<string> primaryKeys)
+        {
+            if (primaryKeys == null)
+            {
+                throw new ArgumentNullException(nameof(primaryKeys));
+            }
+
+            using (@lock.Read())
+            {
+                var dict = new Dictionary<string, object[]>(rows.Count);
+
+                foreach (var primaryKey in primaryKeys)
+                {
+                    var row = GetRowInternal(primaryKey);
+                    if (row == null)
+                    {
+                        continue;
+                    }
+
+                    dict[primaryKey] = GetValues(row);
+                }
+
+                return new ReadOnlyDictionary<string, object[]>(dict);
+            }
+        }
+
+        private object[] GetValues(CellModel[] row)
+        {
+            if (row is null)
+            {
+                return null;
+            }
+
+            return row.Select(cell => cell.Value).ToArray();
+        }
+
+        private CellModel[] GetRowInternal(string primaryKey)
         {
             if (primaryKey == null)
             {
                 throw new ArgumentNullException(nameof(primaryKey));
             }
 
-            using(@lock.Read())
+            using (@lock.Read())
             {
                 if (!keyToRowIndex.TryGetValue(primaryKey, out int rowIndex))
                 {
@@ -171,7 +211,7 @@
         /// <inheritdoc/>
         /// <exception cref="ArgumentException">No column with the specified PID exists.</exception>"
         /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/> or whitespace.</exception>
-        public IParameterValue GetCell(string primaryKey, int columnPid)
+        public object GetCell(string primaryKey, int columnPid)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
             {
@@ -182,16 +222,15 @@
             
             using (@lock.Read())
             {
-                if (!keyToRowIndex.TryGetValue(primaryKey, out int rowIndex))
+                var row = GetRowInternal(primaryKey);
+                if (row == null)
                 {
                     // Return null if the row does not exist.
                     // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
                     return null;
                 }
 
-                var cell = rows[rowIndex][column.Idx];
-
-                return cell;
+                return row[column.Idx].Value;
             }
         }
 
@@ -233,7 +272,7 @@
 
                     string primaryKey = Convert.ToString(row[Schema.PrimaryKeyColumn.Idx]);
 
-                    var existingRow = GetRow(primaryKey);
+                    var existingRow = GetRowInternal(primaryKey);
 
                     if (existingRow == null)
                     {
@@ -286,18 +325,43 @@
         }
 
         /// <inheritdoc/>
-        public ReadOnlyDictionary<string, IParameterValue[]> GetAllRows()
+        public ReadOnlyDictionary<string, object[]> GetAllRows()
         {
             using (@lock.Read())
             {
-                var dict = new Dictionary<string, IParameterValue[]>(rows.Count);
+                var dict = new Dictionary<string, object[]>(rows.Count);
 
                 foreach (var row in rows)
                 {
-                    dict[(string)row[Schema.PrimaryKeyColumn.Idx].Value] = row;
+                    string primaryKey = Convert.ToString(row[Schema.PrimaryKeyColumn.Idx].Value);
+
+                    dict.Add(primaryKey, GetValues(row));
                 }
 
-                return new ReadOnlyDictionary<string, IParameterValue[]>(dict);
+                return new ReadOnlyDictionary<string, object[]>(dict);
+            }
+        }
+
+        public DateTime? GetLastWriteTimestamp(string primaryKey, int columnPid)
+        {
+            if (String.IsNullOrWhiteSpace(primaryKey))
+            {
+                throw new ArgumentNullException(nameof(primaryKey));
+            }
+
+            var column = Schema.FindColumnDefinitionByPid(columnPid) ?? throw new ArgumentException(nameof(columnPid), $"A column with PID '{columnPid}' does not exist.");
+
+            using (@lock.Read())
+            {
+                var row = GetRowInternal(primaryKey);
+                if (row == null)
+                {
+                    // Return null if the row does not exist.
+                    // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
+                    return null;
+                }
+
+                return row[column.Idx].Timestamp;
             }
         }
 
@@ -338,15 +402,13 @@
             }
         }
 
-        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, IParameterValue[] existingRow, EventDispatchScope eventDispatchScope)
+        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, CellModel[] existingRow, EventDispatchScope eventDispatchScope)
         {
             string primaryKey = Convert.ToString(existingRow[Schema.PrimaryKeyColumn.Idx].Value);
 
             bool oneOrMoreCellsChanged = false;
             foreach (var columnDefinition in Schema.ColumnDefinitions)
             {
-                columnDefinition.Validate(rowData[columnDefinition.Idx]);
-
                 var cell = existingRow[columnDefinition.Idx];
 
                 var oldValue = cell.Value;
@@ -373,7 +435,7 @@
         {
             string primaryKey = Convert.ToString(rowData[Schema.PrimaryKeyColumn.Idx]);
 
-            var rowToAdd = new IParameterModel[Schema.ColumnDefinitions.Count];
+            var rowToAdd = new CellModel[Schema.ColumnDefinitions.Count];
 
             foreach (var columnDefinition in Schema.ColumnDefinitions)
             {
@@ -381,7 +443,7 @@
 
                 columnDefinition.Validate(valueToAdd);       
 
-                rowToAdd[columnDefinition.Idx] = new ParameterModel(columnDefinition, valueToAdd, timestamp);
+                rowToAdd[columnDefinition.Idx] = new CellModel(columnDefinition, valueToAdd, timestamp);
             }
 
             rows.Add(rowToAdd);

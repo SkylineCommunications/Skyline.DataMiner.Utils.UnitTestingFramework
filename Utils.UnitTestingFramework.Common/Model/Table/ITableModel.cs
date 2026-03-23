@@ -66,7 +66,7 @@
         /// <param name="primaryKey">The primary key.</param>
         /// <param name="columnPid">The column PID.</param>
         /// <returns>The cell data, or <see langword="null"/> if no such cell exists.</returns>
-        IParameterValue GetCell(string primaryKey, int columnPid);
+        object GetCell(string primaryKey, int columnPid);
 
         /// <summary>
         /// Sets the cell data for the cell with the specified primary key and column PID.
@@ -78,18 +78,25 @@
         void SetCell(string primaryKey, int columnPid, object value, DateTime? timestamp = null);
 
         /// <summary>
-        /// Rows the row data of the row with the specified key, or <see langword="null"/> if no such row exists.
+        /// Gets the row with the specified key, or <see langword="null"/> if no such row exists.
         /// </summary>
         /// <param name="primaryKey">The key.</param>
         /// <returns>The row data, or <see langword="null"/> if no such row exists.</returns>
         /// <exception cref="System.ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/>.</exception>
-        IParameterValue[] GetRow(string primaryKey);
+        object[] GetRow(string primaryKey);
+
+        /// <summary>
+        /// Gets a collection of rows with the specified primary keys, ignoring any keys for which no such row exists.
+        /// </summary>
+        /// <param name="primaryKeys"></param>
+        /// <returns></returns>
+        ReadOnlyDictionary<string, object[]> GetRows(IEnumerable<string> primaryKeys);
 
         /// <summary>
         /// Gets all rows.
         /// </summary>
         /// <returns>A dictionary of rows, where the key represents the primary key.</returns>
-        ReadOnlyDictionary<string, IParameterValue[]> GetAllRows();
+        ReadOnlyDictionary<string, object[]> GetAllRows();
 
         /// <summary>
         /// Sets the row with the specified key, adding a new row if no such row exists.
@@ -121,5 +128,7 @@
         /// </summary>
         /// <returns>An <see cref="IDisposable"/> that, when disposed, resumes notifications.</returns>
         IDisposable SuspendNotifications();
+
+        DateTime? GetLastWriteTimestamp(string primaryKey, int columnPid);
     }
 }
