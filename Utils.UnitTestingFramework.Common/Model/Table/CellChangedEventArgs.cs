@@ -2,7 +2,7 @@
 {
     using System;
 
-    public sealed class CellChangedEventArgs : ParameterValueChangedEventArgs<ColumnDefinition>
+    internal sealed class CellChangedEventArgs : ParameterValueChangedEventArgs<ColumnDefinition>
     {
         public CellChangedEventArgs(string primaryKey, ColumnDefinition columnDefinition, object oldValue, object newValue, DateTime oldTimestamp, DateTime newTimestamp)
             : base(columnDefinition, oldValue, newValue, oldTimestamp, newTimestamp)

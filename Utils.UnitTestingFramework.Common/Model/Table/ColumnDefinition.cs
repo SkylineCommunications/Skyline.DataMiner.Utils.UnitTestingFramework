@@ -2,7 +2,7 @@
 {
     using System;
 
-    public sealed class ColumnDefinition : ParameterDefinition, IEquatable<ColumnDefinition>
+    internal sealed class ColumnDefinition : ParameterDefinition, IEquatable<ColumnDefinition>
     {
         public ColumnDefinition(string name, Type type, int pid, int idx, bool allowNull = true, string description = null) : base(name, type, pid, allowNull, description)
         {

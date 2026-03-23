@@ -2,7 +2,6 @@
 {
     using System;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     internal class Asserter : IAsserter
     {
@@ -13,11 +12,11 @@
             this.elementData = elementData ?? throw new ArgumentNullException(nameof(elementData));
         }
 
-        public IParameterModel Parameter(int parameterId)
+        public IParameterAsserter Parameter(int parameterId)
         {
             try
             {
-                return elementData.GetParameter(parameterId);
+                return new ParameterAsserter(elementData.GetParameter(parameterId));
             }
             catch
             {
@@ -25,9 +24,16 @@
             }
         }
 
-        public IParameterModel Parameter(string parameterName)
+        public IParameterAsserter Parameter(string parameterName)
         {
-            return elementData.GetParameter(parameterName);
+            try
+            {
+                return new ParameterAsserter(elementData.GetParameter(parameterName));
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public ITableAsserter Table(int tablePid)

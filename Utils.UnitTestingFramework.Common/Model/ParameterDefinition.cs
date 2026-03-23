@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class ParameterDefinition : IEquatable<ParameterDefinition>
+    internal class ParameterDefinition : IEquatable<ParameterDefinition>
     {
         public ParameterDefinition(string name, Type type, int pid, bool allowNull = true, string description = null)
         {

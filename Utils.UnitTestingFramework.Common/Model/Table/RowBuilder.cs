@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class RowBuilder
+    internal class RowBuilder
     {
         private readonly TableSchema tableSchema;
         private readonly object[] row;

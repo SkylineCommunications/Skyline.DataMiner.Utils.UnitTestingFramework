@@ -7,7 +7,7 @@
     /// <summary>
     /// Table model interface.
     /// </summary>
-    public interface ITableModel
+    internal interface ITableModel
     {
         /// <summary>
         /// Occurs when a cell value changes.

@@ -19,13 +19,13 @@
         /// </summary>
         /// <param name="parameterId">The parameter ID.</param>
         /// <returns>The parameter model.</returns>
-        IParameterModel Parameter(int parameterId);
+        IParameterAsserter Parameter(int parameterId);
 
         /// <summary>
         /// Retrieves the parameter model of the parameter with the specified name.
         /// </summary>
         /// <param name="parameterName">The parameter name.</param>
         /// <returns>The parameter model.</returns>
-        IParameterModel Parameter(string parameterName);
+        IParameterAsserter Parameter(string parameterName);
     }
 }

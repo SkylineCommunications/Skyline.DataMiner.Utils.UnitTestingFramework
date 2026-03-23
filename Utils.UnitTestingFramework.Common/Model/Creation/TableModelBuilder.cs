@@ -2,14 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     /// <summary>
     /// Table model builder.
     /// </summary>
-    public class TableModelBuilder
+    internal class TableModelBuilder
     {
         private readonly int tableId;
         private readonly List<ColumnDefinition> columns = new List<ColumnDefinition>();
