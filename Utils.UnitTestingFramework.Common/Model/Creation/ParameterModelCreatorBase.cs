@@ -55,8 +55,6 @@
 
         protected virtual void ProcessOtherTypes(ParametersAndTables dataCollection, IParamsParam parameter)
         {
-            int parameterId = (int)parameter.Id.Value.Value;
-
             var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
 
             dataCollection.AddParameter(new ParameterModel(parameterDefinition, null));

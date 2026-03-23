@@ -61,13 +61,11 @@
         /// <param name="timestamp">The timestamp.</param>
         public virtual bool Update(object value, DateTime? timestamp = null)
         {
-            var updatedTimestamp = timestamp ?? DateTime.Now;
-            var oldValue = this.value;
-            var oldTimestamp = this.timestamp;
-
             lock (syncRoot)
             {
                 Definition.Validate(value);
+
+                var updatedTimestamp = timestamp ?? DateTime.Now;
 
                 if (Equals(this.value, value) && this.timestamp == updatedTimestamp)
                 {
