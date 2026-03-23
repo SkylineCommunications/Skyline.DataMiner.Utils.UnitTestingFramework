@@ -122,25 +122,41 @@
                 throw new ArgumentNullException(nameof(primaryKey));
             }
 
+            SetCells(new Dictionary<string, object> { { primaryKey, value } }, columnPid, timestamp);
+        }
+
+        /// <inheritdoc/>
+        /// <exception cref="ArgumentNullException"><paramref name="primaryKeysToValues"/> is <see langword="null"/>.</exception>
+        public void SetCells(IDictionary<string, object> primaryKeysToValues, int columnPid, DateTime? timestamp = null)
+        {
+            if (primaryKeysToValues == null)
+            {
+                throw new ArgumentNullException(nameof(primaryKeysToValues));
+            }
+
             var columnDefinition = Schema.FindColumnDefinitionByPid(columnPid) ?? throw new ArgumentException(nameof(columnPid), $"A column with PID '{columnPid}' does not exist.");
 
-            using (var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
+            using (var eventDelayer = GetEventDelayer()) // Event delayer needs to be disposed after the lock is released
             using (@lock.Write())
             {
-                columnDefinition.Validate(value);
-
-                var row = GetRowInternal(primaryKey) ?? throw new ArgumentException($"No row with primary key '{primaryKey}' exists.", nameof(primaryKey));
-
-                var cell = row[columnDefinition.Idx];
-
-                var oldCellValue = cell.Value;
-                var oldCellTimestamp = cell.Timestamp;
-
-                bool cellChanged = cell.Update(value, timestamp);
-                if (cellChanged)
+                foreach (var kvp in primaryKeysToValues)
                 {
-                    eventDispatcher.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldCellValue, cell.Value, oldCellTimestamp, cell.Timestamp));
-                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Updated));
+                    string primaryKey = kvp.Key;
+                    object value = kvp.Value;
+
+                    var row = GetRowInternal(primaryKey) ?? throw new ArgumentException($"No row with primary key '{primaryKey}' exists.", nameof(primaryKeysToValues));
+
+                    var cell = row[columnDefinition.Idx];
+
+                    var oldCellValue = cell.Value;
+                    var oldCellTimestamp = cell.Timestamp;
+
+                    bool cellChanged = cell.Update(value, timestamp);
+                    if (cellChanged)
+                    {
+                        eventDelayer.Enqueue(() => RaiseCellChanged(primaryKey, columnDefinition, oldCellValue, cell.Value, oldCellTimestamp, cell.Timestamp));
+                        eventDelayer.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Updated));
+                    }
                 }
             }
         }
@@ -149,7 +165,10 @@
         /// <exception cref="ArgumentNullException"><paramref name="primaryKey"/> is <see langword="null"/>.</exception>
         public object[] GetRow(string primaryKey)
         {
-            return GetValues(GetRowInternal(primaryKey));
+            using (@lock.Read())
+            {
+                return GetValues(GetRowInternal(primaryKey));
+            }
         }
 
         public ReadOnlyDictionary<string, object[]> GetRows(IEnumerable<string> primaryKeys)
@@ -195,17 +214,14 @@
                 throw new ArgumentNullException(nameof(primaryKey));
             }
 
-            using (@lock.Read())
+            if (!keyToRowIndex.TryGetValue(primaryKey, out int rowIndex))
             {
-                if (!keyToRowIndex.TryGetValue(primaryKey, out int rowIndex))
-                {
-                    // Return null if the row does not exist.
-                    // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
-                    return null;
-                }
-
-                return rows[rowIndex];
+                // Return null if the row does not exist.
+                // In order to support multithreading, we cannot throw an exception here, because the row might be removed by another thread right after RowExists and before this method.
+                return null;
             }
+
+            return rows[rowIndex];      
         }
 
         /// <inheritdoc/>
@@ -260,7 +276,7 @@
                 throw new ArgumentException("Row cannot be null.", nameof(rows));
             }
 
-            using (var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
+            using (var eventDelayer = GetEventDelayer()) // Event delayer needs to be disposed after the lock is released
             using (@lock.Write())
             {
                 foreach (var row in rows)
@@ -277,11 +293,11 @@
                     if (existingRow == null)
                     {
                         AddNewRow(row, timestamp);
-                        eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Added));
+                        eventDelayer.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Added));
                     }
                     else
                     {
-                        UpdateExistingRow(row, timestamp, existingRow, eventDispatcher);
+                        UpdateExistingRow(row, timestamp, existingRow, eventDelayer);
                     }
                 }
             }
@@ -296,12 +312,12 @@
                 throw new ArgumentNullException(nameof(primaryKeys));
             }
 
-            using (var eventDispatcher = GetEventDispatcher()) // Event Dispatcher needs to be disposed after the lock is released
+            using (var eventDelayer = GetEventDelayer()) // Event delayer needs to be disposed after the lock is released
             using (@lock.Write())
             {
                 foreach (var primaryKey in primaryKeys)
                 {
-                    RemoveRow(primaryKey, eventDispatcher);
+                    RemoveRow(primaryKey, eventDelayer);
                 }
             }
         }
@@ -309,14 +325,14 @@
         /// <inheritdoc/>
         public void RemoveAllRows()
         {
-            using (var eventDispatcher = GetEventDispatcher())
+            using (var eventDelayer = GetEventDelayer())
             using (@lock.Write())
             {
                 foreach (var row in rows)
                 {
                     string primaryKey = Convert.ToString(row[Schema.PrimaryKeyColumn.Idx].Value);
 
-                    eventDispatcher.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Deleted));
+                    eventDelayer.Enqueue(() => RaiseRowChanged(primaryKey, RowChangeType.Deleted));
                 }
 
                 rows.Clear();
@@ -372,7 +388,7 @@
             return new NotificationScope(this);
         }
 
-        private void RemoveRow(string primaryKey, EventDispatchScope eventDispatchScope)
+        private void RemoveRow(string primaryKey, EventDelayScope eventDispatchScope)
         {
             if (String.IsNullOrWhiteSpace(primaryKey))
             {
@@ -402,7 +418,7 @@
             }
         }
 
-        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, CellModel[] existingRow, EventDispatchScope eventDispatchScope)
+        private void UpdateExistingRow(object[] rowData, DateTime? timestamp, CellModel[] existingRow, EventDelayScope eventDispatchScope)
         {
             string primaryKey = Convert.ToString(existingRow[Schema.PrimaryKeyColumn.Idx].Value);
 
@@ -450,9 +466,9 @@
             keyToRowIndex[primaryKey] = rows.Count - 1;
         }
 
-        private EventDispatchScope GetEventDispatcher()
+        private EventDelayScope GetEventDelayer()
         {
-            return new EventDispatchScope(this);
+            return new EventDelayScope(this);
         }
 
         private void RaiseCellChanged(string primaryKey, ColumnDefinition column, object oldValue, object newValue, DateTime oldTimestamp, DateTime newTimestamp)
@@ -488,7 +504,7 @@
             }
         }
 
-        private sealed class EventDispatchScope : IDisposable
+        private sealed class EventDelayScope : IDisposable
         {
             private readonly List<Action> eventsToRaise = new List<Action>();
             private readonly TableModel tableModel;
@@ -496,7 +512,7 @@
             private bool tableChangedEventEnqueued;
             private bool _disposed;
 
-            public EventDispatchScope(TableModel tableModel)
+            public EventDelayScope(TableModel tableModel)
             {
                 this.tableModel = tableModel ?? throw new ArgumentNullException(nameof(tableModel));
             }
@@ -504,7 +520,7 @@
             public void Enqueue(Action action)
             {
                 if (_disposed)
-                    throw new ObjectDisposedException(nameof(EventDispatchScope));
+                    throw new ObjectDisposedException(nameof(EventDelayScope));
 
                 if (action == null)
                 {

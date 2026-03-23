@@ -6,10 +6,10 @@
 
     internal class TableSchema
     {
-        internal TableSchema(IEnumerable<ColumnDefinition> columns, ColumnDefinition primaryKeyColum)
+        internal TableSchema(IEnumerable<ColumnDefinition> columns, ColumnDefinition primaryKeyColumn)
         {
             ColumnDefinitions = columns?.ToList() ?? throw new ArgumentNullException(nameof(columns));
-            PrimaryKeyColumn = primaryKeyColum ?? throw new ArgumentNullException(nameof(primaryKeyColum));
+            PrimaryKeyColumn = primaryKeyColumn ?? throw new ArgumentNullException(nameof(primaryKeyColumn));
         }
 
         /// <summary>

@@ -1296,5 +1296,162 @@
         }
 
         #endregion
+
+        #region GetRows Tests
+
+        [TestMethod]
+        public void GetRows_ValidKeys_ReturnsCorrectRows()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row1 = { "key1", "value1" };
+            object[] row2 = { "key2", "value2" };
+            object[] row3 = { "key3", "value3" };
+            tableModel.SetRow(row1);
+            tableModel.SetRow(row2);
+            tableModel.SetRow(row3);
+
+            // Act
+            var rows = tableModel.GetRows(new[] { "key1", "key3" });
+
+            // Assert
+            Assert.IsNotNull(rows);
+            Assert.AreEqual(2, rows.Count);
+            Assert.IsTrue(rows.ContainsKey("key1"));
+            Assert.IsTrue(rows.ContainsKey("key3"));
+            Assert.AreEqual("value1", rows["key1"][1]);
+            Assert.AreEqual("value3", rows["key3"][1]);
+        }
+
+        [TestMethod]
+        public void GetRows_SingleKey_ReturnsOneRow()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            // Act
+            var rows = tableModel.GetRows(new[] { "key1" });
+
+            // Assert
+            Assert.IsNotNull(rows);
+            Assert.AreEqual(1, rows.Count);
+            Assert.IsTrue(rows.ContainsKey("key1"));
+            Assert.AreEqual("value1", rows["key1"][1]);
+        }
+
+        [TestMethod]
+        public void GetRows_EmptyArray_ReturnsEmptyDictionary()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            // Act
+            var rows = tableModel.GetRows(Array.Empty<string>());
+
+            // Assert
+            Assert.IsNotNull(rows);
+            Assert.AreEqual(0, rows.Count);
+        }
+
+        [TestMethod]
+        public void GetRows_SomeNonExistentKeys_ReturnsOnlyExistingRows()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row1 = { "key1", "value1" };
+            object[] row2 = { "key2", "value2" };
+            tableModel.SetRow(row1);
+            tableModel.SetRow(row2);
+
+            // Act
+            var rows = tableModel.GetRows(new[] { "key1", "nonExistent", "key2" });
+
+            // Assert
+            Assert.IsNotNull(rows);
+            Assert.AreEqual(2, rows.Count);
+            Assert.IsTrue(rows.ContainsKey("key1"));
+            Assert.IsTrue(rows.ContainsKey("key2"));
+            Assert.IsFalse(rows.ContainsKey("nonExistent"));
+        }
+
+        [TestMethod]
+        public void GetRows_AllNonExistentKeys_ReturnsEmptyDictionary()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row = { "key1", "value1" };
+            tableModel.SetRow(row);
+
+            // Act
+            var rows = tableModel.GetRows(new[] { "nonExistent1", "nonExistent2" });
+
+            // Assert
+            Assert.IsNotNull(rows);
+            Assert.AreEqual(0, rows.Count);
+        }
+
+        [TestMethod]
+        public void GetRows_NullArray_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentNullException>(
+                () => tableModel.GetRows(null));
+        }
+
+        [TestMethod]
+        public void GetRows_DuplicateKeys_ReturnsUniqueRows()
+        {
+            // Arrange
+            var tableModelBuilder = new TableModelBuilder(900);
+            tableModelBuilder.AddColumn(1201, 0, true);
+            tableModelBuilder.AddColumn(1202, 1, false);
+            var tableModel = tableModelBuilder.Build();
+
+            object[] row1 = { "key1", "value1" };
+            object[] row2 = { "key2", "value2" };
+            tableModel.SetRow(row1);
+            tableModel.SetRow(row2);
+
+            // Act
+            var rows = tableModel.GetRows(new[] { "key1", "key1", "key2" });
+
+            // Assert
+            Assert.IsNotNull(rows);
+            Assert.AreEqual(2, rows.Count);
+            Assert.IsTrue(rows.ContainsKey("key1"));
+            Assert.IsTrue(rows.ContainsKey("key2"));
+        }
+
+        #endregion
     }
 }
