@@ -10,7 +10,7 @@
     /// Table model.
     /// </summary>
     /// <seealso cref="ITableModel" />
-    public class TableModel : ITableModel
+    internal class TableModel : ITableModel
     {
         private readonly Dictionary<string, int> keyToRowIndex = new Dictionary<string, int>();
         private readonly ReaderWriterLockSlim @lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);

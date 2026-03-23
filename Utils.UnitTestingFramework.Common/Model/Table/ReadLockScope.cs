@@ -3,7 +3,7 @@
     using System;
     using System.Threading;
 
-    public readonly struct ReadLockScope : IDisposable
+    internal readonly struct ReadLockScope : IDisposable
     {
         private readonly ReaderWriterLockSlim _lock;
 

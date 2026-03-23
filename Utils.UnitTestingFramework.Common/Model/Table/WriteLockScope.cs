@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading;
-
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table
 {
-    public readonly struct WriteLockScope : IDisposable
+    using System;
+    using System.Threading;
+
+    internal readonly struct WriteLockScope : IDisposable
     {
         private readonly ReaderWriterLockSlim _lock;
 

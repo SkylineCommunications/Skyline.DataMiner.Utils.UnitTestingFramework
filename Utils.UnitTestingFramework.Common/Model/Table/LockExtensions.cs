@@ -2,7 +2,7 @@
 {
     using System.Threading;
 
-    public static class LockExtensions
+    internal static class LockExtensions
     {
         public static ReadLockScope Read(this ReaderWriterLockSlim @lock)
             => new ReadLockScope(@lock);

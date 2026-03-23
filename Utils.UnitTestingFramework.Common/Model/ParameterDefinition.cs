@@ -1,7 +1,6 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model
 {
     using System;
-    using System.Security.Policy;
 
     public class ParameterDefinition : IEquatable<ParameterDefinition>
     {

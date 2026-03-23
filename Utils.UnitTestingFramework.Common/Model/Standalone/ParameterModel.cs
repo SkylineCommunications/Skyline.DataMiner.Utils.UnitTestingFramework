@@ -8,7 +8,7 @@
     /// Parameter model.
     /// </summary>
     /// <seealso cref="IParameterModel" />
-    public class ParameterModel : ParameterModelBase<ParameterDefinition>, IParameterModel
+    internal class ParameterModel : ParameterModelBase<ParameterDefinition>, IParameterModel
     {
         private int suspendNotifications;
 
