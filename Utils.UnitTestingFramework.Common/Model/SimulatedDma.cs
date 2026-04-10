@@ -6,10 +6,8 @@
 
     using Skyline.DataMiner.Net.Messages;
 
-    public sealed class SimulatedDma
+    public class SimulatedDma
     {
-        private readonly ConcurrentDictionary<int, SimulatedElement> _elements = new ConcurrentDictionary<int, SimulatedElement>();
-
         public SimulatedDma(SimulatedDms dms, int dmaId)
         {
             Dms = dms ?? throw new ArgumentNullException(nameof(dms));
@@ -20,13 +18,15 @@
 
         public int DmaId { get; }
 
-        public IReadOnlyDictionary<int, SimulatedElement> Elements => _elements;
+        public IReadOnlyDictionary<int, SimulatedElement> Elements => ElementsInternal;
+
+        protected ConcurrentDictionary<int, SimulatedElement> ElementsInternal { get; } = new ConcurrentDictionary<int, SimulatedElement>();
 
         public SimulatedElement CreateElement(int elementId, string name, string protocolName, string protocolVersion = "1.0.0.1")
         {
             var element = new SimulatedElement(this, elementId, name, protocolName, protocolVersion);
 
-            if (!_elements.TryAdd(elementId, element))
+            if (!ElementsInternal.TryAdd(elementId, element))
             {
                 throw new InvalidOperationException($"Element with ID {elementId} already exists.");
             }
@@ -34,7 +34,23 @@
             return element;
         }
 
-        internal void NotifySubscriptions(EventMessage e)
+        public SimulatedElement CreateElementBasedOnProtocolXml(int elementId, string name, string pathToProtocolXml)
+        {
+            var protocolModel = ProtocolModelBuilder.Build(pathToProtocolXml);
+
+            var parametersAndTables = ParametersAndTablesBuilder.Build(protocolModel);
+
+            var element = new SimulatedElement(this, elementId, name, protocolModel.Protocol.Name.Value, protocolModel.Protocol.Version.Value, parametersAndTables);
+
+            if (!ElementsInternal.TryAdd(elementId, element))
+            {
+                throw new InvalidOperationException($"Element with ID {elementId} already exists.");
+            }
+
+            return element;
+        }
+
+        protected internal void NotifySubscriptions(EventMessage e)
         {
             Dms.NotifySubscriptions(e);
         }

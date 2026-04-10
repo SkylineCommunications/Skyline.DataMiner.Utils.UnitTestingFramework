@@ -1,11 +1,9 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model
 {
     using System;
-    using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using Newtonsoft.Json;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.Advanced;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
@@ -37,100 +35,71 @@
             return connection;
         }
 
-        internal void NotifySubscriptions(EventMessage eventMessage)
+        protected internal void NotifySubscriptions(EventMessage eventMessage)
         {
             if (eventMessage is null)
             {
                 throw new ArgumentNullException(nameof(eventMessage));
             }
 
-            foreach (SLNetConnectionMock connection in _connections)
+            foreach (var connection in _connections)
             {
                 connection.NotifySubscriptions(eventMessage);
             }
         }
 
-        protected virtual IEnumerable<DMSMessage> HandleMessage(DMSMessage message)
-        {
-            // This method can be overridden in a subclass to provide custom handling logic for messages that are not handled by TryHandleMessage.
-            // By default, it does nothing and returns an empty enumeration, indicating that the message was not handled.
-            return Enumerable.Empty<DMSMessage>();
-        }
-
-        protected virtual bool TryHandleDomMessage(DMSMessage message, out DMSMessage response)
-        {
-            // This method can be overridden in a subclass to provide custom handling logic for DOM messages.
-            // By default, it does not handle any messages and returns false.
-            response = null;
-            return false;
-        }
-
-        internal bool TryHandleMessage(DMSMessage message, out IEnumerable<DMSMessage> responses)
+        protected virtual internal bool TryHandleMessage(DMSMessage message, out IEnumerable<DMSMessage> responses)
         {
             if (message is null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
 
-            if (TryHandleDomMessage(message, out var response))
-            {
-                responses = new[] { response };
-                return true;
-            }
-
             switch (message)
             {
                 case GetLiteElementInfo msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetLiteElementInfoMessage(msg);
                     return true;
 
                 case GetElementByIDMessage msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetElementByIDMessage(msg);
                     return true;
 
                 case GetElementByNameMessage msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetElementByNameMessage(msg);
                     return true;
 
                 case GetPartialTableMessage msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetPartialTableMessage(msg);
                     return true;
 
                 case GetInfoMessage msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetInfoMessage(msg);
                     return true;
 
                 case GetDataMinerByIDMessage msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetDataMinerByIDMessage(msg);
                     return true;
 
                 case GetAgentBuildInfo msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetAgentBuildInfo(msg);
                     return true;
 
                 case GetParameterMessage msg:
-                    responses = HandleMessage(msg);
+                    responses = HandleGetParameterMessage(msg);
                     return true;
 
-                case ExecuteScriptMessage msg:
-                    responses = HandleMessage(msg);
-                    return true;
-
-                case GetScriptInfoMessage msg:
-                    responses = HandleMessage(msg);
-                    return true;
-
-                case CheckAutomationCSharpSyntaxMessage msg:
-                    responses = HandleMessage(msg);
+                case SetDataMinerInfoMessage msg:
+                    responses = HandleSetDataMinerInfoMessage(msg);
                     return true;
 
                 default:
-                    responses = HandleMessage(message);
-                    return responses.Any();
+                    responses = new DMSMessage[0];
+                    return false;
             }
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetLiteElementInfo msg)
+        protected IEnumerable<DMSMessage> HandleGetLiteElementInfoMessage(GetLiteElementInfo msg)
         {
             IEnumerable<SimulatedElement> elements = Agents.Values.SelectMany(x => x.Elements.Values);
 
@@ -145,7 +114,7 @@
             }
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetElementByIDMessage msg)
+        protected IEnumerable<DMSMessage> HandleGetElementByIDMessage(GetElementByIDMessage msg)
         {
             if (Agents.TryGetValue(msg.DataMinerID, out SimulatedDma dma) &&
                 dma.Elements.TryGetValue(msg.ElementID, out SimulatedElement element))
@@ -154,7 +123,7 @@
             }
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetElementByNameMessage msg)
+        protected IEnumerable<DMSMessage> HandleGetElementByNameMessage(GetElementByNameMessage msg)
         {
             IEnumerable<SimulatedElement> elements = Agents.Values.SelectMany(x => x.Elements.Values);
             SimulatedElement element = elements.FirstOrDefault(x => String.Equals(x.Name, msg.ElementName));
@@ -165,7 +134,7 @@
             }
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetPartialTableMessage msg)
+        protected IEnumerable<DMSMessage> HandleGetPartialTableMessage(GetPartialTableMessage msg)
         {
             if (Agents.TryGetValue(msg.DataMinerID, out SimulatedDma dma) &&
                 dma.Elements.TryGetValue(msg.ElementID, out SimulatedElement element) &&
@@ -182,7 +151,7 @@
             }
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetParameterMessage msg)
+        protected IEnumerable<DMSMessage> HandleGetParameterMessage(GetParameterMessage msg)
         {
             if (!Agents.TryGetValue(msg.DataMinerID, out SimulatedDma dma) ||
                 !dma.Elements.TryGetValue(msg.ElId, out SimulatedElement element))
@@ -214,7 +183,7 @@
             };
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(SetDataMinerInfoMessage msg)
+        protected IEnumerable<DMSMessage> HandleSetDataMinerInfoMessage(SetDataMinerInfoMessage msg)
         {
             switch ((NotifyType)msg.What)
             {
@@ -270,7 +239,7 @@
             }
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetInfoMessage msg)
+        protected IEnumerable<DMSMessage> HandleGetInfoMessage(GetInfoMessage msg)
         {
             switch (msg.Type)
             {
@@ -285,7 +254,7 @@
             }
         }
 
-        private IEnumerable<DMSMessage> HandleElementInfoMessage()
+        protected IEnumerable<DMSMessage> HandleElementInfoMessage()
         {
             foreach (SimulatedElement element in Agents.Values.SelectMany(agent => agent.Elements.Values))
             {
@@ -302,7 +271,7 @@
             }
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetDataMinerByIDMessage msg)
+        protected IEnumerable<DMSMessage> HandleGetDataMinerByIDMessage(GetDataMinerByIDMessage msg)
         {
             yield return new GetDataMinerInfoResponseMessage
             {
@@ -311,7 +280,7 @@
             };
         }
 
-        private IEnumerable<DMSMessage> HandleMessage(GetAgentBuildInfo msg)
+        protected IEnumerable<DMSMessage> HandleGetAgentBuildInfo(GetAgentBuildInfo msg)
         {
             yield return new BuildInfoResponse
             {
@@ -326,7 +295,7 @@
             };
         }
 
-        private IEnumerable<DMSMessage> HandleDataMinerInfoMessage()
+        protected IEnumerable<DMSMessage> HandleDataMinerInfoMessage()
         {
             foreach (KeyValuePair<int, SimulatedDma> simulatedDma in Agents)
             {

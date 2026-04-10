@@ -6,6 +6,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
@@ -18,6 +19,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
         private readonly Dictionary<ParameterDefinition, IParameterModel> parametersToValues = new Dictionary<ParameterDefinition, IParameterModel>();
 
         private readonly Dictionary<int, ITableModel> tablesPerTablePid = new Dictionary<int, ITableModel>();
+
+        public IReadOnlyDictionary<int, IParameterModel> Parameters => parameterIdToDefinition.ToDictionary(kvp => kvp.Key, kvp => parametersToValues[kvp.Value]);
 
         public IReadOnlyDictionary<int, ITableModel> Tables => tablesPerTablePid;
 

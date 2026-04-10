@@ -9,35 +9,23 @@
     using AlarmLevel = Net.Messages.AlarmLevel;
     using ElementState = Net.Messages.ElementState;
 
-    public sealed class SimulatedElement
+    public class SimulatedElement
     {
         private readonly ParametersAndTables parametersAndTables = new ParametersAndTables();
 
         public SimulatedElement(SimulatedDma dma, int elementId, string name, string protocolName, string protocolVersion)
+            : this(dma, elementId, name, protocolName, protocolVersion, new ParametersAndTables())
+        { 
+        }
+
+        internal SimulatedElement(SimulatedDma dma, int elementId, string name, string protocolName, string protocolVersion, ParametersAndTables parametersAndTables)
         {
             Dma = dma ?? throw new ArgumentNullException(nameof(dma));
             ElementId = elementId;
             Name = name;
             ProtocolName = protocolName;
             ProtocolVersion = protocolVersion;
-
-            foreach (var table in parametersAndTables.Tables.Values)
-            {
-                table.TableChanged += Table_TableChanged;
-            }
-        }
-
-        private void Table_TableChanged(object sender, TableChangedEventArgs e)
-        {
-            var table = (ITableModel)sender;
-
-            var message = new ParameterTableUpdateEventMessage(DmaId, ElementId, table.TableId)
-            {
-                UpdatedRows = e.ChangedRows.Where(r => r.ChangeType == RowChangeType.Added || r.ChangeType == RowChangeType.Updated).Select(r => ToParameterValue(r.Row)).ToArray(),
-                DeletedRows = e.ChangedRows.Where(r => r.ChangeType == RowChangeType.Deleted).Select(r => r.PrimaryKey).ToArray(),
-            };
-
-            Dma.NotifySubscriptions(message);
+            this.parametersAndTables = parametersAndTables ?? new ParametersAndTables();
         }
 
         public SimulatedDma Dma { get; }
@@ -73,6 +61,8 @@
                     IsElementStartupComplete = true,
                 };
                 Dma.NotifySubscriptions(e2);
+
+                SubscribeToParametersAndTables();
             }
         }
 
@@ -80,6 +70,8 @@
         {
             if (State != ElementState.Stopped)
             {
+                UnsubscribeFromParametersAndTables();
+
                 State = ElementState.Stopped;
 
                 // send event
@@ -96,6 +88,16 @@
         public bool TryGetParameter(int parameterId, out IParameterModel parameter)
         {
             return parametersAndTables.TryGetParameter(parameterId, out parameter);
+        }
+
+        public IParameterModel GetParameter(int parameterId)
+        {
+            return parametersAndTables.GetParameter(parameterId);
+        }
+
+        public ITableModel GetTable(int tableId)
+        {
+            return parametersAndTables.GetTable(tableId);
         }
 
         internal LiteElementInfoEvent ToLiteElementInfo()
@@ -149,6 +151,62 @@
                     specialValue = null;
                     return false;
             }
+        }
+
+        protected internal void NotifySubscriptions(EventMessage e)
+        {
+            Dma.NotifySubscriptions(e);
+        }
+
+        private void SubscribeToParametersAndTables()
+        {
+            foreach (var parameter in parametersAndTables.Parameters.Values)
+            {
+                parameter.Changed += Parameter_Changed;
+            }
+
+            foreach (var table in parametersAndTables.Tables.Values)
+            {
+                table.TableChanged += Table_TableChanged;
+            }
+        }
+
+        private void UnsubscribeFromParametersAndTables()
+        {
+            foreach (var parameter in parametersAndTables.Parameters.Values)
+            {
+                parameter.Changed -= Parameter_Changed;
+            }
+
+            foreach (var table in parametersAndTables.Tables.Values)
+            {
+                table.TableChanged -= Table_TableChanged;
+            }
+        }
+
+        private void Parameter_Changed(object sender, ParameterModelChangedEventArgs e)
+        {
+            var parameter = (IParameterModel)sender;
+
+            var message = new ParameterChangeEventMessage(DmaId, ElementId, parameter.Definition.Pid)
+            {
+                NewValue = parameter.ToParameterValue(),
+            };
+
+            NotifySubscriptions(message);
+        }
+
+        private void Table_TableChanged(object sender, TableChangedEventArgs e)
+        {
+            var table = (ITableModel)sender;
+
+            var message = new ParameterTableUpdateEventMessage(DmaId, ElementId, table.TableId)
+            {
+                UpdatedRows = e.ChangedRows.Where(r => r.ChangeType == RowChangeType.Added || r.ChangeType == RowChangeType.Updated).Select(r => ToParameterValue(r.Row)).ToArray(),
+                DeletedRows = e.ChangedRows.Where(r => r.ChangeType == RowChangeType.Deleted).Select(r => r.PrimaryKey).ToArray(),
+            };
+
+            NotifySubscriptions(message);
         }
 
         private ParameterValue ToParameterValue(object[] row)
