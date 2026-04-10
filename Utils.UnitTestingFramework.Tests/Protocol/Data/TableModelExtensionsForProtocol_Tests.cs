@@ -146,7 +146,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             var table = CreateThreeColumnTable();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => table.SetRowReturnOneBasedIndex((object[])null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => table.SetRowReturnOneBasedIndex((object[])null));
         }
 
         #endregion
@@ -191,9 +191,9 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             var table = CreateThreeColumnTable();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.SetRowReturnOneBasedIndex((string)null));
-            Assert.ThrowsException<ArgumentException>(() => table.SetRowReturnOneBasedIndex("   "));
-            Assert.ThrowsException<ArgumentException>(() => table.SetRowReturnOneBasedIndex(string.Empty));
+            Assert.ThrowsExactly<ArgumentException>(() => table.SetRowReturnOneBasedIndex((string)null));
+            Assert.ThrowsExactly<ArgumentException>(() => table.SetRowReturnOneBasedIndex("   "));
+            Assert.ThrowsExactly<ArgumentException>(() => table.SetRowReturnOneBasedIndex(string.Empty));
         }
 
         #endregion
@@ -471,8 +471,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             var table = CreateFiveColumnTable();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => table.GetRow<PollingConfigurationQActionRow>((string)null));
-            Assert.ThrowsException<ArgumentNullException>(() => table.GetRow<PollingConfigurationQActionRow>("   "));
+            Assert.ThrowsExactly<ArgumentNullException>(() => table.GetRow<PollingConfigurationQActionRow>((string)null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => table.GetRow<PollingConfigurationQActionRow>("   "));
         }
 
         #endregion
@@ -545,7 +545,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
         public void GetParameterIndexByKey_NullTableModel_ThrowsArgumentNullException()
         {
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => TableModelExtensionsForProtocol.GetParameterIndexByKey(null, "key1", 1));
         }
 
@@ -556,8 +556,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             var table = CreateThreeColumnTable();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.GetParameterIndexByKey(null, 1));
-            Assert.ThrowsException<ArgumentException>(() => table.GetParameterIndexByKey("  ", 1));
+            Assert.ThrowsExactly<ArgumentException>(() => table.GetParameterIndexByKey(null, 1));
+            Assert.ThrowsExactly<ArgumentException>(() => table.GetParameterIndexByKey("  ", 1));
         }
 
         [TestMethod]
@@ -570,7 +570,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentOutOfRangeException>(
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                 () => table.GetParameterIndexByKey("key1", oneBasedColumnIndex));
         }
 
@@ -597,7 +597,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
         public void SetParameterIndexByKey_NullTableModel_ThrowsArgumentNullException()
         {
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => TableModelExtensionsForProtocol.SetParameterIndexByKey(null, "key1", 1, "val"));
         }
 
@@ -611,7 +611,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentOutOfRangeException>(
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                 () => table.SetParameterIndexByKey("key1", oneBasedColumnIndex, "newVal"));
         }
 
@@ -878,7 +878,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             var table = CreateThreeColumnTable();
 
             // Act & Assert
-            Assert.ThrowsException<IndexOutOfRangeException>(
+            Assert.ThrowsExactly<IndexOutOfRangeException>(
                 () => table.FillArray(new List<object[]>(), NotifyProtocol.SaveOption.Partial));
         }
 
@@ -1180,7 +1180,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             object[] values = { "val1", "val2" }; // 3 keys but 2 values (not 1 either)
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => table.FillArrayWithColumn(1002, keys, values));
         }
 
@@ -1275,7 +1275,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             var table = CreateThreeColumnTable();
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => table.FillArrayWithColumns(new[] { "key1" }, null));
         }
 
@@ -1315,7 +1315,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             };
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => table.FillArrayWithColumns(keys, columnPidsToValues));
         }
 
@@ -1487,7 +1487,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.GetParameterIndex(rowIndex, 1));
+            Assert.ThrowsExactly<ArgumentException>(() => table.GetParameterIndex(rowIndex, 1));
         }
 
         [TestMethod]
@@ -1500,7 +1500,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.GetParameterIndex(1, colIndex));
+            Assert.ThrowsExactly<ArgumentException>(() => table.GetParameterIndex(1, colIndex));
         }
 
         [TestMethod]
@@ -1511,7 +1511,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.GetParameterIndex(1, 4));
+            Assert.ThrowsExactly<ArgumentException>(() => table.GetParameterIndex(1, 4));
         }
 
         [TestMethod]
@@ -1522,7 +1522,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.GetParameterIndex(2, 1));
+            Assert.ThrowsExactly<ArgumentException>(() => table.GetParameterIndex(2, 1));
         }
 
         #endregion
@@ -1555,7 +1555,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.SetParameterIndex(rowIndex, 2, "val"));
+            Assert.ThrowsExactly<ArgumentException>(() => table.SetParameterIndex(rowIndex, 2, "val"));
         }
 
         [TestMethod]
@@ -1568,7 +1568,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.SetParameterIndex(1, colIndex, "val"));
+            Assert.ThrowsExactly<ArgumentException>(() => table.SetParameterIndex(1, colIndex, "val"));
         }
 
         [TestMethod]
@@ -1579,7 +1579,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.SetParameterIndex(1, 4, "val"));
+            Assert.ThrowsExactly<ArgumentException>(() => table.SetParameterIndex(1, 4, "val"));
         }
 
         [TestMethod]
@@ -1590,7 +1590,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Data
             table.SetRow(new object[] { "key1", "val1", "val2" });
 
             // Act & Assert
-            Assert.ThrowsException<ArgumentException>(() => table.SetParameterIndex(2, 2, "val"));
+            Assert.ThrowsExactly<ArgumentException>(() => table.SetParameterIndex(2, 2, "val"));
         }
 
         [TestMethod]

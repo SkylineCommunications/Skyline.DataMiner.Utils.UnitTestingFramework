@@ -402,6 +402,9 @@ FodyWeavers.xsd
 # Test results
 TestResults/
 
+# Verify snapshot diffs
+*.received.*
+
 # AI assistant context files
 claude.md
 CLAUDE.md
