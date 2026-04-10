@@ -399,6 +399,9 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Test results
+TestResults/
+
 # AI assistant context files
 claude.md
 CLAUDE.md
