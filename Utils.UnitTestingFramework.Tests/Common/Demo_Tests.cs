@@ -7,6 +7,7 @@
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Subscription.Monitors;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     [TestClass]
     public class Demo_Tests
@@ -91,5 +92,92 @@
             // Assert: verify that the code-under-test received the change to the table.
             tableChangedEventReceived.Should().BeTrue();
         }
+
+        public void Demo_MonitorParameter_ArrangeManually()
+        {
+            // Arrange: define how your DataMiner system looks like
+            var simulatedDms = new SimulatedDms();
+
+            var simulatedDma = simulatedDms.GetOrCreateAgent(1);
+
+            var simulatedElement = simulatedDma.CreateElement(1, "Element Name", "Protocol Name"); // at this point, NO parameters and tables exist.
+
+            var parameter55Definition = new ParameterDefinition(name: "parameter name", pid: 55, type: typeof(double?)); // need to define the definition yourself
+
+            var parameter55Model = simulatedElement.AddParameter(parameter55Definition);
+
+            parameter55Model.Update(value: 123); // at this point, the parameter value is changed, but the element is not active yet, so no events will be sent to the IConnections subscribed to this element.
+
+            simulatedElement.Start(); // at this point, the element is active and will report changes to its parameters and tables to all of the IConnections subscribed to it.
+
+            var connection = simulatedDms.CreateConnection();
+
+            // Act - Step 1: prepare the code-under-test, which uses the IDms, IDmsElement, ... from the class library
+            var dms = connection.GetDms();
+
+            var element = dms.GetElement(simulatedElement.Id);
+
+            var dmsStandaloneParameter55 = element.GetStandaloneParameter<double?>(parameterId: 55);
+
+            var newParameter55Values = new List<double?>();
+            dmsStandaloneParameter55.StartValueMonitor("irrelevant monitor id", (ParamValueChange<double?> change) =>
+            {
+                newParameter55Values.Add(change.Value);
+            });
+
+            // Act - Step 2: simulate a change on the parameter by an outside source.
+            parameter55Model.Update(value: 456);
+
+            // Assert: verify that the code-under-test received the change to the parameter value.
+            newParameter55Values.Should().ContainInOrder(123 /*initial value*/, 456 /*new value*/);
+        }
+
+        [TestMethod]
+        public void Demo_MonitorTable_ArrangeManually()
+        {
+            // Arrange: define how your DataMiner system looks like
+            var simulatedDms = new SimulatedDms();
+
+            var simulatedDma = simulatedDms.GetOrCreateAgent(1);
+
+            var simulatedElement = simulatedDma.CreateElement(1, "Element Name", "protocol name"); // at this point, NO parameters and tables exist.
+
+            var primaryKeyColumnDefinition = new ColumnDefinition(name: "primary key column", pid: 1, type: typeof(string), idx: 0);
+            var secondColumnDefinition = new ColumnDefinition(name: "second column", pid: 2, type: typeof(string), idx: 1);
+            var thirdColumnDefinition = new ColumnDefinition(name: "third column", pid: 3, type: typeof(string), idx: 2);
+
+            var tableSchema = new TableSchema(new[] { primaryKeyColumnDefinition, secondColumnDefinition, thirdColumnDefinition }, primaryKeyColumnDefinition);
+
+            var table66Model = simulatedElement.AddTable(tableId: 66, tableSchema);
+
+            var rowToAdd = new object[table66Model.Schema.ColumnCount];
+            rowToAdd[table66Model.Schema.PrimaryKeyColumn.Idx] = "primary key value";
+
+            table66Model.SetRow(rowToAdd);
+
+            simulatedElement.Start(); // at this point, the element is active and will report changes to its parameters and tables to all of the IConnections subscribed to it.
+
+            var connection = simulatedDms.CreateConnection();
+
+            // Act - Step 1: prepare the code-under-test, which uses the IDms, IDmsElement, ... from the class library
+            var dms = connection.GetDms();
+
+            var element = dms.GetElement(simulatedElement.Id);
+
+            var dmsTable66 = element.GetTable(tableId: 66);
+
+            bool tableChangedEventReceived = false;
+            dmsTable66.StartValueMonitor("irrelevant monitor id", table66Model.Schema.PrimaryKeyColumn.Idx, (TableValueChange change) =>
+            {
+                tableChangedEventReceived = true;
+            });
+
+            // Act - Step 2: simulate a change on the table by an outside source.
+            table66Model.SetCell(primaryKey: "primary key value", columnPid: table66Model.Schema.FindColumnDefinitionByIdx(2).Pid, value: "new value for third column");
+
+            // Assert: verify that the code-under-test received the change to the table.
+            tableChangedEventReceived.Should().BeTrue();
+        }
+
     }
 }

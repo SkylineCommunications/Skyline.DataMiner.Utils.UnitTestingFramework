@@ -20,12 +20,13 @@
 
         internal SimulatedElement(SimulatedDma dma, int elementId, string name, string protocolName, string protocolVersion, ParametersAndTables parametersAndTables)
         {
+            this.parametersAndTables = parametersAndTables ?? new ParametersAndTables();
+
             Dma = dma ?? throw new ArgumentNullException(nameof(dma));
             ElementId = elementId;
             Name = name;
             ProtocolName = protocolName;
             ProtocolVersion = protocolVersion;
-            this.parametersAndTables = parametersAndTables ?? new ParametersAndTables();
         }
 
         public SimulatedDma Dma { get; }
@@ -78,6 +79,18 @@
                 var e = new ElementStateEventMessage(DmaId, ElementId, ElementState.Stopped, AlarmLevel.Normal);
                 Dma.NotifySubscriptions(e);
             }
+        }
+
+        public IParameterModel AddParameter(ParameterDefinition parameterDefinition, object initialValue = null)
+        {
+            var parameterModel = new ParameterModel(parameterDefinition, initialValue);
+            parametersAndTables.AddParameter(parameterModel);
+        }
+
+        public ITableModel AddTable(int tableId, TableSchema tableSchema)
+        {
+            var tableModel = new TableModel(tableId, tableSchema);
+            parametersAndTables.AddTable(tableModel);
         }
 
         public bool TryGetTable(int tableId, out ITableModel table)
