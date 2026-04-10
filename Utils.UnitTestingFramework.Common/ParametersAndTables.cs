@@ -19,6 +19,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 
         private readonly Dictionary<int, ITableModel> tablesPerTablePid = new Dictionary<int, ITableModel>();
 
+        public IReadOnlyDictionary<int, ITableModel> Tables => tablesPerTablePid;
+
         public bool ParameterExists(int parameterId)
         {
             return parameterIdToDefinition.ContainsKey(parameterId);
@@ -75,6 +77,16 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
             }
 
             return tableModel;
+        }
+
+        public bool TableExists(int tablePid)
+        {
+            return tablesPerTablePid.ContainsKey(tablePid);
+        }
+
+        public bool TryGetTable(int tablePid, out ITableModel tableModel)
+        {
+            return tablesPerTablePid.TryGetValue(tablePid, out tableModel);
         }
 
         public bool TryGetParameter(int parameterId, out IParameterModel parameterModel)
