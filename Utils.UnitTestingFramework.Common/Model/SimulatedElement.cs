@@ -84,13 +84,19 @@
         public IParameterModel AddParameter(ParameterDefinition parameterDefinition, object initialValue = null)
         {
             var parameterModel = new ParameterModel(parameterDefinition, initialValue);
+
             parametersAndTables.AddParameter(parameterModel);
+
+            return parameterModel;
         }
 
         public ITableModel AddTable(int tableId, TableSchema tableSchema)
         {
             var tableModel = new TableModel(tableId, tableSchema);
+
             parametersAndTables.AddTable(tableModel);
+
+            return tableModel;
         }
 
         public bool TryGetTable(int tableId, out ITableModel table)
