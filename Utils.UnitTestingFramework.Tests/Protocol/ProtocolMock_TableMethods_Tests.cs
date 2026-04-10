@@ -378,9 +378,9 @@
 
             Assert.AreEqual(3, deleteRow);
 
-            Assert.AreEqual("four", remainingRows1[0]);
-            Assert.AreEqual("two", remainingRows2[0]);
-            Assert.AreEqual("three", remainingRows3[0]);
+            Assert.AreEqual("two", remainingRows1[0]);
+            Assert.AreEqual("three", remainingRows2[0]);
+            Assert.AreEqual("four", remainingRows3[0]);
             Assert.IsNull(remainingRows4[0]);
         }
 
@@ -404,7 +404,7 @@
             var pk3 = mock.Object.AddRowReturnKey(900, row3);
             var pk4 = mock.Object.AddRowReturnKey(900, row4);
 
-            var deleteRow1 = mock.Object.DeleteRow(900, 1);
+            int remainingRowCount = mock.Object.DeleteRow(900, 1);
 
             var remainingRows1 = (object[])mock.Object.GetRow(900, 0);
             var remainingRows2 = (object[])mock.Object.GetRow(900, 1);
@@ -417,11 +417,11 @@
             Assert.AreEqual("three", pk3);
             Assert.AreEqual("four", pk4);
 
-            Assert.AreEqual(3, deleteRow1);
+            Assert.AreEqual(3, remainingRowCount);
 
             Assert.AreEqual("one", remainingRows1[0]);
-            Assert.AreEqual("four", remainingRows2[0]);
-            Assert.AreEqual("three", remainingRows3[0]);
+            Assert.AreEqual("three", remainingRows2[0]);
+            Assert.AreEqual("four", remainingRows3[0]);
             Assert.IsNull(remainingRows4[0]);
         }
 
@@ -462,8 +462,8 @@
             Assert.AreEqual(3, deleteRow1);
             Assert.AreEqual(2, deleteRow2);
 
-            Assert.AreEqual("four", remainingRows1[0]);
-            Assert.AreEqual("three", remainingRows2[0]);
+            Assert.AreEqual("two", remainingRows1[0]);
+            Assert.AreEqual("four", remainingRows2[0]);
             Assert.IsNull(remainingRows3[0]);
             Assert.IsNull(remainingRows4[0]);
         }
@@ -525,15 +525,15 @@
 
             Assert.AreEqual("one", remainingRows1_1[0]);
             Assert.AreEqual("two", remainingRows2_1[0]);
-            Assert.AreEqual("five", remainingRows3_1[0]);
-            Assert.AreEqual("four", remainingRows4_1[0]);
+            Assert.AreEqual("four", remainingRows3_1[0]);
+            Assert.AreEqual("five", remainingRows4_1[0]);
             Assert.IsNull(remainingRows5_1[0]);
 
             Assert.AreEqual(3, deleteRow2);
 
             Assert.AreEqual("one", remainingRows1_2[0]);
             Assert.AreEqual("two", remainingRows2_2[0]);
-            Assert.AreEqual("four", remainingRows3_2[0]);
+            Assert.AreEqual("five", remainingRows3_2[0]);
             Assert.IsNull(remainingRows4_2[0]);
             Assert.IsNull(remainingRows5_2[0]);
 
@@ -557,7 +557,7 @@
         }
 
         [TestMethod]
-        public void DeleteRowTest_InexistentRowIndex_ReturnsZero()
+        public void DeleteRowTest_InexistentRowIndex_ReturnsRowCount()
         {
             // Arrange
 
@@ -571,7 +571,7 @@
 
             // Assert
             Assert.AreEqual("one", pk1);
-            Assert.AreEqual(0, deleteRow);
+            Assert.AreEqual(1, deleteRow);
         }
 
         [TestMethod]
@@ -607,9 +607,9 @@
 
             Assert.AreEqual(3, deleteRow);
 
-            Assert.AreEqual("four", remainingRows1[0]);
-            Assert.AreEqual("two", remainingRows2[0]);
-            Assert.AreEqual("three", remainingRows3[0]);
+            Assert.AreEqual("two", remainingRows1[0]);
+            Assert.AreEqual("three", remainingRows2[0]);
+            Assert.AreEqual("four", remainingRows3[0]);
             Assert.IsNull(remainingRows4[0]);
         }
 
@@ -649,8 +649,8 @@
             Assert.AreEqual(3, deleteRow1);
 
             Assert.AreEqual("one", remainingRows1[0]);
-            Assert.AreEqual("four", remainingRows2[0]);
-            Assert.AreEqual("three", remainingRows3[0]);
+            Assert.AreEqual("three", remainingRows2[0]);
+            Assert.AreEqual("four", remainingRows3[0]);
             Assert.IsNull(remainingRows4[0]);
         }
 
@@ -691,8 +691,8 @@
             Assert.AreEqual(3, deleteRow1);
             Assert.AreEqual(2, deleteRow2);
 
-            Assert.AreEqual("four", remainingRows1[0]);
-            Assert.AreEqual("three", remainingRows2[0]);
+            Assert.AreEqual("three", remainingRows1[0]);
+            Assert.AreEqual("four", remainingRows2[0]);
             Assert.IsNull(remainingRows3[0]);
             Assert.IsNull(remainingRows4[0]);
         }
@@ -754,8 +754,8 @@
 
             Assert.AreEqual("one", remainingRows1_1[0]);
             Assert.AreEqual("two", remainingRows2_1[0]);
-            Assert.AreEqual("five", remainingRows3_1[0]);
-            Assert.AreEqual("four", remainingRows4_1[0]);
+            Assert.AreEqual("four", remainingRows3_1[0]);
+            Assert.AreEqual("five", remainingRows4_1[0]);
             Assert.IsNull(remainingRows5_1[0]);
 
             Assert.AreEqual(3, deleteRow2);
@@ -786,7 +786,7 @@
         }
 
         [TestMethod]
-        public void DeleteRowPrimaryKeyTest_InexistentRowIndex_ReturnsZero()
+        public void DeleteRowPrimaryKeyTest_InexistentRowIndex_ReturnsRowCount()
         {
             // Arrange
 
@@ -800,7 +800,7 @@
 
             // Assert
             Assert.AreEqual("one", pk1);
-            Assert.AreEqual(0, deleteRow);
+            Assert.AreEqual(1, deleteRow);
         }
 
         [TestMethod]
@@ -839,8 +839,8 @@
 
             Assert.AreEqual(2, deleteRow1);
 
-            Assert.AreEqual("four", remainingRows1[0]);
-            Assert.AreEqual("three", remainingRows2[0]);
+            Assert.AreEqual("three", remainingRows1[0]);
+            Assert.AreEqual("four", remainingRows2[0]);
             Assert.IsNull(remainingRows3[0]);
             Assert.IsNull(remainingRows4[0]);
         }
@@ -1178,26 +1178,6 @@
             Assert.IsNull(rowOutput[2]);
             Assert.IsNull(rowOutput[3]);
             Assert.IsNull(rowOutput[4]);
-        }
-
-        [TestMethod]
-        public void GetRowWithIndexTest_InexistentTableId_IsNull()
-        {
-            // Arrange
-
-            var mock = new SLProtocolMock(path);
-
-            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
-            object[] row2 = new object[] { "skyline1", "2ndColumnSkyline1", 4, 5, 6 };
-
-            // Act
-            mock.Object.ClearAllKeys(900);
-            mock.Object.AddRow(900, row1);
-            mock.Object.AddRow(900, row2);
-            object rowOutput = mock.Object.GetRow(800, 0);
-
-            // Assert
-            Assert.IsNull(rowOutput);
         }
 
         [TestMethod]
@@ -1648,29 +1628,29 @@
             object[] rowOutput3 = (object[])mock.Object.GetRow(900, 3);
 
             // Assert
-            Assert.AreEqual("skyline4", rowOutput0[0]);
-            Assert.AreEqual("2ndSkyline4", rowOutput0[1]);
-            Assert.AreEqual(10, rowOutput0[2]);
-            Assert.AreEqual(11, rowOutput0[3]);
-            Assert.AreEqual(12, rowOutput0[4]);
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("2ndSkyline1", rowOutput0[1]);
+            Assert.AreEqual(1, rowOutput0[2]);
+            Assert.AreEqual(2, rowOutput0[3]);
+            Assert.AreEqual(3, rowOutput0[4]);
 
-            Assert.AreEqual("skyline1", rowOutput1[0]);
-            Assert.AreEqual("2ndSkyline1", rowOutput1[1]);
-            Assert.AreEqual(1, rowOutput1[2]);
-            Assert.AreEqual(2, rowOutput1[3]);
-            Assert.AreEqual(3, rowOutput1[4]);
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("2ndSkyline2", rowOutput1[1]);
+            Assert.AreEqual(4, rowOutput1[2]);
+            Assert.AreEqual(5, rowOutput1[3]);
+            Assert.AreEqual(6, rowOutput1[4]);
 
-            Assert.AreEqual("skyline2", rowOutput2[0]);
-            Assert.AreEqual("2ndSkyline2", rowOutput2[1]);
-            Assert.AreEqual(4, rowOutput2[2]);
-            Assert.AreEqual(5, rowOutput2[3]);
-            Assert.AreEqual(6, rowOutput2[4]);
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.AreEqual("2ndSkyline3", rowOutput2[1]);
+            Assert.AreEqual(7, rowOutput2[2]);
+            Assert.AreEqual(8, rowOutput2[3]);
+            Assert.AreEqual(9, rowOutput2[4]);
 
-            Assert.AreEqual("skyline3", rowOutput3[0]);
-            Assert.AreEqual("2ndSkyline3", rowOutput3[1]);
-            Assert.AreEqual(7, rowOutput3[2]);
-            Assert.AreEqual(8, rowOutput3[3]);
-            Assert.AreEqual(9, rowOutput3[4]);
+            Assert.AreEqual("skyline4", rowOutput3[0]);
+            Assert.AreEqual("2ndSkyline4", rowOutput3[1]);
+            Assert.AreEqual(10, rowOutput3[2]);
+            Assert.AreEqual(11, rowOutput3[3]);
+            Assert.AreEqual(12, rowOutput3[4]);
         }
 
         [TestMethod]
@@ -1711,23 +1691,23 @@
             object[] rowOutput2 = (object[])mock.Object.GetRow(900, 2);
 
             // Assert
-            Assert.AreEqual("skyline4", rowOutput0[0]);
-            Assert.AreEqual("2ndSkyline4", rowOutput0[1]);
-            Assert.AreEqual(10, rowOutput0[2]);
-            Assert.AreEqual(11, rowOutput0[3]);
-            Assert.AreEqual(12, rowOutput0[4]);
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("2ndSkyline1", rowOutput0[1]);
+            Assert.AreEqual(1, rowOutput0[2]);
+            Assert.AreEqual(2, rowOutput0[3]);
+            Assert.AreEqual(3, rowOutput0[4]);
 
-            Assert.AreEqual("skyline3", rowOutput1[0]);
-            Assert.IsNull(rowOutput1[1]);
-            Assert.AreEqual(7, rowOutput1[2]);
-            Assert.AreEqual(8, rowOutput1[3]);
-            Assert.AreEqual(9, rowOutput1[4]);
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("2ndSkyline2", rowOutput1[1]);
+            Assert.AreEqual(4, rowOutput1[2]);
+            Assert.AreEqual(5, rowOutput1[3]);
+            Assert.AreEqual(6, rowOutput1[4]);
 
-            Assert.AreEqual("skyline1", rowOutput2[0]);
-            Assert.AreEqual("2ndSkyline1", rowOutput2[1]);
-            Assert.AreEqual(1, rowOutput2[2]);
-            Assert.AreEqual(2, rowOutput2[3]);
-            Assert.AreEqual(3, rowOutput2[4]);
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.IsNull(rowOutput2[1]);
+            Assert.AreEqual(7, rowOutput2[2]);
+            Assert.AreEqual(8, rowOutput2[3]);
+            Assert.AreEqual(9, rowOutput2[4]);
         }
 
         [TestMethod]
@@ -1812,29 +1792,29 @@
             object[] rowOutput3 = (object[])mock.Object.GetRow(900, 3);
 
             // Assert
-            Assert.AreEqual("skyline4", rowOutput0[0]);
-            Assert.AreEqual("2ndSkyline4", rowOutput0[1]);
-            Assert.AreEqual(10, rowOutput0[2]);
-            Assert.AreEqual(11, rowOutput0[3]);
-            Assert.AreEqual(12, rowOutput0[4]);
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("2ndSkyline1", rowOutput0[1]);
+            Assert.AreEqual(1, rowOutput0[2]);
+            Assert.AreEqual(2, rowOutput0[3]);
+            Assert.AreEqual(3, rowOutput0[4]);
 
-            Assert.AreEqual("skyline1", rowOutput1[0]);
-            Assert.AreEqual("2ndSkyline1", rowOutput1[1]);
-            Assert.AreEqual(1, rowOutput1[2]);
-            Assert.AreEqual(2, rowOutput1[3]);
-            Assert.AreEqual(3, rowOutput1[4]);
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("2ndSkyline2", rowOutput1[1]);
+            Assert.AreEqual(4, rowOutput1[2]);
+            Assert.AreEqual(5, rowOutput1[3]);
+            Assert.AreEqual(6, rowOutput1[4]);
 
-            Assert.AreEqual("skyline2", rowOutput2[0]);
-            Assert.AreEqual("2ndSkyline2", rowOutput2[1]);
-            Assert.AreEqual(4, rowOutput2[2]);
-            Assert.AreEqual(5, rowOutput2[3]);
-            Assert.AreEqual(6, rowOutput2[4]);
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.AreEqual("2ndSkyline3", rowOutput2[1]);
+            Assert.AreEqual(7, rowOutput2[2]);
+            Assert.AreEqual(8, rowOutput2[3]);
+            Assert.AreEqual(9, rowOutput2[4]);
 
-            Assert.AreEqual("skyline3", rowOutput3[0]);
-            Assert.AreEqual("2ndSkyline3", rowOutput3[1]);
-            Assert.AreEqual(7, rowOutput3[2]);
-            Assert.AreEqual(8, rowOutput3[3]);
-            Assert.AreEqual(9, rowOutput3[4]);
+            Assert.AreEqual("skyline4", rowOutput3[0]);
+            Assert.AreEqual("2ndSkyline4", rowOutput3[1]);
+            Assert.AreEqual(10, rowOutput3[2]);
+            Assert.AreEqual(11, rowOutput3[3]);
+            Assert.AreEqual(12, rowOutput3[4]);
         }
 
         [TestMethod]
@@ -1867,29 +1847,29 @@
             object[] rowOutput3 = (object[])mock.Object.GetRow(900, 3);
 
             // Assert
-            Assert.AreEqual("skyline4", rowOutput0[0]);
-            Assert.AreEqual("2ndSkyline4", rowOutput0[1]);
-            Assert.AreEqual(10, rowOutput0[2]);
-            Assert.AreEqual(11, rowOutput0[3]);
-            Assert.AreEqual(12, rowOutput0[4]);
+            Assert.AreEqual("skyline1", rowOutput0[0]);
+            Assert.AreEqual("2ndSkyline1", rowOutput0[1]);
+            Assert.AreEqual(1, rowOutput0[2]);
+            Assert.AreEqual(2, rowOutput0[3]);
+            Assert.AreEqual(3, rowOutput0[4]);
 
-            Assert.AreEqual("skyline1", rowOutput1[0]);
-            Assert.AreEqual("2ndSkyline1", rowOutput1[1]);
-            Assert.AreEqual(1, rowOutput1[2]);
-            Assert.AreEqual(2, rowOutput1[3]);
-            Assert.AreEqual(3, rowOutput1[4]);
+            Assert.AreEqual("skyline2", rowOutput1[0]);
+            Assert.AreEqual("2ndSkyline2", rowOutput1[1]);
+            Assert.AreEqual(4, rowOutput1[2]);
+            Assert.AreEqual(5, rowOutput1[3]);
+            Assert.AreEqual(6, rowOutput1[4]);
 
-            Assert.AreEqual("skyline2", rowOutput2[0]);
-            Assert.AreEqual("2ndSkyline2", rowOutput2[1]);
-            Assert.AreEqual(4, rowOutput2[2]);
-            Assert.AreEqual(5, rowOutput2[3]);
-            Assert.AreEqual(6, rowOutput2[4]);
+            Assert.AreEqual("skyline3", rowOutput2[0]);
+            Assert.AreEqual("2ndSkyline3", rowOutput2[1]);
+            Assert.AreEqual(7, rowOutput2[2]);
+            Assert.AreEqual(8, rowOutput2[3]);
+            Assert.AreEqual(9, rowOutput2[4]);
 
-            Assert.AreEqual("skyline3", rowOutput3[0]);
-            Assert.AreEqual("2ndSkyline3", rowOutput3[1]);
-            Assert.AreEqual(7, rowOutput3[2]);
-            Assert.AreEqual(8, rowOutput3[3]);
-            Assert.AreEqual(9, rowOutput3[4]);
+            Assert.AreEqual("skyline4", rowOutput3[0]);
+            Assert.AreEqual("2ndSkyline4", rowOutput3[1]);
+            Assert.AreEqual(10, rowOutput3[2]);
+            Assert.AreEqual(11, rowOutput3[3]);
+            Assert.AreEqual(12, rowOutput3[4]);
         }
 
         [TestMethod]
@@ -2250,7 +2230,7 @@
 
             var mock = new SLProtocolMock(path);
 
-            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
+            object[] row1 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
 
             object[] pk = new object[] { "skyline1", "skyline2" };
 
@@ -2269,9 +2249,9 @@
             // Assert
             Assert.AreEqual("skyline1", rowOutput0[0]);
             Assert.AreEqual("value1", rowOutput0[1]);
-            Assert.AreEqual("1", rowOutput0[2]);
-            Assert.AreEqual("2", rowOutput0[3]);
-            Assert.AreEqual("3", rowOutput0[4]);
+            Assert.AreEqual(1, rowOutput0[2]);
+            Assert.AreEqual(2, rowOutput0[3]);
+            Assert.AreEqual(3, rowOutput0[4]);
 
             Assert.AreEqual("skyline2", rowOutput1[0]);
             Assert.AreEqual("value2", rowOutput1[1]);

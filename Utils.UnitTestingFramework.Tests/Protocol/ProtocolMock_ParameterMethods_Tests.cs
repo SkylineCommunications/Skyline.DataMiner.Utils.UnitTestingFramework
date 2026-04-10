@@ -6,7 +6,6 @@
 
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Constants;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
@@ -29,55 +28,29 @@
         }
 
         [TestMethod]
-        public void SLProtocolMockTest_InvalidTypeStringPidGet_ArgumentException()
+        public void GetParameters_StringArrayArgument_ThrowsArgumentException()
         {
             // Arrange
 
             var mock = new SLProtocolMock(path);
             string[] parameterIds = { "100", "200", "300" };
 
-            // Act
-            mock.Object.SetParameter(100, 10);
-            mock.Object.SetParameter(200, 20);
-            mock.Object.SetParameter(300, 30);
-
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
                 () => mock.Object.GetParameters(parameterIds));
         }
 
         [TestMethod]
-        public void SLProtocolMockTest_InvalidTypeObjectPidGet_ArgumentException()
+        public void GetParameters_ObjectArrayArgumentWithStrings_ThrowsArgumentException()
         {
             // Arrange
 
             var mock = new SLProtocolMock(path);
             object[] parameterIds = { "100", "200", "300" };
 
-            // Act
-            mock.Object.SetParameter(100, 10);
-            mock.Object.SetParameter(200, 20);
-            mock.Object.SetParameter(300, 30);
-
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
                 () => mock.Object.GetParameters(parameterIds));
-        }
-
-        [TestMethod]
-        public void SLProtocolMockTest_InvalidStringGet_GetAndSetParameter()
-        {
-            // Arrange
-
-            var mock = new SLProtocolMock(path);
-
-            // Act
-            var outputSet = mock.Object.SetParameter(1000, 20);
-            var outputGet = mock.Object.GetParameter(1010);
-
-            // Assert
-            Assert.AreEqual(0, outputSet);
-            Assert.IsNull(outputGet);
         }
 
         [TestMethod]
@@ -105,16 +78,16 @@
 
             var mock = new SLProtocolMock(path);
 
-            int[] parameterIdsArray = { 1000, 1001, 1002, 1003, 1004 };
+            int[] parameterIdsArray = { 800, 700, 801, 701, 123 /*non-existing PID*/};
             object[] valuesArray = { 10, "15", 0x0A, "parameterValue", 11 };
 
             // Act
             var value1 = (int[])mock.Object.SetParameters(parameterIdsArray, valuesArray);
-            var outputGet1 = mock.Object.GetParameter(1000);
-            var outputGet2 = mock.Object.GetParameter(1001);
-            var outputGet3 = mock.Object.GetParameter(1002);
-            var outputGet4 = mock.Object.GetParameter(1003);
-            var outputGet5 = mock.Object.GetParameter(1004);
+            var outputGet1 = mock.Object.GetParameter(800);
+            var outputGet2 = mock.Object.GetParameter(700);
+            var outputGet3 = mock.Object.GetParameter(801);
+            var outputGet4 = mock.Object.GetParameter(701);
+            var outputGet5 = mock.Object.GetParameter(123);
 
             // Assert
             Assert.AreEqual(0, value1[0]);
@@ -177,23 +150,20 @@
         }
 
         [TestMethod]
-        public void SLProtocolMockTest_InexistentPidGetParameters_GetIsNull()
+        public void SetParameters_NonExistingPids_ReturnsArrayWithFailureFlags()
         {
             // Arrange
 
             var mock = new SLProtocolMock(path);
-            int[] parameterIds = { 1, 2, 3 };
+            int[] parameterIds = { 1, 2, 3};
             object[] values = { 10, 20, 30 };
-            uint[] uintParameterIds = { 4, 5, 6 };
 
             // Act
-            mock.Object.SetParameters(parameterIds, values);
-            object[] paramValue = (object[])mock.Object.GetParameters(uintParameterIds);
+            var result = (int[])mock.Object.SetParameters(parameterIds, values);
 
-            // Assert
-            Assert.IsNull(paramValue.GetValue(0));
-            Assert.IsNull(paramValue.GetValue(1));
-            Assert.IsNull(paramValue.GetValue(2));
+            Assert.AreEqual(Constants.HRESULT_FAIL_IDINEXISTENT, result[0]);
+            Assert.AreEqual(Constants.HRESULT_FAIL_IDINEXISTENT, result[1]);
+            Assert.AreEqual(Constants.HRESULT_FAIL_IDINEXISTENT, result[2]);
         }
 
         [TestMethod]
@@ -226,9 +196,9 @@
             // Arrange
 
             var mock = new SLProtocolMock(path);
-            int[] parameterIds = { 4, 5, 6 };
+            int[] parameterIds = { 800, 801, 802 };
             object[] values = { 40, 50 };
-            uint[] uintParameterIds = { 4, 5, 6 };
+            uint[] uintParameterIds = { 800, 801, 802 };
             DateTime[] timestamps = { new DateTime(2022, 7, 14), new DateTime(2022, 7, 15), new DateTime(2022, 7, 16) };
 
             // Act
@@ -243,17 +213,12 @@
         }
 
         [TestMethod]
-        public void SLProtocolMockTest_InvalidGetInput_ThrowsArgumentException()
+        public void GetParameters_NonExistentPids_ThrowsArgumentException()
         {
             // Arrange
 
             var mock = new SLProtocolMock(path);
-            int[] parameterIds = { 1, 2, 3 };
-            object[] values = { 10, 20, 30 };
             int[] intParameterIds = { 1, 2, 3 };
-
-            // Act
-            mock.Object.SetParameters(parameterIds, values);
 
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
@@ -271,7 +236,7 @@
             var value = mock.Object.GetParameterByName("NumericParameter");
 
             // Assert
-            Assert.AreEqual(10, value);
+            Assert.AreEqual(10.0, value);
         }
 
         [TestMethod]
@@ -317,7 +282,7 @@
 
             // Assert
             Assert.AreEqual(0, setOutput);
-            Assert.AreEqual(10, getOutput);
+            Assert.AreEqual(10.0, getOutput);
         }
 
         [TestMethod]

@@ -1,0 +1,44 @@
+﻿[assembly: System.Reflection.AssemblyMetadata("RepositoryUrl", "https://github.com/SkylineCommunications/Skyline.DataMiner.Utils.UnitTestingFrame" +
+    "work")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Utils.UnitTestingFramework.Tests")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETFramework,Version=v4.8", FrameworkDisplayName=".NET Framework 4.8")]
+namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting
+{
+    public interface IAsserter
+    {
+        Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting.IParameterAsserter Parameter(int parameterId);
+        Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting.IParameterAsserter Parameter(string parameterName);
+        Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting.ITableAsserter Table(int tablePid);
+    }
+    public interface IParameterAsserter
+    {
+        System.DateTime Timestamp { get; }
+        object Value { get; }
+    }
+    public interface ITableAsserter
+    {
+        int ColumnCount { get; }
+        int RowCount { get; }
+        System.Collections.Generic.IDictionary<string, object[]> AllRows();
+        object[] Column(int pid);
+        object[] Row(int rowIndex);
+        object[] Row(string key);
+        TRow Row<TRow>(int index)
+            where TRow : Skyline.DataMiner.Scripting.QActionTableRow;
+        TRow Row<TRow>(string key)
+            where TRow : Skyline.DataMiner.Scripting.QActionTableRow;
+    }
+}
+namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
+{
+    public class SLProtocolMock : Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.SLProtocolMock<Skyline.DataMiner.Scripting.SLProtocol>
+    {
+        public SLProtocolMock(string customPathToProtocolXml = null) { }
+    }
+    public class SLProtocolMock<T> : Moq.Mock<T>
+        where T :  class, Skyline.DataMiner.Scripting.SLProtocol
+    {
+        public SLProtocolMock(string customPathToProtocolXml = null) { }
+        public Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Asserting.IAsserter Assert() { }
+    }
+}

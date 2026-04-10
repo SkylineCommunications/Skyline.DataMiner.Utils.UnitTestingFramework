@@ -49,7 +49,7 @@
             var output = mock.Object.NotifyProtocol(73, 1000, null); // GetParameter
 
             // Assert
-            Assert.AreEqual(10, output);
+            Assert.AreEqual(10.0, output);
         }
 
         [TestMethod]
@@ -62,7 +62,7 @@
             var output = mock.Object.NotifyProtocol(85, "NumericParameter", null); // GetParameterByName
 
             // Assert
-            Assert.AreEqual(10, output);
+            Assert.AreEqual(10.0, output);
         }
 
         [TestMethod]
@@ -351,9 +351,9 @@
             string primaryKey1 = "Row 1 PK";
 
             string col2 = "Row 1 2nd Col";
-            string col3 = "Row 1 3rd Col";
-            string col4 = "Row 1 4th Col";
-            string col5 = "Row 1 5th Col";
+            int col3 = 1;
+            int col4 = 2;
+            int col5 = 3;
 
             object[] rowDetails = new object[] { tableID, primaryKey1, DateTime.Now, true };
 
@@ -365,7 +365,7 @@
             // Act
             rowData[1] = Constants.PROTOCOL_CLEAR;
             rowData[2] = Constants.PROTOCOL_LEAVE;
-            rowData[3] = "Row 1 4th Col new value";
+            rowData[3] = 10;
 
             mock.Object.NotifyProtocol((int)NotifyType.NT_SET_ROW, rowDetails, rowData);
 
@@ -374,7 +374,7 @@
 
             Assert.AreEqual(1, outputAddRow1);
 
-            string[] row = { "Row 1 PK", null, "Row 1 3rd Col", "Row 1 4th Col new value", "Row 1 5th Col" };
+            object[] row = { "Row 1 PK", null /*clear*/, 1 /*leave*/, 10 /*new value*/, 3 };
 
             outputGetRow1.Should().BeEquivalentTo(row);
         }
@@ -399,13 +399,13 @@
             var column1 = new object[] { primaryKey1, primaryKey2 };
 
             var column2 = new object[] { "A", "B" };
-            var column3 = new object[] { "C", "D" };
-            var column4 = new object[] { "E", "F" };
-            var column5 = new object[] { "G", "H" };
+            var column3 = new object[] { 2, 3 };
+            var column4 = new object[] { 4, 5 };
+            var column5 = new object[] { 6, 7 };
 
             var tableContent = new object[] { column1, column2, column3, column4, column5 };
 
-            var rowData = new object[] { primaryKey0, "Row 1.2", "Row 1.3", "Row 1.4", "Row 1.5" };
+            var rowData = new object[] { primaryKey0, "Row 1.2", 10, 11, 12 };
 
             // Act
             mock.Object.NotifyProtocol(149, tableID, primaryKey0); // AddRow
@@ -419,10 +419,10 @@
             object[] row0 = { null, null, null, null, null };
             outputGetRow0.Should().BeEquivalentTo(row0);
 
-            string[] row1 = { "Row 1 PK", "A", "C", "E", "G" };
+            object[] row1 = { "Row 1 PK", "A", 2, 4, 6 };
             outputGetRow1.Should().BeEquivalentTo(row1);
 
-            string[] row2 = { "Row 2 PK", "B", "D", "F", "H" };
+            object[] row2 = { "Row 2 PK", "B", 3, 5, 7 };
             outputGetRow2.Should().BeEquivalentTo(row2);
         }
 
@@ -444,13 +444,13 @@
 
             var column1 = new object[] { primaryKey1, primaryKey2 };
             var column2 = new object[] { "A", "B" };
-            var column3 = new object[] { "C", "D" };
-            var column4 = new object[] { "E", "F" };
-            var column5 = new object[] { "G", "H" };
+            var column3 = new object[] { 2, 3 };
+            var column4 = new object[] { 4, 5 };
+            var column5 = new object[] { 6, 7 };
 
             var tableContent = new object[] { column1, column2, column3, column4, column5 };
 
-            var rowData = new object[] { primaryKey0, "Row 1.2", "Row 1.3", "Row 1.4", "Row 1.5" };
+            var rowData = new object[] { primaryKey0, "Row 1.2", 10, 11, 12 };
 
             // Act
             mock.Object.NotifyProtocol(149, tableID, primaryKey0); // AddRow
@@ -461,13 +461,13 @@
             var outputGetRow2 = (object[])mock.Object.NotifyProtocol(215, rowDetails2, null); // GetRow
 
             // Assert
-            object[] row0 = { "Row 1.1", "Row 1.2", "Row 1.3", "Row 1.4", "Row 1.5" };
+            object[] row0 = { "Row 1.1", "Row 1.2", 10, 11, 12 };
             outputGetRow0.Should().BeEquivalentTo(row0);
 
-            string[] row1 = { "Row 1 PK", "A", "C", "E", "G" };
+            object[] row1 = { "Row 1 PK", "A", 2, 4, 6 };
             outputGetRow1.Should().BeEquivalentTo(row1);
 
-            string[] row2 = { "Row 2 PK", "B", "D", "F", "H" };
+            object[] row2 = { "Row 2 PK", "B", 3, 5, 7 };
             outputGetRow2.Should().BeEquivalentTo(row2);
         }
 
@@ -494,7 +494,7 @@
             var primaryKeys = new object[] { "Row 1 PK", "Row 2 PK" };
 
             var columnValues1 = new object[] { "A", "B" };
-            var columnValues2 = new object[] { "G", "H" };
+            var columnValues2 = new object[] { 6, 7 };
 
             var values1 = new object[] { primaryKeys, columnValues1 };
             var values2 = new object[] { primaryKeys, columnValues2 };
@@ -506,10 +506,10 @@
             var outputGetRow2 = (object[])mock.Object.NotifyProtocol(215, rowDetails2, null); // GetRow
 
             // Assert
-            string[] row1 = { "Row 1 PK", "A", null, null, "G" };
+            object[] row1 = { "Row 1 PK", "A", null, null, 6 };
             outputGetRow1.Should().BeEquivalentTo(row1);
 
-            string[] row2 = { "Row 2 PK", "B", null, null, "H" };
+            object[] row2 = { "Row 2 PK", "B", null, null, 7 };
             outputGetRow2.Should().BeEquivalentTo(row2);
         }
 
@@ -524,11 +524,11 @@
 
             uint[] columnIndexes = new uint[] { 0, 1 };
 
-            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
-            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", "4", "5", "6" };
-            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", "7", "8", "9" };
-            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", "10", "11", "12" };
-            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", "13", "14", "15" };
+            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
+            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", 7, 8, 9 };
+            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", 10, 11, 12 };
+            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", 13, 14, 15 };
 
             var rowDetails0 = new object[] { tableID, "skyline1" };
             var rowDetails1 = new object[] { tableID, "skyline2" };
@@ -571,11 +571,11 @@
 
             uint[] columnIndexes = new uint[] { 0, 10 };
 
-            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", "1", "2", "3" };
-            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", "4", "5", "6" };
-            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", "7", "8", "9" };
-            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", "10", "11", "12" };
-            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", "13", "14", "15" };
+            object[] row0 = new object[] { "skyline1", "2ndColumnSkyline1", 1, 2, 3 };
+            object[] row1 = new object[] { "skyline2", "2ndColumnSkyline2", 4, 5, 6 };
+            object[] row2 = new object[] { "skyline3", "2ndColumnSkyline3", 7, 8, 9 };
+            object[] row3 = new object[] { "skyline4", "2ndColumnSkyline4", 10, 11, 12 };
+            object[] row4 = new object[] { "skyline5", "2ndColumnSkyline5", 13, 14, 15 };
 
             var rowDetails0 = new object[] { tableID, "skyline1" };
             var rowDetails1 = new object[] { tableID, "skyline2" };
@@ -635,35 +635,35 @@
         [TestMethod]
         [DataRow(1, 1, "Row 1 PK")]
         [DataRow(1, 2, "value 1.1")]
-        [DataRow(1, 3, "value 1.2")]
-        [DataRow(1, 4, "value 1.3")]
-        [DataRow(1, 5, "value 1.4")]
+        [DataRow(1, 3, 1)]
+        [DataRow(1, 4, 2)]
+        [DataRow(1, 5, 3)]
         [DataRow(2, 1, "Row 2 PK")]
         [DataRow(2, 2, "value 2.1")]
-        [DataRow(2, 3, "value 2.2")]
-        [DataRow(2, 4, "value 2.3")]
-        [DataRow(2, 5, "value 2.4")]
+        [DataRow(2, 3, 4)]
+        [DataRow(2, 4, 5)]
+        [DataRow(2, 5, 6)]
         [DataRow(3, 1, "Row 3 PK")]
         [DataRow(3, 2, "value 3.1")]
-        [DataRow(3, 3, "value 3.2")]
-        [DataRow(3, 4, "value 3.3")]
-        [DataRow(3, 5, "value 3.4")]
+        [DataRow(3, 3, 7)]
+        [DataRow(3, 4, 8)]
+        [DataRow(3, 5, 9)]
         [DataRow("Row 1 PK", 1, "Row 1 PK")]
         [DataRow("Row 1 PK", 2, "value 1.1")]
-        [DataRow("Row 1 PK", 3, "value 1.2")]
-        [DataRow("Row 1 PK", 4, "value 1.3")]
-        [DataRow("Row 1 PK", 5, "value 1.4")]
+        [DataRow("Row 1 PK", 3, 1)]
+        [DataRow("Row 1 PK", 4, 2)]
+        [DataRow("Row 1 PK", 5, 3)]
         [DataRow("Row 2 PK", 1, "Row 2 PK")]
         [DataRow("Row 2 PK", 2, "value 2.1")]
-        [DataRow("Row 2 PK", 3, "value 2.2")]
-        [DataRow("Row 2 PK", 4, "value 2.3")]
-        [DataRow("Row 2 PK", 5, "value 2.4")]
+        [DataRow("Row 2 PK", 3, 4)]
+        [DataRow("Row 2 PK", 4, 5)]
+        [DataRow("Row 2 PK", 5, 6)]
         [DataRow("Row 3 PK", 1, "Row 3 PK")]
         [DataRow("Row 3 PK", 2, "value 3.1")]
-        [DataRow("Row 3 PK", 3, "value 3.2")]
-        [DataRow("Row 3 PK", 4, "value 3.3")]
-        [DataRow("Row 3 PK", 5, "value 3.4")]
-        public void GetParameterIndex(object rowIndicator, int oneBasedColumnIndex, string expectedCellValue)
+        [DataRow("Row 3 PK", 3, 7)]
+        [DataRow("Row 3 PK", 4, 8)]
+        [DataRow("Row 3 PK", 5, 9)]
+        public void GetParameterIndex(object rowIndicator, int oneBasedColumnIndex, object expectedCellValue)
         {
             // Arrange
             var mock = new SLProtocolMock(path);
@@ -672,9 +672,9 @@
 
             string primaryKey1 = "Row 1 PK";
 
-            mock.Object.AddRow(tableID, new[] { primaryKey1, "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
-            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
-            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+            mock.Object.AddRow(tableID, new object[] { primaryKey1, "value 1.1", 1, 2, 3 });
+            mock.Object.AddRow(tableID, new object[] { "Row 2 PK", "value 2.1", 4, 5, 6 });
+            mock.Object.AddRow(tableID, new object[] { "Row 3 PK", "value 3.1", 7, 8, 9 });
 
             // Act & Assert
             var cellValue = mock.Object.NotifyProtocol((int)NotifyType.GetParameterIndex, new[] { tableID, rowIndicator, oneBasedColumnIndex }, null);
@@ -693,9 +693,9 @@
 
             string primaryKey1 = "Row 1 PK";
 
-            mock.Object.AddRow(tableID, new[] { primaryKey1, "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
-            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
-            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+            mock.Object.AddRow(tableID, new object[] { primaryKey1, "value 1.1", 1, 2, 3 });
+            mock.Object.AddRow(tableID, new object[] { "Row 2 PK", "value 2.1", 4, 5, 6 });
+            mock.Object.AddRow(tableID, new object[] { "Row 3 PK", "value 3.1", 7, 8, 9 });
 
             object[] info = new object[] { tableID, 902, new object[] { true } }; // Column 902 (2nd column), with protocol_leave and protocol_clear
             object[] primaryKeys = new object[] { primaryKey1, "Row 2 PK", "Row 3 PK" };
@@ -721,14 +721,14 @@
 
             int tableID = 900;
 
-            mock.Object.AddRow(tableID, new[] { "Row 1 PK", "value 1.1", "value 1.2", "value 1.3", "value 1.4" });
-            mock.Object.AddRow(tableID, new[] { "Row 2 PK", "value 2.1", "value 2.2", "value 2.3", "value 2.4" });
-            mock.Object.AddRow(tableID, new[] { "Row 3 PK", "value 3.1", "value 3.2", "value 3.3", "value 3.4" });
+            mock.Object.AddRow(tableID, new object[] { "Row 1 PK", "value 1.1", 1, 2, 3 });
+            mock.Object.AddRow(tableID, new object[] { "Row 2 PK", "value 2.1", 4, 5, 6 });
+            mock.Object.AddRow(tableID, new object[] { "Row 3 PK", "value 3.1", 7, 8, 9 });
 
             object[] info = new object[] { tableID, 902, 904, new object[] { true } }; // Column 902 & 903, with protocol_leave and protocol_clear
             object[] primaryKeys = new object[] { "Row 1 PK", "Row 2 PK", "Row 3 PK" };
             object[] column1Values = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.1",  Constants.PROTOCOL_CLEAR };
-            object[] column2Values = new object[] { Constants.PROTOCOL_LEAVE, "new value 2.3", Constants.PROTOCOL_CLEAR };
+            object[] column2Values = new object[] { Constants.PROTOCOL_LEAVE, 100, Constants.PROTOCOL_CLEAR };
 
             // Act
             mock.Object.NotifyProtocol((int)NotifyType.NT_FILL_ARRAY_WITH_COLUMN, info, new object[] { primaryKeys, column1Values, column2Values });
@@ -742,8 +742,8 @@
             Assert.AreEqual(null, firstColumn[2]); // Cleared because of protocol_clear
 
 
-            Assert.AreEqual("value 1.3", secondColumn[0]); // Not changed because of protocol_leave
-            Assert.AreEqual("new value 2.3", secondColumn[1]); // Changed
+            Assert.AreEqual(2, secondColumn[0]); // Not changed because of protocol_leave
+            Assert.AreEqual(100, secondColumn[1]); // Changed
             Assert.AreEqual(null, secondColumn[2]); // Cleared because of protocol_clear
         }
     }

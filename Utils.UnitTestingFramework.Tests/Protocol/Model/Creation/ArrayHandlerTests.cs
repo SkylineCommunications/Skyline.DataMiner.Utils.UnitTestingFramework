@@ -5,8 +5,8 @@
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model.Creation;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Creation;
 
     [TestClass]
     public class ArrayHandlerTests
@@ -23,20 +23,20 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
-            var tableModel = arrayHandler.CreateTableModelFromArrayOptions(parameter);
+            var arrayHandler = new TableModelCreator(excludedPids);
+            var protocolModelParameterFinder = new ProtocolModelParameterFinder(protocolModel);
+            var tableModel = arrayHandler.CreateTableModelFromArrayOptions(parameter, protocolModelParameterFinder);
 
             // Assert
-            Assert.AreEqual(5, tableModel.ColumnIndexesToPids.Count);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[0]);
-            Assert.AreEqual(902, tableModel.ColumnIndexesToPids[1]);
-            Assert.AreEqual(903, tableModel.ColumnIndexesToPids[2]);
-            Assert.AreEqual(904, tableModel.ColumnIndexesToPids[3]);
-            Assert.AreEqual(905, tableModel.ColumnIndexesToPids[4]);
-            Assert.AreEqual(5, tableModel.ColumnCount);
+            Assert.AreEqual(5, tableModel.Schema.ColumnDefinitions.Count);
+            Assert.AreEqual(901, tableModel.Schema.ColumnDefinitions[0].Pid);
+            Assert.AreEqual(902, tableModel.Schema.ColumnDefinitions[1].Pid);
+            Assert.AreEqual(903, tableModel.Schema.ColumnDefinitions[2].Pid);
+            Assert.AreEqual(904, tableModel.Schema.ColumnDefinitions[3].Pid);
+            Assert.AreEqual(905, tableModel.Schema.ColumnDefinitions[4].Pid);
             Assert.AreEqual(900, tableModel.TableId);
-            Assert.AreEqual(0, tableModel.PrimaryKeyColumnIdx);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx]);
+            Assert.AreEqual(0, tableModel.Schema.PrimaryKeyColumn.Idx);
+            Assert.AreEqual(901, tableModel.Schema.PrimaryKeyColumn.Pid);
         }
 
         [TestMethod]
@@ -51,17 +51,16 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
-            var tableModel = arrayHandler.CreateTableModelFromArrayOptions(parameter);
+            var arrayHandler = new TableModelCreator(excludedPids);
+            var protocolModelParameterFinder = new ProtocolModelParameterFinder(protocolModel);
+            var tableModel = arrayHandler.CreateTableModelFromArrayOptions(parameter, protocolModelParameterFinder);
 
             // Assert
-            Assert.AreEqual(2, tableModel.ColumnIndexesToPids.Count);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[1]);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[2]);
-            Assert.AreEqual(1, tableModel.ColumnCount);
+            Assert.AreEqual(2, tableModel.Schema.ColumnDefinitions.Count);
+            Assert.AreEqual(901, tableModel.Schema.ColumnDefinitions[1].Pid);
             Assert.AreEqual(910, tableModel.TableId);
-            Assert.AreEqual(1, tableModel.PrimaryKeyColumnIdx);
-            Assert.AreEqual(901, tableModel.ColumnIndexesToPids[tableModel.PrimaryKeyColumnIdx]);
+            Assert.AreEqual(1, tableModel.Schema.PrimaryKeyColumn.Idx);
+            Assert.AreEqual(901, tableModel.Schema.PrimaryKeyColumn.Pid);
         }
 
         [TestMethod]
@@ -76,11 +75,12 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
+            var arrayHandler = new TableModelCreator(excludedPids);
 
             // Act & Assert
+            var protocolModelParameterFinder = new ProtocolModelParameterFinder(protocolModel);
             Assert.ThrowsExactly<InvalidOperationException>(
-                () => arrayHandler.CreateTableModelFromArrayOptions(parameter));
+                () => arrayHandler.CreateTableModelFromArrayOptions(parameter, protocolModelParameterFinder));
         }
 
         [TestMethod]
@@ -95,11 +95,13 @@
             HashSet<int> excludedPids = new HashSet<int>();
 
             // Act
-            var arrayHandler = new ArrayHandler(excludedPids);
+            var arrayHandler = new TableModelCreator(excludedPids);
 
             // Act & Assert
+            var protocolModelParameterFinder = new ProtocolModelParameterFinder(protocolModel);
+
             Assert.ThrowsExactly<InvalidOperationException>(
-                () => arrayHandler.CreateTableModelFromArrayOptions(parameter));
+                () => arrayHandler.CreateTableModelFromArrayOptions(parameter, protocolModelParameterFinder));
         }
     }
 }

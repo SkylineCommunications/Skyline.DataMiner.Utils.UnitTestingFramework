@@ -5,8 +5,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
     using System.Threading.Tasks;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Protocol.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
 
     [TestClass]
     public class ParameterModelTests
@@ -17,7 +17,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
             // Arrange
             var initialTimestamp = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var updatedTimestamp = initialTimestamp.AddMinutes(1);
-            var parameter = new ParameterModel("initial", initialTimestamp);
+            var parameterDefinition = new ParameterDefinition("TestParameter", typeof(string), 1);
+            var parameter = new ParameterModel(parameterDefinition, "initial", initialTimestamp);
 
             ParameterModelChangedEventArgs eventArgs = null;
             parameter.Changed += (sender, args) => eventArgs = args;
@@ -41,7 +42,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
             // Arrange
             const int iterations = 100;
             var baseTimestamp = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            var parameter = new ParameterModel(0, baseTimestamp);
+            var parameterDefinition = new ParameterDefinition("TestParameter", typeof(string), 1);
+            var parameter = new ParameterModel(parameterDefinition, "0", baseTimestamp);
 
             int eventCount = 0;
             parameter.Changed += (sender, args) => Interlocked.Increment(ref eventCount);
@@ -49,7 +51,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
             // Act
             Parallel.For(0, iterations, i =>
             {
-                parameter.Update(i, baseTimestamp.AddTicks(i + 1));
+                parameter.Update(i.ToString(), baseTimestamp.AddTicks(i + 1));
                 _ = parameter.Value;
                 _ = parameter.Timestamp;
             });

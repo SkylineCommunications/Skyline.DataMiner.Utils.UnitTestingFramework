@@ -216,7 +216,97 @@ Any inquiries can be addressed to:
 				<Type>number</Type>
 			</Measurement>
 		</Param>
-
+		<Param id="700" trending="false">
+			<Name>StringParameter1</Name>
+			<Description>String Parameter 1</Description>
+			<Type>read</Type>
+			<Interprete>
+				<RawType>other</RawType>
+				<Type>string</Type>
+				<LengthType>next param</LengthType>
+				<DefaultValue>one</DefaultValue>
+			</Interprete>
+			<Measurement>
+				<Type>string</Type>
+			</Measurement>
+		</Param>
+		<Param id="701" trending="false">
+			<Name>StringParameter2</Name>
+			<Description>String Parameter 2</Description>
+			<Type>read</Type>
+			<Interprete>
+				<RawType>other</RawType>
+				<Type>string</Type>
+				<LengthType>next param</LengthType>
+				<DefaultValue>two</DefaultValue>
+			</Interprete>
+			<Measurement>
+				<Type>string</Type>
+			</Measurement>
+		</Param>
+		<Param id="702" trending="false">
+			<Name>StringParameter3</Name>
+			<Description>String Parameter 3</Description>
+			<Type>read</Type>
+			<Interprete>
+				<RawType>other</RawType>
+				<Type>string</Type>
+				<LengthType>next param</LengthType>
+				<DefaultValue>three</DefaultValue>
+			</Interprete>
+			<Measurement>
+				<Type>string</Type>
+			</Measurement>
+		</Param>
+		<Param id="800" trending="false">
+			<Name>NumericParameter1</Name>
+			<Description>Numeric Parameter 1</Description>
+			<Type>read</Type>
+			<Interprete>
+				<RawType>numeric text</RawType>
+				<Type>double</Type>
+				<LengthType>next param</LengthType>
+			</Interprete>
+			<Display>
+				<RTDisplay>true</RTDisplay>
+				<Positions>
+					<Position>
+						<Page>General</Page>
+						<Column>0</Column>
+						<Row>0</Row>
+					</Position>
+				</Positions>
+			</Display>
+			<Measurement>
+				<Type>number</Type>
+			</Measurement>
+		</Param>
+		<Param id="801" trending="false">
+			<Name>NumericParameter2</Name>
+			<Description>Numeric Parameter 2</Description>
+			<Type>read</Type>
+			<Interprete>
+				<RawType>numeric text</RawType>
+				<Type>double</Type>
+				<LengthType>next param</LengthType>
+			</Interprete>
+			<Measurement>
+				<Type>number</Type>
+			</Measurement>
+		</Param>
+		<Param id="802" trending="false">
+			<Name>NumericParameter3</Name>
+			<Description>Numeric Parameter 3</Description>
+			<Type>read</Type>
+			<Interprete>
+				<RawType>numeric text</RawType>
+				<Type>double</Type>
+				<LengthType>next param</LengthType>
+			</Interprete>
+			<Measurement>
+				<Type>number</Type>
+			</Measurement>
+		</Param>
 		<Param id="900">
 			<Name>PollingConfiguration</Name>
 			<Description>Polling Configuration</Description>
