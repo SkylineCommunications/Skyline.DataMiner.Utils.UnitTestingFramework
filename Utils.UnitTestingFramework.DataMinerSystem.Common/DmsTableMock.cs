@@ -43,7 +43,7 @@
 
             Setup(t => t.AddRow(It.IsAny<object[]>())).Callback((object[] data) => this.tableModel.SetRow(data));
 
-            Setup(t => t.SetRow(It.IsAny<string>(), It.IsAny<object[]>())).Callback((string _, object[] data) => this.tableModel.SetRow(data));
+            Setup(t => t.SetRow(It.IsAny<string>(), It.IsAny<object[]>())).Callback((string key, object[] data) => SetRow(key, data));
 
             Setup(t => t.DeleteRow(It.IsAny<string>())).Callback((string key) => this.tableModel.RemoveRows(key));
 
@@ -57,6 +57,31 @@
 
                     return GetColumnObject(columnType, columnPid);
                 }));
+        }
+
+        private void SetRow(string primaryKey, object[] data)
+        {
+            if (primaryKey == null)
+            {
+                throw new ArgumentNullException(nameof(primaryKey));
+            }
+
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            // The primary key argument is authoritative: force the primary key column to the specified key
+            // so the correct row is updated regardless of the key embedded in the provided data.
+            var row = (object[])data.Clone();
+
+            var primaryKeyColumnIndex = tableModel.Schema.PrimaryKeyColumn.Idx;
+            if (primaryKeyColumnIndex < row.Length)
+            {
+                row[primaryKeyColumnIndex] = primaryKey;
+            }
+
+            tableModel.SetRow(row);
         }
 
         private object GetColumnObject(Type columnType, int columnPid)
