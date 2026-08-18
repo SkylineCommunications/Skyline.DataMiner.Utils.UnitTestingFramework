@@ -22,6 +22,7 @@
     <PackageReference Include="PublicApiGenerator" Version="11.5.4" />
     <PackageReference Include="Verify.MSTest" Version="31.12.5" />
     <PackageReference Include="Skyline.DataMiner.CICD.Models.Protocol" Version="1.1.0" />
+    <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Common" Version="1.2.0.3" />
     <PackageReference Include="Skyline.DataMiner.Dev.Protocol" Version="10.3.0" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -31,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Utils.UnitTestingFramework.Protocol\Utils.UnitTestingFramework.Protocol.csproj" />
+    <ProjectReference Include="..\Utils.UnitTestingFramework.DataMinerSystem.Common\Utils.UnitTestingFramework.DataMinerSystem.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
