@@ -18,22 +18,7 @@ var cellValue = elementMock.Object.GetTable(1000).GetColumn<string>(1001).GetVal
 
 ### Arranging and asserting data
 
-The `IDmsElement` mock is passed to the code under test through `IDmsElementMock.Object`. To arrange (set up) the data before the test and to assert (verify) the data afterwards, you do not need to go through `.Object`: `IDmsElementMock` exposes `GetStandaloneParameter<T>` and `GetTable` directly. Both the direct methods and `.Object` are backed by the same store, so values written through one are visible through the other. Because the direct methods bypass `.Object`, arranging data through them is not recorded as an invocation on the mock, so it does not interfere with a later `IDmsElementMock.Verify(...)`.
-
-```csharp
-var elementMock = new IDmsElementMock("path/to/protocol.xml");
-
-// Arrange: set up the data the code under test will read.
-elementMock.GetStandaloneParameter<string>(123).SetValue("initial value");
-elementMock.GetTable(1000).AddRow(new object[] { "PK", "description" });
-
-// Act: run the code under test, passing in elementMock.Object.
-SystemUnderTest.DoSomething(elementMock.Object);
-
-// Assert: verify the data the code under test wrote.
-Assert.AreEqual("expected value", elementMock.GetStandaloneParameter<string>(123).GetValue());
-Assert.AreEqual("expected cell", elementMock.GetTable(1000).GetColumn<string>(1001).GetValue("PK"));
-```
+The `IDmsElement` mock is passed to the code under test through `IDmsElementMock.Object`. Both arranging (setting up) the data before the test and asserting (verifying) the data afterwards happen through `.Object`, backed by the same store the code under test reads from.
 
 Only the four types supported by the DataMiner System interfaces (`int?`, `double?`, `DateTime?` and `string`) can be used as the generic argument of `GetStandaloneParameter<T>` and `GetColumn<T>`. Any other type results in a `NotSupportedException`.
 

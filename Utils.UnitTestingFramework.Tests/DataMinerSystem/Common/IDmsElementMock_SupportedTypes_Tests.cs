@@ -98,17 +98,6 @@
         }
 
         [TestMethod]
-        public void GetStandaloneParameter_DirectAccess_UnsupportedType_ThrowsNotSupportedException()
-        {
-            // Arrange
-            var mock = new IDmsElementMock(path);
-
-            // Act & Assert
-            Assert.ThrowsExactly<NotSupportedException>(
-                () => mock.GetStandaloneParameter<int>(800));
-        }
-
-        [TestMethod]
         public void GetColumn_SupportedType_IsSupported()
         {
             // Arrange

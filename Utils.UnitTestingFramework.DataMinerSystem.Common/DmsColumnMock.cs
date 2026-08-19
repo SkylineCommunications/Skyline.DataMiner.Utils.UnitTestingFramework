@@ -187,13 +187,13 @@
 
         private Column CreateColumnSelector()
         {
-            var element = table.Element;
+            var element = table.Object.Element;
             return new Column(element?.AgentId ?? 0, element?.Id ?? 0, TableModel.TableId, columnPid);
         }
 
         private Cell CreateCellSelector(string primaryKey)
         {
-            var element = table.Element;
+            var element = table.Object.Element;
             return new Cell(element?.AgentId ?? 0, element?.Id ?? 0, TableModel.TableId, columnPid, primaryKey);
         }
     }
