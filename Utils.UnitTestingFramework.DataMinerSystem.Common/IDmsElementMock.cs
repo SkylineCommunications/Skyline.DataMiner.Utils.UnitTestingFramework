@@ -18,8 +18,8 @@
     public class IDmsElementMock : Mock<IDmsElement>
     {
         private readonly ParametersAndTables parametersAndTables;
-        private readonly Dictionary<int, object> tableMocks = new Dictionary<int, object>();
-        private readonly Dictionary<string, object> standaloneParameterMocks = new Dictionary<string, object>();
+        private readonly Dictionary<int, DmsTableMock> tableMocks = new Dictionary<int, DmsTableMock>();
+        private readonly Dictionary<string, Mock> standaloneParameterMocks = new Dictionary<string, Mock>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IDmsElementMock"/> class.
@@ -31,6 +31,30 @@
 
             SetupStandaloneParameters();
             SetupTables();
+        }
+
+        /// <summary>
+        /// Gets the standalone parameter with the specified ID, allowing values to be arranged and asserted without going through <see cref="Mock{T}.Object"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the parameter value. Only <see cref="int"/>?, <see cref="double"/>?, <see cref="DateTime"/>? and <see cref="string"/> are supported.</typeparam>
+        /// <param name="parameterId">The parameter ID.</param>
+        /// <returns>The standalone parameter.</returns>
+        /// <exception cref="NotSupportedException"><typeparamref name="T"/> is not a supported type.</exception>
+        /// <exception cref="ArgumentException">No standalone parameter with the specified <paramref name="parameterId"/> exists.</exception>
+        public IDmsStandaloneParameter<T> GetStandaloneParameter<T>(int parameterId)
+        {
+            return Object.GetStandaloneParameter<T>(parameterId);
+        }
+
+        /// <summary>
+        /// Gets the table with the specified ID, allowing rows and cells to be arranged and asserted without going through <see cref="Mock{T}.Object"/>.
+        /// </summary>
+        /// <param name="tableId">The table ID.</param>
+        /// <returns>The table.</returns>
+        /// <exception cref="ArgumentException">No table with the specified <paramref name="tableId"/> exists.</exception>
+        public IDmsTable GetTable(int tableId)
+        {
+            return Object.GetTable(tableId);
         }
 
         private void SetupStandaloneParameters()
@@ -53,33 +77,34 @@
 
         private object GetStandaloneParameterObject(Type parameterType, int parameterId)
         {
+            SupportedValueTypes.EnsureSupported(parameterType);
+
             var cacheKey = $"{parameterId}|{parameterType.AssemblyQualifiedName}";
 
-            if (!standaloneParameterMocks.TryGetValue(cacheKey, out var parameterMockObject))
+            if (!standaloneParameterMocks.TryGetValue(cacheKey, out var parameterMock))
             {
                 var parameterModel = parametersAndTables.GetParameter(parameterId);
 
                 var parameterMockType = typeof(DmsStandaloneParameterMock<>).MakeGenericType(parameterType);
-                var parameterMock = (Mock)Activator.CreateInstance(parameterMockType, parameterModel, Object);
+                parameterMock = (Mock)Activator.CreateInstance(parameterMockType, parameterModel, Object);
 
-                parameterMockObject = parameterMock.Object;
-                standaloneParameterMocks.Add(cacheKey, parameterMockObject);
+                standaloneParameterMocks.Add(cacheKey, parameterMock);
             }
 
-            return parameterMockObject;
+            return parameterMock.Object;
         }
 
         private IDmsTable GetTableObject(int tableId)
         {
-            if (!tableMocks.TryGetValue(tableId, out var tableMockObject))
+            if (!tableMocks.TryGetValue(tableId, out var tableMock))
             {
                 var tableModel = parametersAndTables.GetTable(tableId);
 
-                tableMockObject = new DmsTableMock(tableModel, Object).Object;
-                tableMocks.Add(tableId, tableMockObject);
+                tableMock = new DmsTableMock(tableModel, Object);
+                tableMocks.Add(tableId, tableMock);
             }
 
-            return (IDmsTable)tableMockObject;
+            return tableMock.Object;
         }
     }
 }

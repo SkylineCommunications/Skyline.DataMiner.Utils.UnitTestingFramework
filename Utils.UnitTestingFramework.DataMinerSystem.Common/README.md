@@ -16,6 +16,29 @@ elementMock.Object.GetTable(1000).GetColumn<string>(1001).SetValue("PK", "cell v
 var cellValue = elementMock.Object.GetTable(1000).GetColumn<string>(1001).GetValue("PK"); // "cell value"
 ```
 
+### Arranging and asserting data
+
+The `IDmsElement` mock is passed to the code under test through `IDmsElementMock.Object`. To arrange (set up) the data before the test and to assert (verify) the data afterwards, you do not need to go through `.Object`: `IDmsElementMock` exposes `GetStandaloneParameter<T>` and `GetTable` directly. Because both the direct methods and `.Object` are backed by the same store, values written through one are visible through the other.
+
+```csharp
+var elementMock = new IDmsElementMock("path/to/protocol.xml");
+
+// Arrange: set up the data the code under test will read.
+elementMock.GetStandaloneParameter<string>(123).SetValue("initial value");
+elementMock.GetTable(1000).AddRow(new object[] { "PK", "description" });
+
+// Act: run the code under test, passing in elementMock.Object.
+SystemUnderTest.DoSomething(elementMock.Object);
+
+// Assert: verify the data the code under test wrote.
+Assert.AreEqual("expected value", elementMock.GetStandaloneParameter<string>(123).GetValue());
+Assert.AreEqual("expected cell", elementMock.GetTable(1000).GetColumn<string>(1001).GetValue("PK"));
+```
+
+Only the four types supported by the DataMiner System interfaces (`int?`, `double?`, `DateTime?` and `string`) can be used as the generic argument of `GetStandaloneParameter<T>` and `GetColumn<T>`. Any other type results in a `NotSupportedException`.
+
+Value monitors are supported as well: `StartValueMonitor`/`StopValueMonitor` on standalone parameters, tables and columns invoke the registered callback whenever the underlying value changes.
+
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.
