@@ -75,6 +75,11 @@
         /// </summary>
         internal ITableModel TableModel => tableModel;
 
+        /// <summary>
+        /// Gets the element this table belongs to, if any.
+        /// </summary>
+        internal IDmsElement Element => element;
+
         private void SetupValueMonitors()
         {
             Setup(t => t.StartValueMonitor(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Action<TableValueChange>>(), It.IsAny<bool>()))
