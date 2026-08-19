@@ -70,6 +70,11 @@
             SetupValueMonitors();
         }
 
+        /// <summary>
+        /// Gets the <see cref="ITableModel"/> that backs this table and holds its data.
+        /// </summary>
+        internal ITableModel TableModel => tableModel;
+
         private void SetupValueMonitors()
         {
             Setup(t => t.StartValueMonitor(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Action<TableValueChange>>(), It.IsAny<bool>()))
@@ -247,7 +252,7 @@
             if (!columnMocks.TryGetValue(cacheKey, out var columnMockObject))
             {
                 var columnMockType = typeof(DmsColumnMock<>).MakeGenericType(columnType);
-                var columnMock = (Mock)Activator.CreateInstance(columnMockType, tableModel, columnPid, Object);
+                var columnMock = (Mock)Activator.CreateInstance(columnMockType, this, columnPid);
 
                 columnMockObject = columnMock.Object;
                 columnMocks.Add(cacheKey, columnMockObject);

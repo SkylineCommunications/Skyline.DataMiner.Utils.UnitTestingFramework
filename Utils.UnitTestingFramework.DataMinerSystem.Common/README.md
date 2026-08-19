@@ -18,7 +18,7 @@ var cellValue = elementMock.Object.GetTable(1000).GetColumn<string>(1001).GetVal
 
 ### Arranging and asserting data
 
-The `IDmsElement` mock is passed to the code under test through `IDmsElementMock.Object`. To arrange (set up) the data before the test and to assert (verify) the data afterwards, you do not need to go through `.Object`: `IDmsElementMock` exposes `GetStandaloneParameter<T>` and `GetTable` directly. Because both the direct methods and `.Object` are backed by the same store, values written through one are visible through the other.
+The `IDmsElement` mock is passed to the code under test through `IDmsElementMock.Object`. To arrange (set up) the data before the test and to assert (verify) the data afterwards, you do not need to go through `.Object`: `IDmsElementMock` exposes `GetStandaloneParameter<T>` and `GetTable` directly. Both the direct methods and `.Object` are backed by the same store, so values written through one are visible through the other. Because the direct methods bypass `.Object`, arranging data through them is not recorded as an invocation on the mock, so it does not interfere with a later `IDmsElementMock.Verify(...)`.
 
 ```csharp
 var elementMock = new IDmsElementMock("path/to/protocol.xml");

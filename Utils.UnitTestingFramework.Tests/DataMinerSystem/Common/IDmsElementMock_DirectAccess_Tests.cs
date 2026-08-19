@@ -2,6 +2,9 @@
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Moq;
+
+    using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common;
 
     [TestClass]
@@ -63,6 +66,22 @@
 
             // Assert
             Assert.AreSame(objectTable, directTable);
+        }
+
+        [TestMethod]
+        public void ArrangeViaDirectMethods_DoesNotRecordInvocationsOnMock()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+
+            // Act: arrange data exclusively through the direct methods.
+            mock.GetStandaloneParameter<string>(1001).SetValue("new value");
+            mock.GetTable(900).AddRow(new object[] { "one", "one-desc", 3.0, 4.0, 5.0 });
+
+            // Assert: arranging via the direct methods must not be recorded as invocations on the mock,
+            // so a later Verify is not impacted.
+            mock.Verify(e => e.GetStandaloneParameter<string>(It.IsAny<int>()), Times.Never);
+            mock.Verify(e => e.GetTable(It.IsAny<int>()), Times.Never);
         }
     }
 }

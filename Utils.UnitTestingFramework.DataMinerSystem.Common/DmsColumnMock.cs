@@ -17,9 +17,8 @@
     /// <typeparam name="T">The type of the column value.</typeparam>
     internal class DmsColumnMock<T> : Mock<IDmsColumn<T>>
     {
-        private readonly ITableModel tableModel;
+        private readonly DmsTableMock table;
         private readonly int columnPid;
-        private readonly IDmsTable table;
         private readonly Dictionary<string, EventHandler<CellChangedEventArgs>> columnMonitors =
             new Dictionary<string, EventHandler<CellChangedEventArgs>>();
         private readonly Dictionary<string, EventHandler<CellChangedEventArgs>> cellMonitors =
@@ -28,38 +27,38 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="DmsColumnMock{T}"/> class.
         /// </summary>
-        /// <param name="tableModel">The table model that holds the cell values.</param>
+        /// <param name="table">The table this column belongs to, which also provides the backing <see cref="ITableModel"/>.</param>
         /// <param name="columnPid">The parameter ID of the column.</param>
-        /// <param name="table">The table this column belongs to.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="tableModel"/> is <see langword="null"/>.</exception>
-        public DmsColumnMock(ITableModel tableModel, int columnPid, IDmsTable table)
+        /// <exception cref="ArgumentNullException"><paramref name="table"/> is <see langword="null"/>.</exception>
+        public DmsColumnMock(DmsTableMock table, int columnPid)
         {
-            this.tableModel = tableModel ?? throw new ArgumentNullException(nameof(tableModel));
+            this.table = table ?? throw new ArgumentNullException(nameof(table));
             this.columnPid = columnPid;
-            this.table = table;
 
             Setup(c => c.Id).Returns(columnPid);
-            Setup(c => c.Table).Returns(table);
+            Setup(c => c.Table).Returns(table.Object);
 
 #pragma warning disable CS0618 // Type or member is obsolete - the obsolete overload is set up to remain usable by callers.
             Setup(c => c.GetValue(It.IsAny<string>()))
-                .Returns((string key) => ValueConverter.Convert<T>(this.tableModel.GetCell(key, this.columnPid)));
+                .Returns((string key) => ValueConverter.Convert<T>(TableModel.GetCell(key, this.columnPid)));
 #pragma warning restore CS0618
 
             Setup(c => c.GetValue(It.IsAny<string>(), It.IsAny<KeyType>()))
-                .Returns((string key, KeyType _) => ValueConverter.Convert<T>(this.tableModel.GetCell(key, this.columnPid)));
+                .Returns((string key, KeyType _) => ValueConverter.Convert<T>(TableModel.GetCell(key, this.columnPid)));
 
             Setup(c => c.SetValue(It.IsAny<string>(), It.IsAny<T>()))
-                .Callback((string key, T value) => this.tableModel.SetCell(key, this.columnPid, value));
+                .Callback((string key, T value) => TableModel.SetCell(key, this.columnPid, value));
 
             Setup(c => c.SetValue(It.IsAny<string>(), It.IsAny<KeyType>(), It.IsAny<T>()))
-                .Callback((string key, KeyType _, T value) => this.tableModel.SetCell(key, this.columnPid, value));
+                .Callback((string key, KeyType _, T value) => TableModel.SetCell(key, this.columnPid, value));
 
             Setup(c => c.SetValue(It.IsAny<string>(), It.IsAny<KeyType>(), It.IsAny<T>(), It.IsAny<TimeSpan>(), It.IsAny<Skyline.DataMiner.Core.DataMinerSystem.Common.Subscription.Waiters.ExpectedChanges>()))
-                .Callback((string key, KeyType _, T value, TimeSpan __, Skyline.DataMiner.Core.DataMinerSystem.Common.Subscription.Waiters.ExpectedChanges ___) => this.tableModel.SetCell(key, this.columnPid, value));
+                .Callback((string key, KeyType _, T value, TimeSpan __, Skyline.DataMiner.Core.DataMinerSystem.Common.Subscription.Waiters.ExpectedChanges ___) => TableModel.SetCell(key, this.columnPid, value));
 
             SetupValueMonitors();
         }
+
+        private ITableModel TableModel => table.TableModel;
 
         private void SetupValueMonitors()
         {
@@ -118,14 +117,14 @@
             }
 
             columnMonitors[sourceId] = Handler;
-            tableModel.CellChanged += Handler;
+            TableModel.CellChanged += Handler;
         }
 
         private void StopColumnMonitor(string sourceId)
         {
             if (sourceId != null && columnMonitors.TryGetValue(sourceId, out var handler))
             {
-                tableModel.CellChanged -= handler;
+                TableModel.CellChanged -= handler;
                 columnMonitors.Remove(sourceId);
             }
         }
@@ -163,7 +162,7 @@
             }
 
             cellMonitors[monitorKey] = Handler;
-            tableModel.CellChanged += Handler;
+            TableModel.CellChanged += Handler;
         }
 
         private void StopCellMonitor(string sourceId, string primaryKey)
@@ -176,7 +175,7 @@
             var monitorKey = CreateCellMonitorKey(sourceId, primaryKey);
             if (cellMonitors.TryGetValue(monitorKey, out var handler))
             {
-                tableModel.CellChanged -= handler;
+                TableModel.CellChanged -= handler;
                 cellMonitors.Remove(monitorKey);
             }
         }
@@ -188,14 +187,14 @@
 
         private Column CreateColumnSelector()
         {
-            var element = table?.Element;
-            return new Column(element?.AgentId ?? 0, element?.Id ?? 0, tableModel.TableId, columnPid);
+            var element = table.Object.Element;
+            return new Column(element?.AgentId ?? 0, element?.Id ?? 0, TableModel.TableId, columnPid);
         }
 
         private Cell CreateCellSelector(string primaryKey)
         {
-            var element = table?.Element;
-            return new Cell(element?.AgentId ?? 0, element?.Id ?? 0, tableModel.TableId, columnPid, primaryKey);
+            var element = table.Object.Element;
+            return new Cell(element?.AgentId ?? 0, element?.Id ?? 0, TableModel.TableId, columnPid, primaryKey);
         }
     }
 }

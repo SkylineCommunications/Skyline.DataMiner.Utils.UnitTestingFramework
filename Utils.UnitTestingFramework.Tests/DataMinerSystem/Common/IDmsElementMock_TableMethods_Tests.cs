@@ -5,6 +5,7 @@
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common;
 
     [TestClass]
@@ -189,6 +190,106 @@
             // Act & Assert
             Assert.ThrowsExactly<ArgumentException>(
                 () => mock.Object.GetTable(123456));
+        }
+
+        [TestMethod]
+        public void GetTable_QueryData_NoFilters_ReturnsAllRows()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+            var table = mock.Object.GetTable(900);
+            table.AddRow(new object[] { "one", "one-desc", 3.0, 4.0, 5.0 });
+            table.AddRow(new object[] { "two", "two-desc", 6.0, 7.0, 8.0 });
+
+            // Act
+            var rows = table.QueryData(Enumerable.Empty<IColumnFilter>()).ToList();
+
+            // Assert
+            Assert.AreEqual(2, rows.Count);
+        }
+
+        [TestMethod]
+        public void GetTable_QueryData_EqualFilter_ReturnsMatchingRows()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+            var table = mock.Object.GetTable(900);
+            table.AddRow(new object[] { "one", "one-desc", 3.0, 4.0, 5.0 });
+            table.AddRow(new object[] { "two", "two-desc", 6.0, 7.0, 8.0 });
+
+            // Act
+            var filters = new IColumnFilter[]
+            {
+                new ColumnFilter { Pid = 903, Value = "3", ComparisonOperator = ComparisonOperator.Equal },
+            };
+            var rows = table.QueryData(filters).ToList();
+
+            // Assert
+            Assert.AreEqual(1, rows.Count);
+            Assert.AreEqual("one", rows[0][0]);
+        }
+
+        [TestMethod]
+        public void GetTable_QueryData_GreaterThanFilter_ReturnsMatchingRows()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+            var table = mock.Object.GetTable(900);
+            table.AddRow(new object[] { "one", "one-desc", 3.0, 4.0, 5.0 });
+            table.AddRow(new object[] { "two", "two-desc", 6.0, 7.0, 8.0 });
+
+            // Act
+            var filters = new IColumnFilter[]
+            {
+                new ColumnFilter { Pid = 903, Value = "4", ComparisonOperator = ComparisonOperator.GreaterThan },
+            };
+            var rows = table.QueryData(filters).ToList();
+
+            // Assert
+            Assert.AreEqual(1, rows.Count);
+            Assert.AreEqual("two", rows[0][0]);
+        }
+
+        [TestMethod]
+        public void GetTable_QueryData_ReturnFilter_LimitsReturnedColumns()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+            var table = mock.Object.GetTable(900);
+            table.AddRow(new object[] { "one", "one-desc", 3.0, 4.0, 5.0 });
+
+            // Act
+            var filters = new IColumnFilter[]
+            {
+                new ColumnReturnFilter { Pid = 902 },
+            };
+            var rows = table.QueryData(filters).ToList();
+
+            // Assert
+            Assert.AreEqual(1, rows.Count);
+            CollectionAssert.AreEqual(new object[] { "one-desc" }, rows[0]);
+        }
+
+        [TestMethod]
+        public void GetTable_QueryData_FilterAndReturnFilterCombined_ReturnsSelectedColumnsOfMatchingRows()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+            var table = mock.Object.GetTable(900);
+            table.AddRow(new object[] { "one", "one-desc", 3.0, 4.0, 5.0 });
+            table.AddRow(new object[] { "two", "two-desc", 6.0, 7.0, 8.0 });
+
+            // Act
+            var filters = new IColumnFilter[]
+            {
+                new ColumnFilter { Pid = 903, Value = "6", ComparisonOperator = ComparisonOperator.Equal },
+                new ColumnReturnFilter { Pid = 902 },
+            };
+            var rows = table.QueryData(filters).ToList();
+
+            // Assert
+            Assert.AreEqual(1, rows.Count);
+            CollectionAssert.AreEqual(new object[] { "two-desc" }, rows[0]);
         }
     }
 }

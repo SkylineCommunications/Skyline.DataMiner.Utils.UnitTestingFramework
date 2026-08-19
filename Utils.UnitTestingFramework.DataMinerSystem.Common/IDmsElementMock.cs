@@ -36,6 +36,7 @@
         /// <summary>
         /// Gets the standalone parameter with the specified ID, allowing values to be arranged and asserted without going through <see cref="Mock{T}.Object"/>.
         /// </summary>
+        /// <remarks>Calls to this method are not recorded as invocations on the mock, so arranging data through it does not interfere with a later <see cref="Mock.Verify()"/>.</remarks>
         /// <typeparam name="T">The type of the parameter value. Only <see cref="int"/>?, <see cref="double"/>?, <see cref="DateTime"/>? and <see cref="string"/> are supported.</typeparam>
         /// <param name="parameterId">The parameter ID.</param>
         /// <returns>The standalone parameter.</returns>
@@ -43,18 +44,19 @@
         /// <exception cref="ArgumentException">No standalone parameter with the specified <paramref name="parameterId"/> exists.</exception>
         public IDmsStandaloneParameter<T> GetStandaloneParameter<T>(int parameterId)
         {
-            return Object.GetStandaloneParameter<T>(parameterId);
+            return (IDmsStandaloneParameter<T>)GetStandaloneParameterObject(typeof(T), parameterId);
         }
 
         /// <summary>
         /// Gets the table with the specified ID, allowing rows and cells to be arranged and asserted without going through <see cref="Mock{T}.Object"/>.
         /// </summary>
+        /// <remarks>Calls to this method are not recorded as invocations on the mock, so arranging data through it does not interfere with a later <see cref="Mock.Verify()"/>.</remarks>
         /// <param name="tableId">The table ID.</param>
         /// <returns>The table.</returns>
         /// <exception cref="ArgumentException">No table with the specified <paramref name="tableId"/> exists.</exception>
         public IDmsTable GetTable(int tableId)
         {
-            return Object.GetTable(tableId);
+            return GetTableObject(tableId);
         }
 
         private void SetupStandaloneParameters()
