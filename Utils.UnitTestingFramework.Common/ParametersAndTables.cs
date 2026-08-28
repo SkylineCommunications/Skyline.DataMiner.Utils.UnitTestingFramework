@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Skyline.DataMiner.Utils.UnitTestingFramework.Protocol")]
+[assembly: InternalsVisibleTo("Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common")]
 [assembly: InternalsVisibleTo("Utils.UnitTestingFramework.Tests")]
 namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 {
