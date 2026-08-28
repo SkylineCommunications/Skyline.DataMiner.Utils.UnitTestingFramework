@@ -4,13 +4,42 @@
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common;
 
     [TestClass]
     [DeploymentItem("TestFiles/Model/Data/protocol.xml")]
-    public class IDmsElementMock_SupportedTypes_Tests
+    public class IDmsElementMockTests
     {
         private readonly string path = "protocol.xml";
+
+        [TestMethod]
+        public void GetStandaloneParameter_ExistingId_ReturnsParameterWithMatchingId()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+
+            // Act
+            var parameter = mock.Object.GetStandaloneParameter<string>(1001);
+
+            // Assert
+            Assert.IsNotNull(parameter);
+            Assert.AreEqual(1001, parameter.Id);
+        }
+
+        [TestMethod]
+        public void GetStandaloneParameter_CalledTwice_ReturnsSameCachedInstance()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+
+            // Act
+            var first = mock.Object.GetStandaloneParameter<string>(1001);
+            var second = mock.Object.GetStandaloneParameter<string>(1001);
+
+            // Assert
+            Assert.AreSame(first, second);
+        }
 
         [TestMethod]
         public void GetStandaloneParameter_StringType_IsSupported()
@@ -98,28 +127,53 @@
         }
 
         [TestMethod]
-        public void GetColumn_SupportedType_IsSupported()
+        public void GetStandaloneParameter_NonExistingId_ThrowsArgumentException()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
+
+            // Act & Assert
+            Assert.ThrowsExactly<ArgumentException>(
+                () => mock.Object.GetStandaloneParameter<string>(123456));
+        }
+
+        [TestMethod]
+        public void GetTable_ExistingId_ReturnsTableWithMatchingId()
         {
             // Arrange
             var mock = new IDmsElementMock(path);
 
             // Act
-            var column = mock.Object.GetTable(900).GetColumn<string>(902);
+            var table = mock.Object.GetTable(900);
 
             // Assert
-            Assert.IsNotNull(column);
+            Assert.IsNotNull(table);
+            Assert.AreEqual(900, table.Id);
         }
 
         [TestMethod]
-        public void GetColumn_UnsupportedType_ThrowsNotSupportedException()
+        public void GetTable_CalledTwice_ReturnsSameCachedInstance()
         {
             // Arrange
             var mock = new IDmsElementMock(path);
-            var table = mock.Object.GetTable(900);
+
+            // Act
+            var first = mock.Object.GetTable(900);
+            var second = mock.Object.GetTable(900);
+
+            // Assert
+            Assert.AreSame(first, second);
+        }
+
+        [TestMethod]
+        public void GetTable_NonExistingId_ThrowsArgumentException()
+        {
+            // Arrange
+            var mock = new IDmsElementMock(path);
 
             // Act & Assert
-            Assert.ThrowsExactly<NotSupportedException>(
-                () => table.GetColumn<double>(903));
+            Assert.ThrowsExactly<ArgumentException>(
+                () => mock.Object.GetTable(123456));
         }
     }
 }
