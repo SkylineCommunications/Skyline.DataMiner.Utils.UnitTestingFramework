@@ -392,8 +392,8 @@
             // Arrange
             var dmsMock = new IDmsMock();
             var dmaMock = dmsMock.CreateAgent(agentId: 1);
-            var first = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var first = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            dmaMock.CreateElement(path, id: 2, name: "Second Element");
 
             // Act
             var protocols = dmsMock.Object.GetProtocols();
@@ -435,7 +435,7 @@
             var agentMock = mock.CreateAgent(agentId: 1);
 
             // Act
-            var elementMock = agentMock.CreateElement(path, id: 2, agentId: 1, name: "Test Element");
+            var elementMock = agentMock.CreateElement(path, id: 2, name: "Test Element");
 
             // Assert
             Assert.IsTrue(mock.Object.ElementExists(new DmsElementId(1, 2)));
@@ -491,7 +491,7 @@
         {
             // Arrange
             var mock = new IDmsMock();
-            var elementMock = mock.CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1, name: "Test Element");
+            var elementMock = mock.CreateAgent(agentId: 1).CreateElement(path, id: 2, name: "Test Element");
 
             // Act
             elementMock.Object.Delete();

@@ -106,6 +106,16 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
             }
         }
 
+        internal ICollection<IParameterModel> GetParameters()
+        {
+            return new List<IParameterModel>(parametersToValues.Values);
+        }
+
+        internal ICollection<ITableModel> GetTables()
+        {
+            return new List<ITableModel>(tablesPerTablePid.Values);
+        }
+
         /// <summary>
         /// Adds the specified model.
         /// </summary>

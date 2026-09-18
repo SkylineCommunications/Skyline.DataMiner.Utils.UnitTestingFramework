@@ -9,7 +9,7 @@ This package provides a pre-arranged mock of `IDmsElement` (from the `Skyline.Da
 ```csharp
 var dmsMock = new IDmsMock();
 var dmaMock = dmsMock.CreateAgent(agentId: 1, name: "Agent");
-var elementMock = dmaMock.CreateElement("path/to/protocol.xml", id: 1, agentId: 1, name: "Element");
+var elementMock = dmaMock.CreateElement("path/to/protocol.xml", id: 1, name: "Element");
 
 elementMock.Object.GetStandaloneParameter<string>(123).SetValue("new value");
 var parameterValue = elementMock.Object.GetStandaloneParameter<string>(123).GetValue(); // "new value"

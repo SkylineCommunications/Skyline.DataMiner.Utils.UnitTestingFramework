@@ -75,8 +75,14 @@
         /// </summary>
         internal ITableModel TableModel { get; }
 
+        /// <summary>
+        /// Gets all rows in the table.
+        /// </summary>
         public ReadOnlyDictionary<string, object[]> AllRows => TableModel.GetAllRows();
 
+        /// <summary>
+        /// Adds or updates one row.
+        /// </summary>
         public void SetRow(object[] row, DateTime? timestamp = null)
         {
             if (row == null)
@@ -87,6 +93,64 @@
             TableModel.SetRow(row, timestamp);
         }
 
+        // Rows
+
+        /// <summary>
+        /// Gets the number of rows.
+        /// </summary>
+        public int RowCount => TableModel.RowCount;
+
+        /// <summary>
+        /// Checks whether a row with the given primary key exists.
+        /// </summary>
+        public bool RowExists(string primaryKey) => TableModel.RowExists(primaryKey);
+
+        /// <summary>
+        /// Gets one row by its primary key.
+        /// </summary>
+        public object[] GetRow(string primaryKey) => TableModel.GetRow(primaryKey);
+
+        /// <summary>
+        /// Gets the rows with the given primary keys.
+        /// </summary>
+        public ReadOnlyDictionary<string, object[]> GetRows(IEnumerable<string> primaryKeys) => TableModel.GetRows(primaryKeys);
+
+        /// <summary>
+        /// Gets all rows in the table.
+        /// </summary>
+        public ReadOnlyDictionary<string, object[]> GetAllRows() => TableModel.GetAllRows();
+
+        /// <summary>
+        /// Adds or updates multiple rows.
+        /// </summary>
+        public void SetRows(IEnumerable<object[]> rows, DateTime? timestamp = null) => TableModel.SetRows(rows, timestamp);
+
+        /// <summary>
+        /// Removes the rows with the given primary keys.
+        /// </summary>
+        public void RemoveRows(params string[] primaryKeys) => TableModel.RemoveRows(primaryKeys);
+
+        /// <summary>
+        /// Removes all rows.
+        /// </summary>
+        public void RemoveAllRows() => TableModel.RemoveAllRows();
+
+        // Cells
+
+        /// <summary>
+        /// Gets the value of one cell.
+        /// </summary>
+        public object GetCell(string primaryKey, int columnPid) => TableModel.GetCell(primaryKey, columnPid);
+
+        /// <summary>
+        /// Sets the value of one cell.
+        /// </summary>
+        public void SetCell(string primaryKey, int columnPid, object value, DateTime? timestamp = null) => TableModel.SetCell(primaryKey, columnPid, value, timestamp);
+
+        /// <summary>
+        /// Sets values in one column for multiple rows.
+        /// </summary>
+        public void SetCells(IDictionary<string, object> primaryKeysToValues, int columnPid, DateTime? timestamp = null) => TableModel.SetCells(primaryKeysToValues, columnPid, timestamp);
         private void SetupValueMonitors()
         {
             Setup(t => t.StartValueMonitor(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<Action<TableValueChange>>(), It.IsAny<bool>()))

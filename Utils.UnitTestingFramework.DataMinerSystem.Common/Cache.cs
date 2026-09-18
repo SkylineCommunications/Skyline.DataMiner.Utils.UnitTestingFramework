@@ -12,6 +12,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
     internal sealed class Cache
     {
+        private readonly IConnectionMock connectionMock = new IConnectionMock();
         private IDmsMock dmsMock;
         private readonly Dictionary<int, IDmaMock> dmaMocksById = new Dictionary<int, IDmaMock>();
         private readonly Dictionary<string, IDmaMock> dmaMocksByName = new Dictionary<string, IDmaMock>(StringComparer.OrdinalIgnoreCase);
@@ -37,6 +38,11 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         internal IDmsMock GetDms()
         {
             return dmsMock;
+        }
+
+        internal IConnectionMock GetConnection()
+        {
+            return connectionMock;
         }
 
         internal void AddProtocol(IDmsProtocolMock protocolMock)

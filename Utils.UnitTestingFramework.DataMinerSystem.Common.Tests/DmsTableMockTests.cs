@@ -1,6 +1,7 @@
 ﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -434,6 +435,176 @@
 
             // Assert
             Assert.IsNull(received);
+        }
+        [TestMethod]
+        public void SetRow_OnTableMock_AddsRowThatCanBeRead()
+        {
+            // Arrange
+            var elementMock = new IDmsMock()
+                .CreateAgent(agentId: 0)
+                .CreateElement(path);
+
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+            var row = new object[] { "one", "one-desc", 3.0, 4.0, 5.0 };
+
+            // Act
+            tableMock.SetRow(row);
+
+            // Assert
+            Assert.AreEqual(1, tableMock.RowCount);
+            Assert.IsTrue(tableMock.RowExists("one"));
+            CollectionAssert.AreEqual(row, tableMock.GetRow("one"));
+        }
+        [TestMethod]
+        public void GetRows_OnTableMock_ReturnsOnlyRequestedRows()
+        {
+            // Arrange
+            var elementMock = new IDmsMock().CreateAgent(agentId: 0).CreateElement(path);
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+
+            var firstRow = new object[] { "one", "one-desc", 3.0, 4.0, 5.0 };
+            var secondRow = new object[] { "two", "two-desc", 6.0, 7.0, 8.0 };
+            tableMock.SetRows(new[] { firstRow, secondRow });
+
+            // Act
+            var rows = tableMock.GetRows(new[] { "two" });
+
+            // Assert
+            Assert.AreEqual(1, rows.Count);
+            CollectionAssert.AreEqual(secondRow, rows["two"]);
+        }
+
+        [TestMethod]
+        public void GetAllRows_OnTableMock_ReturnsEveryRow()
+        {
+            // Arrange
+            var elementMock = new IDmsMock().CreateAgent(agentId: 0).CreateElement(path);
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+
+            tableMock.SetRows(new[]
+            {
+                new object[] { "one", "one-desc", 3.0, 4.0, 5.0 },
+                new object[] { "two", "two-desc", 6.0, 7.0, 8.0 }
+            });
+
+            // Act
+            var rows = tableMock.GetAllRows();
+            var allRowsProperty = tableMock.AllRows;
+
+            // Assert
+            Assert.AreEqual(2, rows.Count);
+            Assert.IsTrue(rows.ContainsKey("one"));
+            Assert.IsTrue(rows.ContainsKey("two"));
+            Assert.AreEqual(2, allRowsProperty.Count);
+        }
+
+        [TestMethod]
+        public void SetRows_OnTableMock_AddsAndUpdatesRows()
+        {
+            // Arrange
+            var elementMock = new IDmsMock().CreateAgent(agentId: 0).CreateElement(path);
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+            tableMock.SetRow(new object[] { "one", "old-desc", 3.0, 4.0, 5.0 });
+
+            var updatedRow = new object[] { "one", "new-desc", 3.0, 4.0, 5.0 };
+            var newRow = new object[] { "two", "two-desc", 6.0, 7.0, 8.0 };
+
+            // Act
+            tableMock.SetRows(new[] { updatedRow, newRow });
+
+            // Assert
+            Assert.AreEqual(2, tableMock.RowCount);
+            CollectionAssert.AreEqual(updatedRow, tableMock.GetRow("one"));
+            CollectionAssert.AreEqual(newRow, tableMock.GetRow("two"));
+        }
+
+        [TestMethod]
+        public void RemoveRows_OnTableMock_RemovesOnlySpecifiedRow()
+        {
+            // Arrange
+            var elementMock = new IDmsMock().CreateAgent(agentId: 0).CreateElement(path);
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+
+            tableMock.SetRows(new[]
+            {
+                new object[] { "one", "one-desc", 3.0, 4.0, 5.0 },
+                new object[] { "two", "two-desc", 6.0, 7.0, 8.0 }
+            });
+
+            // Act
+            tableMock.RemoveRows("one");
+
+            // Assert
+            Assert.AreEqual(1, tableMock.RowCount);
+            Assert.IsFalse(tableMock.RowExists("one"));
+            Assert.IsTrue(tableMock.RowExists("two"));
+        }
+
+        [TestMethod]
+        public void RemoveAllRows_OnTableMock_ClearsTable()
+        {
+            // Arrange
+            var elementMock = new IDmsMock().CreateAgent(agentId: 0).CreateElement(path);
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+            tableMock.SetRow(new object[] { "one", "one-desc", 3.0, 4.0, 5.0 });
+
+            // Act
+            tableMock.RemoveAllRows();
+
+            // Assert
+            Assert.AreEqual(0, tableMock.RowCount);
+            Assert.AreEqual(0, tableMock.GetAllRows().Count);
+        }
+
+        [TestMethod]
+        public void SetCell_OnTableMock_UpdatesOneCell()
+        {
+            // Arrange
+            var elementMock = new IDmsMock().CreateAgent(agentId: 0).CreateElement(path);
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+            tableMock.SetRow(new object[] { "one", "old-desc", 3.0, 4.0, 5.0 });
+
+            // Act
+            tableMock.SetCell("one", 902, "new-desc");
+
+            // Assert
+            Assert.AreEqual("new-desc", tableMock.GetCell("one", 902));
+            Assert.AreEqual("new-desc", tableMock.GetRow("one")[1]);
+        }
+
+        [TestMethod]
+        public void SetCells_OnTableMock_UpdatesSameColumnInMultipleRows()
+        {
+            // Arrange
+            var elementMock = new IDmsMock().CreateAgent(agentId: 0).CreateElement(path);
+            elementMock.Object.GetTable(900);
+            var tableMock = elementMock.GetDmsTableMock(900);
+
+            tableMock.SetRows(new[]
+            {
+                new object[] { "one", "old-one", 3.0, 4.0, 5.0 },
+                new object[] { "two", "old-two", 6.0, 7.0, 8.0 }
+            });
+
+            var newValues = new Dictionary<string, object>
+            {
+                { "one", "new-one" },
+                { "two", "new-two" }
+            };
+
+            // Act
+            tableMock.SetCells(newValues, 902);
+
+            // Assert
+            Assert.AreEqual("new-one", tableMock.GetCell("one", 902));
+            Assert.AreEqual("new-two", tableMock.GetCell("two", 902));
         }
     }
 }

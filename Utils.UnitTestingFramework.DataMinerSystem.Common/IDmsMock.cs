@@ -10,6 +10,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
     using Moq;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Properties;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.DOM;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
 
     /// <summary>
@@ -20,9 +21,19 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         private readonly Cache cache;
 
         /// <summary>
+        /// Gets the SLNet connection mock shared by this DataMiner System and all its elements.
+        /// </summary>
+        public IConnectionMock Connection { get; }
+
+        /// <summary>
         /// Gets the communication interface.
         /// </summary>
         public ICommunication Communication { get; set; } = new Mock<ICommunication>().Object;
+
+        /// <summary>
+        /// Gets the DOM state that belongs to this DataMiner System mock.
+        /// </summary>
+        public DomSystemMock Dom { get; }
         public IPropertyDefinitionCollection<IDmsElementPropertyDefinition> ElementPropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsElementPropertyDefinition>();
         public IPropertyDefinitionCollection<IDmsServicePropertyDefinition> ServicePropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsServicePropertyDefinition>();
         public IPropertyDefinitionCollection<IDmsViewPropertyDefinition> ViewPropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsViewPropertyDefinition>();
@@ -34,6 +45,11 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         {
             cache = new Cache();
             cache.AddDms(this);
+            Connection = cache.GetConnection();
+            Dom = new DomSystemMock(
+                Connection.HandleMessages,
+                (message, applyFilters) => Connection.NotifySubscriptions(message, applyFilters));
+            Connection.SetMessageHandler(Dom.HandleMessages);
             Setup(dms => dms.Communication).Returns(() => Communication);
             Setup(dms => dms.ElementPropertyDefinitions).Returns(() => ElementPropertyDefinitions);
             Setup(dms => dms.ServicePropertyDefinitions).Returns(() => ServicePropertyDefinitions);

@@ -306,7 +306,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             // Arrange
             var dmsMock = new IDmsMock();
             var viewMock = dmsMock.CreateView(viewId: 10);
-            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2);
             elementMock.AddView(viewMock.Object.Id);
 
             // Act
@@ -325,7 +325,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             var dmsMock = new IDmsMock();
             var firstViewMock = dmsMock.CreateView(viewId: 10, name: "First View");
             var secondViewMock = dmsMock.CreateView(viewId: 11, name: "Second View");
-            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2);
             elementMock.AddView(firstViewMock.Object.Id);
             elementMock.AddView(secondViewMock.Object.Id);
 
@@ -340,7 +340,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             // Arrange
             var dmsMock = new IDmsMock();
             var viewMock = dmsMock.CreateView(viewId: 10);
-            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2);
             elementMock.AddView(viewMock.Object.Id);
 
             // Act
@@ -356,7 +356,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             // Arrange
             var dmsMock = new IDmsMock();
             var viewMock = dmsMock.CreateView(viewId: 10);
-            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2);
 
             // Act
             var elements = viewMock.Object.Elements;
@@ -371,7 +371,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             // Arrange
             var dmsMock = new IDmsMock();
             var viewMock = dmsMock.CreateView(viewId: 10);
-            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2);
             elementMock.AddView(viewMock.Object.Id);
 
             // Act

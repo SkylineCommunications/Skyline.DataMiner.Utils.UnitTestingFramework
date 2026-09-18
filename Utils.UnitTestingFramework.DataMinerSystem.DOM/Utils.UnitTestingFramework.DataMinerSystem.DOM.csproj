@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net48</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.DOM</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.DOM</RootNamespace>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Version>1.0.0</Version>
+    <PackageTags>Skyline;DataMiner;DOM;UnitTesting</PackageTags>
+    <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageIcon>Icon.png</PackageIcon>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>SkylineCommunications</Authors>
+    <Company>Skyline Communications</Company>
+    <Description>Provides DOM support for the Skyline DataMiner Unit Testing Framework.</Description>
+    <OutputType>Library</OutputType>
+    <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Utils.UnitTestingFramework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageId>Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.DOM</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\Utils.UnitTestingFramework.Protocol\LICENSE.txt" Pack="true" PackagePath="" />
+    <None Include="..\Utils.UnitTestingFramework.Protocol\nuget\Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.4.0.24" />
+    <PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.3.3.3" />
+  </ItemGroup>
+</Project>

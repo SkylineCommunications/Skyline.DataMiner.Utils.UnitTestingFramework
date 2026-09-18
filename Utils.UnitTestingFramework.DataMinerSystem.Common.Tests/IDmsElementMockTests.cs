@@ -55,8 +55,8 @@
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var firstMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var secondMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var firstMock = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var secondMock = dmaMock.CreateElement(path, id: 2, name: "Second Element");
 
             // Act
             var first = firstMock.Object.AdvancedSettings;
@@ -109,7 +109,7 @@
         public void AgentId_CustomValue_ReturnsProvidedValue()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 123).CreateElement(path, agentId: 123);
+            var mock = new IDmsMock().CreateAgent(agentId: 123).CreateElement(path);
 
             // Act
             var agentId = mock.Object.AgentId;
@@ -122,7 +122,7 @@
         public void Identifiers_CustomValues_AreUsedInParameterValueChange()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 123).CreateElement(path, agentId: 123, id: 456);
+            var mock = new IDmsMock().CreateAgent(agentId: 123).CreateElement(path, id: 456);
             var parameter = mock.Object.GetStandaloneParameter<string>(1001);
 
             var receivedAgentId = 0;
@@ -157,7 +157,7 @@
         public void DmsElementId_CustomIdentifiers_ReturnsSystemWideElementId()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 123).CreateElement(path, id: 456, agentId: 123);
+            var mock = new IDmsMock().CreateAgent(agentId: 123).CreateElement(path, id: 456);
 
             // Act
             var dmsElementId = mock.Object.DmsElementId;
@@ -212,8 +212,8 @@
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var firstMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var secondMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var firstMock = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var secondMock = dmaMock.CreateElement(path, id: 2, name: "Second Element");
 
             // Act
             firstMock.Object.Name = "Renamed First Element";
@@ -423,8 +423,8 @@
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var firstMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var secondMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var firstMock = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var secondMock = dmaMock.CreateElement(path, id: 2, name: "Second Element");
             firstMock.Description = "First description";
             secondMock.Description = "Second description";
 
@@ -565,8 +565,8 @@
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var firstMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var secondMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var firstMock = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var secondMock = dmaMock.CreateElement(path, id: 2, name: "Second Element");
 
             // Act
             firstMock.Object.Stop();
@@ -722,8 +722,8 @@
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var firstMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var secondMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var firstMock = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var secondMock = dmaMock.CreateElement(path, id: 2, name: "Second Element");
 
             // Act
             firstMock.Object.Delete();
@@ -943,8 +943,8 @@
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var first = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var second = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var first = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var second = dmaMock.CreateElement(path, id: 2, name: "Second Element");
 
             // Act
             var protocol = first.Object.Protocol;
@@ -1441,8 +1441,8 @@
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var firstMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var secondMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var firstMock = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var secondMock = dmaMock.CreateElement(path, id: 2, name: "Second Element");
             var updatedConnections = new Mock<IElementConnectionCollection>().Object;
 
             // Act
@@ -1777,7 +1777,7 @@
         public void ActiveAlarmCounts_CustomValues_ReturnProvidedValues()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             mock.ActiveAlarmCount = 9;
             mock.MajorAlarmCount = 3;
             mock.MinorAlarmCount = 2;
@@ -1798,7 +1798,7 @@
         public void GetActiveMajorAlarmCount_DeletedElement_ThrowsElementNotFoundException()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             mock.Object.Delete();
 
             // Act & Assert
@@ -1812,7 +1812,7 @@
             var dmsMock = new IDmsMock();
             var sourceAgent = dmsMock.CreateAgent(agentId: 1, name: "Source Agent");
             var targetAgent = dmsMock.CreateAgent(agentId: 2, name: "Target Agent");
-            var sourceElement = sourceAgent.CreateElement(path, id: 10, agentId: 1, name: "Original Element");
+            var sourceElement = sourceAgent.CreateElement(path, id: 10, name: "Original Element");
             sourceElement.Description = "Description";
 
             // Act
@@ -1829,7 +1829,7 @@
         public void Exists_ElementIsDeleted_ReturnsFalse()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
 
             // Act & Assert
             Assert.IsTrue(mock.Object.Exists());
@@ -1843,7 +1843,7 @@
         public void Update_ExistingElement_DoesNotThrowException()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
 
             // Act
             mock.Object.Update();
@@ -1856,7 +1856,7 @@
         public void Update_DeletedElement_ThrowsElementNotFoundException()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             mock.Object.Delete();
 
             // Act & Assert
@@ -1867,7 +1867,7 @@
         public void Duplicate_AgentFromDifferentDms_ThrowsAgentNotFoundException()
         {
             // Arrange
-            var sourceElementMock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var sourceElementMock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             var foreignAgentMock = new IDmsMock().CreateAgent(agentId: 2);
 
             // Act & Assert
@@ -1880,7 +1880,7 @@
             // Arrange
             var dmsMock = new IDmsMock();
             var viewMock = dmsMock.CreateView(viewId: 10);
-            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var elementMock = dmsMock.CreateAgent(agentId: 1).CreateElement(path, id: 2);
             elementMock.Object.Delete();
 
             // Act & Assert
@@ -1891,7 +1891,7 @@
         public void StartNameMonitor_NameChanges_InvokesCallback()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             ElementNameChange receivedChange = null;
             mock.Object.StartNameMonitor("test", change => receivedChange = change);
 
@@ -1909,7 +1909,7 @@
         public void StopNameMonitor_NameChanges_DoesNotInvokeCallback()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             var callbackCount = 0;
             mock.Object.StartNameMonitor("test", change => callbackCount++);
             mock.Object.StopNameMonitor("test", force: false);
@@ -1925,7 +1925,7 @@
         public void StartStateMonitor_StateChanges_InvokesCallback()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             ElementStateChange receivedChange = null;
             mock.Object.StartStateMonitor("test", change => receivedChange = change, TimeSpan.FromSeconds(1));
 
@@ -1941,7 +1941,7 @@
         public void StartAlarmLevelMonitor_AlarmLevelChanges_InvokesCallback()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
             ElementAlarmlevelChange receivedChange = null;
             mock.Object.StartAlarmLevelMonitor("test", change => receivedChange = change);
 
@@ -1957,7 +1957,7 @@
         public void StartNameMonitor_NullArguments_ThrowArgumentNullException()
         {
             // Arrange
-            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2, agentId: 1);
+            var mock = new IDmsMock().CreateAgent(agentId: 1).CreateElement(path, id: 2);
 
             // Act & Assert
             Assert.ThrowsExactly<ArgumentNullException>(() => mock.Object.StartNameMonitor(null, change => { }));

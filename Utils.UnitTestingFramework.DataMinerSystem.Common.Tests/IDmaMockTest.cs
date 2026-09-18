@@ -148,7 +148,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 123);
-            var elementMock = dmaMock.CreateElement(path, agentId: 123);
+            var elementMock = dmaMock.CreateElement(path);
 
             // Act
             var host = elementMock.Object.Host;
@@ -231,7 +231,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Element");
 
             // Act
             var elements = dmaMock.Object.GetElements();
@@ -427,7 +427,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Element");
 
             // Act
             var exists = dmaMock.Object.ElementExists(elementMock.Object.DmsElementId);
@@ -457,7 +457,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             var dmsMock = new IDmsMock();
             var firstDmaMock = dmsMock.CreateAgent(agentId: 1, name: "First Agent");
             var secondDmaMock = dmsMock.CreateAgent(agentId: 2, name: "Second Agent");
-            var elementMock = secondDmaMock.CreateElement(path, id: 123, agentId: 2, name: "Element");
+            var elementMock = secondDmaMock.CreateElement(path, id: 123, name: "Element");
 
             // Act
             var exists = firstDmaMock.Object.ElementExists(elementMock.Object.DmsElementId);
@@ -485,7 +485,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            dmaMock.CreateElement(path, id: 123, name: "Test Element");
 
             // Act
             var exists = dmaMock.Object.ElementExists("Test Element");
@@ -499,7 +499,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            dmaMock.CreateElement(path, id: 123, name: "Test Element");
 
             // Act
             var exists = dmaMock.Object.ElementExists("Unknown Element");
@@ -535,7 +535,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Test Element");
 
             // Act
             var element = dmaMock.Object.GetElement(elementMock.Object.DmsElementId);
@@ -562,7 +562,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             var dmsMock = new IDmsMock();
             var firstDmaMock = dmsMock.CreateAgent(agentId: 1, name: "First Agent");
             var secondDmaMock = dmsMock.CreateAgent(agentId: 2, name: "Second Agent");
-            var elementMock = secondDmaMock.CreateElement(path, id: 123, agentId: 2, name: "Element");
+            var elementMock = secondDmaMock.CreateElement(path, id: 123, name: "Element");
 
             // Act & Assert
             Assert.ThrowsExactly<ElementNotFoundException>(() => firstDmaMock.Object.GetElement(elementMock.Object.DmsElementId));
@@ -587,7 +587,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Test Element");
 
             // Act
             var element = dmaMock.Object.GetElement("Test Element");
@@ -622,7 +622,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Existing Element");
+            dmaMock.CreateElement(path, id: 123, name: "Existing Element");
 
             // Act & Assert
             Assert.ThrowsExactly<ElementNotFoundException>(() => dmaMock.Object.GetElement("Unknown Element"));
@@ -633,7 +633,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Old Name");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Old Name");
             elementMock.Object.Name = "New Name";
 
             // Act
@@ -661,7 +661,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Test Element");
             elementMock.Object.Delete();
 
             // Act
@@ -676,7 +676,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Test Element");
             elementMock.Object.Delete();
 
             // Act
@@ -690,7 +690,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Test Element");
             var dmsElementId = elementMock.Object.DmsElementId;
             elementMock.Object.Delete();
 
@@ -702,7 +702,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 123, agentId: 1, name: "Test Element");
+            var elementMock = dmaMock.CreateElement(path, id: 123, name: "Test Element");
             elementMock.Object.Delete();
 
             // Act & Assert
@@ -714,8 +714,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var deletedElementMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "Deleted Element");
-            var existingElementMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Existing Element");
+            var deletedElementMock = dmaMock.CreateElement(path, id: 1, name: "Deleted Element");
+            var existingElementMock = dmaMock.CreateElement(path, id: 2, name: "Existing Element");
             deletedElementMock.Object.Delete();
 
             // Act
@@ -744,8 +744,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var firstMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var secondMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Second Element");
+            var firstMock = dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var secondMock = dmaMock.CreateElement(path, id: 2, name: "Second Element");
 
             // Act
             var elements = dmaMock.Object.GetElements();
@@ -762,8 +762,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            dmaMock.CreateElement(path, id: 1, agentId: 1, name: "First Element");
-            var expectedElementMock = dmaMock.CreateElement(path, id: 2, agentId: 1, name: "Target Element");
+            dmaMock.CreateElement(path, id: 1, name: "First Element");
+            var expectedElementMock = dmaMock.CreateElement(path, id: 2, name: "Target Element");
 
             // Act
             var element = Business_Code_Example_FindElementByName.FindElementByName(dmaMock.Object, "Target Element");
@@ -777,7 +777,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var expectedElementMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "Target Element");
+            var expectedElementMock = dmaMock.CreateElement(path, id: 1, name: "Target Element");
 
             // Act
             var element = Business_Code_Example_FindElementByName.FindElementByName(dmaMock.Object, "target element");
@@ -791,7 +791,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            dmaMock.CreateElement(path, id: 1, agentId: 1, name: "Existing Element");
+            dmaMock.CreateElement(path, id: 1, name: "Existing Element");
 
             // Act
             var element = Business_Code_Example_FindElementByName.FindElementByName(dmaMock.Object, "Unknown Element");
@@ -827,7 +827,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrangeilho
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "Deleted Element");
+            var elementMock = dmaMock.CreateElement(path, id: 1, name: "Deleted Element");
             elementMock.Object.Delete();
 
             // ActJenn
@@ -842,7 +842,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var dmaMock = new IDmsMock().CreateAgent(agentId: 1);
-            var elementMock = dmaMock.CreateElement(path, id: 1, agentId: 1, name: "Original Element");
+            var elementMock = dmaMock.CreateElement(path, id: 1, name: "Original Element");
 
             // Act
             Business_Code_Example_RenameElement.RenameElement(elementMock.Object, "Renamed Element");
