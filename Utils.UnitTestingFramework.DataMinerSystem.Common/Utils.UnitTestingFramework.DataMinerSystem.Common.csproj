@@ -17,7 +17,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>
-    <Description>Provides in-memory mocks and builders for unit testing code that uses the DataMiner System Common interfaces, including DMAs, elements, services, views, protocols, parameters, tables, SLNet subscriptions, custom messages, and DOM.</Description>
+    <Description>Provides in-memory mocks and builders for unit testing code that uses the DataMinerSystem.Common interfaces, including DMAs, elements, services, views, protocols, parameters, tables, SLNet subscriptions, custom messages, and DOM.</Description>
     <OutputType>Library</OutputType>
     <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Utils.UnitTestingFramework</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

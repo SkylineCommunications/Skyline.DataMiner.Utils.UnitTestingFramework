@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "Unit Testing Framework.sln",
+    "projects": [
+      "Utils.UnitTestingFramework.Common\\Utils.UnitTestingFramework.Common.csproj",
+      "Utils.UnitTestingFramework.DataMinerSystem.Common\\Utils.UnitTestingFramework.DataMinerSystem.Common.csproj",
+      "Utils.UnitTestingFramework.DataMinerSystem.Common.Tests\\Utils.UnitTestingFramework.DataMinerSystem.Common.Tests.csproj",
+    ]
+  }
+}

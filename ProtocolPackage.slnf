@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "Unit Testing Framework.sln",
+    "projects": [
+      "Utils.UnitTestingFramework.Common\\Utils.UnitTestingFramework.Common.csproj",
+      "Utils.UnitTestingFramework.Protocol\\Utils.UnitTestingFramework.Protocol.csproj",
+      "Utils.UnitTestingFramework.Tests\\Utils.UnitTestingFramework.Protocol.Tests.csproj",
+    ]
+  }
+}
