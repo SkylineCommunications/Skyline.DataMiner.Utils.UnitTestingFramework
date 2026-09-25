@@ -41,11 +41,17 @@
             }
         }
 
-        protected ParameterDefinition BuildDefinitionFromProtocolParameter(IParamsParam parameter, bool allowNull = true)
+        protected StandaloneParameterDefinition BuildDefinitionFromProtocolParameter(IParamsParam parameter, object defaultValue = null, bool allowNull = true)
         {
             int parameterId = (int)parameter.Id.Value.Value;
 
-            return new ParameterDefinition(parameter.Name.Value, GetTypeForDefinition(parameter), parameterId, description: parameter.Description?.Value, allowNull: allowNull);
+            return new StandaloneParameterDefinition(
+                parameter.Name.Value,
+                GetTypeForDefinition(parameter),
+                parameterId,
+                defaultValue,
+                description: parameter.Description?.Value,
+                allowNull: allowNull);
         }
 
         protected abstract void ProcessString(ParameterAndTableDefinitions definitions, IParamsParam parameter);

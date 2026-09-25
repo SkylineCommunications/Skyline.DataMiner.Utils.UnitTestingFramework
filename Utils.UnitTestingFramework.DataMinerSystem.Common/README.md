@@ -49,7 +49,7 @@ The following example defines a protocol without a `protocol.xml`, creates a vie
 var dmsMock = new DmsBuilder()
     .WithProtocol("ExampleProtocol", protocol => protocol
         .AddParameterDefinition(
-            new ParameterDefinition("Status", typeof(string), 100)))
+            new StandaloneParameterDefinition("Status", typeof(string), 100)))
     .WithView(500, "Main view")
     .WithDma(1, dma => dma
         .WithElement(
@@ -118,12 +118,12 @@ var dmsMock = new DmsBuilder()
     .WithProtocol(
         "VersionedProtocol",
         protocol => protocol.AddParameterDefinition(
-            new ParameterDefinition("Old status", typeof(string), 100)),
+            new StandaloneParameterDefinition("Old status", typeof(string), 100)),
         version: "1.0.0.1")
     .WithProtocol(
         "VersionedProtocol",
         protocol => protocol.AddParameterDefinition(
-            new ParameterDefinition("New status", typeof(string), 200)),
+            new StandaloneParameterDefinition("New status", typeof(string), 200)),
         version: "2.0.0.0")
     .WithDma(1, dma => dma
         .WithElement(10, "Old element", "VersionedProtocol", "1.0.0.1")

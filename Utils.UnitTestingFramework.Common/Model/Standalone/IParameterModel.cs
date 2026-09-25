@@ -15,7 +15,7 @@
         /// <summary>
         /// Gets the parameter definition.
         /// </summary>
-        ParameterDefinition Definition { get; }
+        StandaloneParameterDefinition Definition { get; }
 
         /// <summary>
         /// Gets the parameter value.

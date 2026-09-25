@@ -10,7 +10,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
     {
         private readonly string name;
         private readonly string version;
-        private readonly Dictionary<int, ParameterDefinition> parameterDefinitions = new Dictionary<int, ParameterDefinition>();
+        private readonly Dictionary<int, StandaloneParameterDefinition> parameterDefinitions = new Dictionary<int, StandaloneParameterDefinition>();
         private readonly Dictionary<int, TableDefinition> tableDefinitions = new Dictionary<int, TableDefinition>();
 
         public IDmsProtocolMockBuilder(string name, string version = IDmsProtocolMock.DefaultVersion)
@@ -19,7 +19,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
             this.version = version;
         }
 
-        public IDmsProtocolMockBuilder AddParameterDefinition(ParameterDefinition parameterDefinition)
+        public IDmsProtocolMockBuilder AddParameterDefinition(StandaloneParameterDefinition parameterDefinition)
         {
             if (parameterDefinition == null)
             {

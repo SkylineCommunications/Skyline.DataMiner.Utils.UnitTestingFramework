@@ -9,15 +9,15 @@
 
     internal class ParameterAndTableDefinitions
     {
-        private readonly Dictionary<string, ParameterDefinition> parameterNameToDefinition = new Dictionary<string, ParameterDefinition>();
-        private readonly Dictionary<int, ParameterDefinition> parameterIdToDefinition = new Dictionary<int, ParameterDefinition>();
+        private readonly Dictionary<string, StandaloneParameterDefinition> parameterNameToDefinition = new Dictionary<string, StandaloneParameterDefinition>();
+        private readonly Dictionary<int, StandaloneParameterDefinition> parameterIdToDefinition = new Dictionary<int, StandaloneParameterDefinition>();
         private readonly Dictionary<int, TableDefinition> tablesPerTablePid = new Dictionary<int, TableDefinition>();
 
         public ParameterAndTableDefinitions()
         {
         }
 
-        public void AddParameterDefinition(ParameterDefinition parameterDefinition)
+        public void AddParameterDefinition(StandaloneParameterDefinition parameterDefinition)
         {
             if (parameterDefinition == null)
             {
@@ -38,7 +38,7 @@
             parameterNameToDefinition.Add(parameterDefinition.Name, parameterDefinition);
         }
 
-        public ParameterDefinition GetParameterDefinition(int parameterId)
+        public StandaloneParameterDefinition GetParameterDefinition(int parameterId)
         {
             if (!parameterIdToDefinition.TryGetValue(parameterId, out var definition))
             {
@@ -48,7 +48,7 @@
             return definition;
         }
 
-        public ParameterDefinition GetParameterDefinition(string parameterName)
+        public StandaloneParameterDefinition GetParameterDefinition(string parameterName)
         {
             if (!parameterNameToDefinition.TryGetValue(parameterName, out var definition))
             {
@@ -83,7 +83,7 @@
             return tableDefinition;
         }
 
-        internal ICollection<ParameterDefinition> GetParameterDefinitions()
+        internal ICollection<StandaloneParameterDefinition> GetParameterDefinitions()
         {
             return parameterIdToDefinition.Values.ToList();
         }

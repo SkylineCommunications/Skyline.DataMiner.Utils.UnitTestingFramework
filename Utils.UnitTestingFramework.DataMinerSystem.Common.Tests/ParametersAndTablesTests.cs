@@ -15,7 +15,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void Constructor_CreatesParameterModels_FromDefinitions()
         {
             var definitions = new ParameterAndTableDefinitions();
-            var definition = new ParameterDefinition("Parameter", typeof(string), 100);
+            var definition = new StandaloneParameterDefinition("Parameter", typeof(string), 100);
             definitions.AddParameterDefinition(definition);
 
             var parametersAndTables = new ParametersAndTables(definitions);
@@ -23,6 +23,18 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             Assert.IsTrue(parametersAndTables.ParameterExists(100));
             Assert.IsTrue(parametersAndTables.ParameterExists("Parameter"));
             Assert.AreSame(definition, parametersAndTables.GetParameter(100).Definition);
+        }
+
+        [TestMethod]
+        public void Constructor_UsesDefaultValue_FromStandaloneParameterDefinition()
+        {
+            var definitions = new ParameterAndTableDefinitions();
+            var definition = new StandaloneParameterDefinition("Parameter", typeof(string), 100, "Initial value");
+            definitions.AddParameterDefinition(definition);
+
+            var parametersAndTables = new ParametersAndTables(definitions);
+
+            Assert.AreEqual("Initial value", parametersAndTables.GetParameter(100).Value);
         }
 
         [TestMethod]

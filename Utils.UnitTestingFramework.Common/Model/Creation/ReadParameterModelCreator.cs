@@ -23,7 +23,7 @@
                 return;
             }
 
-            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter, parameter.Interprete.DefaultValue?.Value);
 
             definitions.AddParameterDefinition(parameterDefinition);
         }
@@ -37,7 +37,13 @@
                 return;
             }
 
-            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter);
+            object defaultValue = null;
+            if (Double.TryParse(parameter.Interprete.DefaultValue?.Value, out double parsedValue))
+            {
+                defaultValue = parsedValue;
+            }
+
+            var parameterDefinition = BuildDefinitionFromProtocolParameter(parameter, defaultValue);
 
             definitions.AddParameterDefinition(parameterDefinition);
         }

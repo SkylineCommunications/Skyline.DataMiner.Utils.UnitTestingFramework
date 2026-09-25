@@ -9,23 +9,16 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.Text.RegularExpressions;
-    using Skyline.DataMiner.CICD.Models.Protocol.Enums;
-    using Skyline.DataMiner.CICD.Models.Protocol.Read.Interfaces;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     internal class ParametersAndTables
     {
-        private static readonly Regex HexString = new Regex(@"^(0x[0-9a-fA-F]{2})+$");
-        private static readonly string[] HexStringSeparator = new[] { "0x" };
-
         // Dictionaries to allow fast lookup
-        private readonly Dictionary<string, ParameterDefinition> parameterNameToDefinition = new Dictionary<string, ParameterDefinition>();
-        private readonly Dictionary<int, ParameterDefinition> parameterIdToDefinition = new Dictionary<int, ParameterDefinition>();
-        private readonly Dictionary<ParameterDefinition, IParameterModel> parametersToValues = new Dictionary<ParameterDefinition, IParameterModel>();
+        private readonly Dictionary<string, StandaloneParameterDefinition> parameterNameToDefinition = new Dictionary<string, StandaloneParameterDefinition>();
+        private readonly Dictionary<int, StandaloneParameterDefinition> parameterIdToDefinition = new Dictionary<int, StandaloneParameterDefinition>();
+        private readonly Dictionary<StandaloneParameterDefinition, IParameterModel> parametersToValues = new Dictionary<StandaloneParameterDefinition, IParameterModel>();
 
         private readonly Dictionary<int, ITableModel> tablesPerTablePid = new Dictionary<int, ITableModel>();
 
@@ -42,7 +35,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 
             foreach (var parameterDefinition in definitions.GetParameterDefinitions())
             {
-                AddParameter(new ParameterModel(parameterDefinition, null));
+                AddParameter(new ParameterModel(parameterDefinition, parameterDefinition.DefaultValue));
             }
 
             foreach (var tableDefinition in definitions.GetTableDefinitions())
@@ -145,76 +138,6 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
         internal ICollection<ITableModel> GetTables()
         {
             return new List<ITableModel>(tablesPerTablePid.Values);
-        }
-
-        internal void ApplyInitialValues(IProtocolModel protocolModel)
-        {
-            if (protocolModel == null)
-            {
-                throw new ArgumentNullException(nameof(protocolModel));
-            }
-
-            foreach (var parameter in protocolModel.Protocol.Params)
-            {
-                int parameterId = (int)parameter.Id.Value.Value;
-                if (!TryGetParameter(parameterId, out var parameterModel) || parameter.Interprete?.Type?.Value == null)
-                {
-                    continue;
-                }
-
-                object initialValue = null;
-                switch (parameter.Type.Value.Value)
-                {
-                    case EnumParamType.Read:
-                        initialValue = GetReadInitialValue(parameter.Interprete.Type.Value.Value, parameter.Interprete.DefaultValue?.Value);
-                        break;
-
-                    case EnumParamType.Fixed:
-                        initialValue = GetFixedInitialValue(parameter.Interprete.Type.Value.Value, parameter.Interprete.ValueElement?.Value);
-                        break;
-                }
-
-                if (initialValue != null)
-                {
-                    parameterModel.Update(initialValue);
-                }
-            }
-        }
-
-        private static object GetReadInitialValue(EnumParamInterpretType interpreteType, string value)
-        {
-            if (interpreteType == EnumParamInterpretType.String)
-            {
-                return value;
-            }
-
-            if (interpreteType == EnumParamInterpretType.Double && Double.TryParse(value, out double doubleValue))
-            {
-                return doubleValue;
-            }
-
-            return null;
-        }
-
-        private static object GetFixedInitialValue(EnumParamInterpretType interpreteType, string value)
-        {
-            if (interpreteType == EnumParamInterpretType.String)
-            {
-                return value;
-            }
-
-            if (interpreteType != EnumParamInterpretType.Double || value == null)
-            {
-                return null;
-            }
-
-            if (!HexString.IsMatch(value))
-            {
-                return -1;
-            }
-
-            string[] parts = value.Split(HexStringSeparator, StringSplitOptions.RemoveEmptyEntries);
-            return Int32.Parse(parts[0], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
         }
 
         /// <summary>

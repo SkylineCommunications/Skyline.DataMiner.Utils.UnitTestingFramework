@@ -16,7 +16,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void AddParameterDefinition_MakesDefinitionAvailable_ByIdAndName()
         {
             var definitions = new ParameterAndTableDefinitions();
-            var definition = new ParameterDefinition("Parameter", typeof(string), 100);
+            var definition = new StandaloneParameterDefinition("Parameter", typeof(string), 100);
 
             definitions.AddParameterDefinition(definition);
 
@@ -28,20 +28,20 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void AddParameterDefinition_ThrowsArgumentException_WithDuplicateId()
         {
             var definitions = new ParameterAndTableDefinitions();
-            definitions.AddParameterDefinition(new ParameterDefinition("First", typeof(string), 100));
+            definitions.AddParameterDefinition(new StandaloneParameterDefinition("First", typeof(string), 100));
 
             Assert.ThrowsExactly<ArgumentException>(() =>
-                definitions.AddParameterDefinition(new ParameterDefinition("Second", typeof(string), 100)));
+                definitions.AddParameterDefinition(new StandaloneParameterDefinition("Second", typeof(string), 100)));
         }
 
         [TestMethod]
         public void AddParameterDefinition_ThrowsArgumentException_WithDuplicateName()
         {
             var definitions = new ParameterAndTableDefinitions();
-            definitions.AddParameterDefinition(new ParameterDefinition("Parameter", typeof(string), 100));
+            definitions.AddParameterDefinition(new StandaloneParameterDefinition("Parameter", typeof(string), 100));
 
             Assert.ThrowsExactly<ArgumentException>(() =>
-                definitions.AddParameterDefinition(new ParameterDefinition("Parameter", typeof(string), 101)));
+                definitions.AddParameterDefinition(new StandaloneParameterDefinition("Parameter", typeof(string), 101)));
         }
 
         [TestMethod]

@@ -42,7 +42,6 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Protocol
 
             var definitions = ParameterAndTablesDefinitionsBuilder.Build(protocolModel);
             this.parametersAndTables = new ParametersAndTables(definitions);
-            this.parametersAndTables.ApplyInitialValues(protocolModel);
 
             this.notifyProtocolHelper = new NotifyProtocolHelper(parametersAndTables);
 

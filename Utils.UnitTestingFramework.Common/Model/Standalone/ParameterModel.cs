@@ -8,7 +8,7 @@
     /// Parameter model.
     /// </summary>
     /// <seealso cref="IParameterModel" />
-    internal class ParameterModel : ParameterModelBase<ParameterDefinition>, IParameterModel
+    internal class ParameterModel : ParameterModelBase<StandaloneParameterDefinition>, IParameterModel
     {
         private int suspendNotifications;
 
@@ -18,7 +18,7 @@
         /// <param name="parameterDefinition"></param>
         /// <param name="value">The value.</param>
         /// <param name="timestamp">The timestamp.</param>
-        public ParameterModel(ParameterDefinition parameterDefinition, object value, DateTime? timestamp = null)
+        public ParameterModel(StandaloneParameterDefinition parameterDefinition, object value, DateTime? timestamp = null)
             : base(parameterDefinition, value, timestamp)
         {
 

@@ -8,7 +8,11 @@
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Utils.DOM.Builders;
+    using Skyline.DataMiner.Utils.DOM.Extensions;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common;
 
     [TestClass]
     public class Demo3_Tests
@@ -20,6 +24,75 @@
         private static readonly SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(Guid.NewGuid());
 
         private static readonly FieldDescriptorID StatusFieldId = new FieldDescriptorID(Guid.NewGuid());
+
+        [TestMethod]
+        public void DomInstanceWorkflow_TracksOnlyTargetDefinition_WhenInstancesAreCreatedUpdatedAndDeleted()
+        {
+            // Arrange
+            var dmsMock = CreateDmsMock(out var definition);
+            var domHelper = new DomHelper(dmsMock.Connection.Object.HandleMessages, ModuleId);
+            var instanceId = new DomInstanceId(Guid.NewGuid());
+            var instance = new DomInstanceBuilder(definition)
+                .WithID(instanceId)
+                .WithFieldValue(SectionDefinitionId, StatusFieldId, "Pending")
+                .Build();
+            var unrelatedDefinition = new DomDefinitionBuilder()
+                .WithID(Guid.NewGuid())
+                .WithName("Unrelated definition")
+                .Build();
+            var unrelatedInstance = new DomInstanceBuilder(unrelatedDefinition)
+                .WithID(Guid.NewGuid())
+                .Build();
+            var fieldSetter = new DomFieldSetter(domHelper, SectionDefinitionId, StatusFieldId);
+            domHelper.DomDefinitions.Create(unrelatedDefinition);
+
+            using (var changeCounter = new DomInstanceChangeCounter(dmsMock.Connection.Object, DomDefinitionId))
+            {
+                changeCounter.StartWatching();
+
+                // Act
+                domHelper.DomInstances.Create(unrelatedInstance);
+                domHelper.DomInstances.Create(instance);
+                fieldSetter.Set(instanceId, "Completed");
+                var updatedInstance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(instanceId)).Single();
+                var statusSection = updatedInstance.Sections.Single(section => section.SectionDefinitionID.Equals(SectionDefinitionId));
+                var updatedStatus = statusSection.GetFieldValue<string>(StatusFieldId);
+                domHelper.DomInstances.Delete(updatedInstance);
+
+                // Assert
+                Assert.AreEqual("Completed", updatedStatus);
+                Assert.IsFalse(domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(instanceId)).Any());
+                Assert.IsTrue(domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(unrelatedInstance.ID)).Any());
+                Assert.AreEqual(1, changeCounter.NumberOfAdded);
+                Assert.AreEqual(1, changeCounter.NumberOfUpdated);
+                Assert.AreEqual(1, changeCounter.NumberOfDeleted);
+            }
+        }
+
+        private static IDmsMock CreateDmsMock(out DomDefinition domDefinition)
+        {
+            var sectionDefinition = new SectionDefinitionBuilder()
+                .WithID(SectionDefinitionId)
+                .WithName("Demo status section")
+                .AddFieldDescriptor(field => field
+                    .WithID(StatusFieldId)
+                    .WithName("Status")
+                    .WithType(typeof(string)))
+                .Build();
+
+            var builtDomDefinition = new DomDefinitionBuilder()
+                .WithID(DomDefinitionId)
+                .WithName("Demo definition")
+                .AddSectionDefinitionLink(SectionDefinitionId)
+                .Build();
+
+            domDefinition = builtDomDefinition;
+
+            return new DmsBuilder()
+                .WithSectionDefinition(ModuleId, () => sectionDefinition)
+                .WithDomDefinition(ModuleId, () => builtDomDefinition)
+                .Build();
+        }
     }
 
     internal class DomFieldSetter
@@ -53,6 +126,7 @@
     {
         private readonly IConnection connection;
         private readonly Guid domDefinitionId;
+        private readonly string subscriptionId = $"DomInstanceChangeCounter-{Guid.NewGuid()}";
         private bool isWatching;
         private bool disposed;
 
@@ -76,6 +150,12 @@
             }
 
             connection.OnNewMessage += Connection_OnNewMessage;
+            connection.AddSubscription(
+                subscriptionId,
+                new SubscriptionFilter[]
+                {
+                    new SubscriptionFilterElement(typeof(DomInstancesChangedEventMessage), -1, -1),
+                });
             isWatching = true;
         }
 
@@ -87,6 +167,7 @@
             }
 
             connection.OnNewMessage -= Connection_OnNewMessage;
+            connection.ClearSubscriptions(subscriptionId);
             isWatching = false;
         }
 

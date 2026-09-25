@@ -17,7 +17,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
             // Arrange
             var initialTimestamp = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var updatedTimestamp = initialTimestamp.AddMinutes(1);
-            var parameterDefinition = new ParameterDefinition("TestParameter", typeof(string), 1);
+            var parameterDefinition = new StandaloneParameterDefinition("TestParameter", typeof(string), 1);
             var parameter = new ParameterModel(parameterDefinition, "initial", initialTimestamp);
 
             ParameterModelChangedEventArgs eventArgs = null;
@@ -42,7 +42,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.Tests.Protocol.Model
             // Arrange
             const int iterations = 100;
             var baseTimestamp = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            var parameterDefinition = new ParameterDefinition("TestParameter", typeof(string), 1);
+            var parameterDefinition = new StandaloneParameterDefinition("TestParameter", typeof(string), 1);
             var parameter = new ParameterModel(parameterDefinition, "0", baseTimestamp);
 
             int eventCount = 0;

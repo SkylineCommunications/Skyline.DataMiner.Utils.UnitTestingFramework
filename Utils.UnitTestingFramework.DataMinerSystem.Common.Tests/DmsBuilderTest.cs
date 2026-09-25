@@ -8,7 +8,6 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DOM.Builders;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
-    using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Creation;
 
     [TestClass]
     public class DmsBuilderTests
@@ -49,8 +48,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
                     .WithElement(id: 33, name: "Element 33", protocolName: ProtocolName, configure: element => element
                         .FillTable(tableId: 900, rows: [row])
                         .FillTable(tableId: 900,
-                            row => row.SetPrimaryKey("two").SetValueByIdx(2, "two-desc"),
-                            row => row.SetPrimaryKey("three").SetValueByIdx(2, "three-desc"))))
+                            row => row.SetValueByIdx(new[] { 0, 1 }, new object[] { "two", "two-desc" }),
+                            row => row.SetPrimaryKey("three").SetValueByIdx(1, "three-desc"))))
                 .Build();
 
             // Assert
@@ -95,11 +94,11 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void Build_CreatesDmaElementParametersTablesViewsAndDom_WithCompleteConfiguration()
         {
             // Arrange
-            var parameterDefinition = new ParameterDefinition("Standalone", typeof(int), 100);
-            var tableBuilder = new TableModelBuilder(200);
-            tableBuilder.AddColumn(columnPid: 201, columnIdx: 0, isKey: true, columnName: "Key");
-            tableBuilder.AddColumn(columnPid: 202, columnIdx: 1, columnName: "Value");
-            var tableDefinition = tableBuilder.Build().Definition;
+            var parameterDefinition = new StandaloneParameterDefinition("Standalone", typeof(int), 100);
+            var tableDefinition = new TableDefinitionBuilder()
+                .AddColumn(columnPid: 201, columnIdx: 0, isPrimaryKey: true, columnName: "Key")
+                .AddColumn(columnPid: 202, columnIdx: 1, columnName: "Value")
+                .Build();
             var row = new object[] { "row-1", "value-1" };
             var domDefinitionId = Guid.NewGuid();
 
@@ -138,8 +137,8 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             const string protocolName = "VersionedProtocol";
             const string firstVersion = "1.0.0.1";
             const string secondVersion = "2.0.0.0";
-            var firstParameter = new ParameterDefinition("First version parameter", typeof(double), 100);
-            var secondParameter = new ParameterDefinition("Second version parameter", typeof(double), 200);
+            var firstParameter = new StandaloneParameterDefinition("First version parameter", typeof(double), 100);
+            var secondParameter = new StandaloneParameterDefinition("Second version parameter", typeof(double), 200);
 
             // Act
             var dmsMock = new DmsBuilder()
@@ -171,11 +170,11 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void Build_CreatesElementWithoutProtocolXml_WithManualProtocolDefinitions()
         {
             // Arrange
-            var parameterDefinition = new ParameterDefinition("Standalone", typeof(double), 100);
-            var tableBuilder = new TableModelBuilder(200);
-            tableBuilder.AddColumn(columnPid: 201, columnIdx: 0, isKey: true, columnName: "Key");
-            tableBuilder.AddColumn(columnPid: 202, columnIdx: 1, columnName: "Value");
-            var tableDefinition = tableBuilder.Build().Definition;
+            var parameterDefinition = new StandaloneParameterDefinition("Standalone", typeof(double), 100);
+            var tableDefinition = new TableDefinitionBuilder()
+                .AddColumn(columnPid: 201, columnIdx: 0, isPrimaryKey: true, columnName: "Key")
+                .AddColumn(columnPid: 202, columnIdx: 1, columnName: "Value")
+                .Build();
 
             // Act
             var dmsMock = new DmsBuilder()
