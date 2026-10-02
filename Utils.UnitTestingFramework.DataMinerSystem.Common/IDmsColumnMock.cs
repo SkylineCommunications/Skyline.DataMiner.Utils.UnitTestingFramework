@@ -8,6 +8,7 @@
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Selectors;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Subscription.Monitors;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     /// <summary>
@@ -15,7 +16,7 @@
     /// so that cell values that are set are stored and can be retrieved again.
     /// </summary>
     /// <typeparam name="T">The type of the column value.</typeparam>
-    internal class DmsColumnMock<T> : Mock<IDmsColumn<T>>
+    internal class IDmsColumnMock<T> : Mock<IDmsColumn<T>>
     {
         private readonly DmsTableMock table;
         private readonly int columnPid;
@@ -25,12 +26,12 @@
             new Dictionary<string, EventHandler<CellChangedEventArgs>>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DmsColumnMock{T}"/> class.
+        /// Initializes a new instance of the <see cref="IDmsColumnMock{T}"/> class.
         /// </summary>
         /// <param name="table">The table this column belongs to, which also provides the backing <see cref="ITableModel"/>.</param>
         /// <param name="columnPid">The parameter ID of the column.</param>
         /// <exception cref="ArgumentNullException"><paramref name="table"/> is <see langword="null"/>.</exception>
-        public DmsColumnMock(DmsTableMock table, int columnPid)
+        public IDmsColumnMock(DmsTableMock table, int columnPid)
         {
             this.table = table ?? throw new ArgumentNullException(nameof(table));
             this.columnPid = columnPid;

@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
+namespace Skyline.DataMiner.Utils.UnitTestingFramework.Dev.Common
 {
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.ToolsSpace.Collections;

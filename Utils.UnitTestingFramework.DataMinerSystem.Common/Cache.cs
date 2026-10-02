@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Dev.Common;
 
     internal sealed class Cache
     {
-        private readonly IConnectionMock connectionMock = new IConnectionMock();
+        private readonly IConnectionMock connectionMock;
         private IDmsMock dmsMock;
         private readonly Dictionary<int, IDmaMock> dmaMocksById = new Dictionary<int, IDmaMock>();
         private readonly Dictionary<string, IDmaMock> dmaMocksByName = new Dictionary<string, IDmaMock>(StringComparer.OrdinalIgnoreCase);
@@ -24,6 +21,11 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         private readonly Dictionary<string, IDmsViewMock> viewMocksByName = new Dictionary<string, IDmsViewMock>(StringComparer.OrdinalIgnoreCase);
 
         private readonly Dictionary<string, Dictionary<string, IDmsProtocolMock>> protocolMocksByName = new Dictionary<string, Dictionary<string, IDmsProtocolMock>>(StringComparer.OrdinalIgnoreCase);
+
+        internal Cache(IConnectionMock connectionMock = null)
+        {
+            this.connectionMock = connectionMock ?? new IConnectionMock();
+        }
 
         internal void AddDms(IDmsMock dmsMock)
         {

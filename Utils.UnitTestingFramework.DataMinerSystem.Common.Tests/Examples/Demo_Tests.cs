@@ -18,7 +18,7 @@ namespace Utils.UnitTestingFramework.DataMinerSystem.Common.Tests.Examples
         public void FindOtherViewsOnSameDms_ReturnsAllViewsExceptSelectedView_WithBuilders()
         {
             // Arrange
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithProtocol("Examples/protocol.xml")
                 .WithView(10, "View 1")
                 .WithView(20, "View 2")
@@ -72,7 +72,7 @@ namespace Utils.UnitTestingFramework.DataMinerSystem.Common.Tests.Examples
         public void FindSimilarOnSameDma_ReturnsMatchingElementsFromSameDma_WithBuilders()
         {
             // Arrange
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithProtocol("Examples/protocol.xml")
                 .WithDma(id: 1, dma => dma
                     .WithElement(id: 11, name: "Element A", protocolName: "DemoProtocol")
@@ -128,7 +128,7 @@ namespace Utils.UnitTestingFramework.DataMinerSystem.Common.Tests.Examples
         public void Repoll_ReplacesExistingRowsWithPolledRows_WithBuilders()
         {
             // Arrange
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithProtocol("Examples/protocol.xml")
                 .WithDma(id: 1, dma => dma
                     .WithElement(id: 11, name: "Element A", protocolName: "DemoProtocol", configure: element => element
@@ -186,7 +186,7 @@ namespace Utils.UnitTestingFramework.DataMinerSystem.Common.Tests.Examples
         public void RestartAndEnablePolling_SetsPollingStatusToEnabledAfterCompletedStartup_WithBuilders()
         {
             // Arrange
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithProtocol("Examples/protocol.xml")
                 .WithDma(id: 1, dma => dma
                     .WithElement(id: 11, name: "Element A", protocolName: "DemoProtocol", configure: element => element

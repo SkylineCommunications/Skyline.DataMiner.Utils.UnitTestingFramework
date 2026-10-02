@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             var secondDefinitionId = Guid.NewGuid();
 
             // Act
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithDomDefinition(moduleId: "module", createDefinition: () => CreateDefinition(firstDefinitionId, "First"))
                 .WithDomDefinition(moduleId: "module", createDefinition: () => CreateDefinition(secondDefinitionId, "Second"))
                 .Build();
@@ -40,7 +40,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             var secondDefinitionId = Guid.NewGuid();
 
             // Act
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithDomDefinition(moduleId: "first-module", createDefinition: () => CreateDefinition(firstDefinitionId, "First definition"))
                 .WithDomDefinition(moduleId: "second-module", createDefinition: () => CreateDefinition(secondDefinitionId, "Second definition"))
                 .Build();
@@ -64,7 +64,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             var instanceId = Guid.NewGuid();
 
             // Act
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithDomDefinition(moduleId: "complete-module", createDefinition: () => definition)
                 .WithSectionDefinition(moduleId: "complete-module", createDefinition: () => new SectionDefinitionBuilder()
                     .WithID(sectionDefinitionId)
@@ -94,7 +94,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
             var definitionId = Guid.NewGuid();
 
             // Act
-            var dmsMock = new DmsBuilder()
+            var dmsMock = new IDmsBuilder()
                 .WithDomDefinition(moduleId: "dms-module", createDefinition: () => new DomDefinitionBuilder()
                     .WithID(definitionId)
                     .WithName("DMS definition")
@@ -111,7 +111,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void Build_ThrowsInvalidOperationException_WhenDomFactoryReturnsNull()
         {
             // Arrange
-            var builder = new DmsBuilder()
+            var builder = new IDmsBuilder()
                 .WithDomDefinition(moduleId: "module", createDefinition: () => null);
 
             // Act and assert
@@ -122,7 +122,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void WithDomBehaviorDefinition_ThrowsArgumentNullException_WithNullFactory()
         {
             // Arrange
-            var builder = new DmsBuilder();
+            var builder = new IDmsBuilder();
 
             // Act and assert
             Assert.ThrowsExactly<ArgumentNullException>(() => builder.WithDomBehaviorDefinition(moduleId: "module", createDefinition: null));
@@ -133,7 +133,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         {
             // Arrange
             var factoryInvoked = false;
-            var builder = new DmsBuilder()
+            var builder = new IDmsBuilder()
                 .WithDomDefinition(moduleId: "module", createDefinition: () =>
                 {
                     factoryInvoked = true;
@@ -153,7 +153,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void WithDomDefinition_ThrowsArgumentException_WithEmptyModuleId()
         {
             // Arrange
-            var builder = new DmsBuilder();
+            var builder = new IDmsBuilder();
 
             // Act and assert
             Assert.ThrowsExactly<ArgumentException>(() => builder.WithDomDefinition(
@@ -165,7 +165,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void WithDomDefinition_ThrowsArgumentNullException_WithNullFactory()
         {
             // Arrange
-            var builder = new DmsBuilder();
+            var builder = new IDmsBuilder();
 
             // Act and assert
             Assert.ThrowsExactly<ArgumentNullException>(() => builder.WithDomDefinition(moduleId: "module", createDefinition: null));
@@ -175,7 +175,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void WithDomInstance_ThrowsArgumentNullException_WithNullFactory()
         {
             // Arrange
-            var builder = new DmsBuilder();
+            var builder = new IDmsBuilder();
 
             // Act and assert
             Assert.ThrowsExactly<ArgumentNullException>(() => builder.WithDomInstance(moduleId: "module", createInstance: null));
@@ -185,7 +185,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common.Te
         public void WithSectionDefinition_ThrowsArgumentNullException_WithNullFactory()
         {
             // Arrange
-            var builder = new DmsBuilder();
+            var builder = new IDmsBuilder();
 
             // Act and assert
             Assert.ThrowsExactly<ArgumentNullException>(() => builder.WithSectionDefinition(moduleId: "module", createDefinition: null));

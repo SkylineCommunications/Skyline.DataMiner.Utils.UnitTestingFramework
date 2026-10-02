@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
+namespace Skyline.DataMiner.Utils.UnitTestingFramework.Dev.Common
 {
     using System;
     using System.Collections.Concurrent;
@@ -11,13 +11,12 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
     using Skyline.DataMiner.Net.Messages;
 
     /// <summary>
-    /// A pre-arranged mock of an SLNet <see cref="IConnection"/>.
+    /// A pre-arranged mock of an <see cref="IConnection"/>.
     /// </summary>
     public class IConnectionMock : Mock<IConnection>
     {
         private readonly ConcurrentDictionary<string, SubscriptionSet> subscriptions = new ConcurrentDictionary<string, SubscriptionSet>(StringComparer.Ordinal);
-        private readonly ConcurrentDictionary<Type, Func<DMSMessage, DMSMessage>> customMessageHandlers = new ConcurrentDictionary<Type, Func<DMSMessage, DMSMessage>>();
-        private Func<DMSMessage[], DMSMessage[]> messageHandler = messages => Array.Empty<DMSMessage>();
+        private readonly ConcurrentDictionary<Type, Func<DMSMessage, DMSMessage>> messageHandlers = new ConcurrentDictionary<Type, Func<DMSMessage, DMSMessage>>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IConnectionMock"/> class.
@@ -26,29 +25,34 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         {
             Setup(connection => connection.Subscribe(It.IsAny<SubscriptionFilter[]>()))
                 .Callback((SubscriptionFilter[] filters) => Subscribe(filters))
-                .Returns((SubscriptionFilter[] filters) => new CreateSubscriptionResponseMessage
-                {
-                    Filters = filters,
-                });
+                .Returns((SubscriptionFilter[] filters) => new CreateSubscriptionResponseMessage { Filters = filters });
+
             Setup(connection => connection.Unsubscribe()).Callback(Unsubscribe);
+
             Setup(connection => connection.AddSubscription(It.IsAny<string>(), It.IsAny<SubscriptionFilter[]>()))
                 .Callback((string subscriptionId, SubscriptionFilter[] filters) => AddSubscription(subscriptionId, filters));
+
             Setup(connection => connection.RemoveSubscription(It.IsAny<string>(), It.IsAny<SubscriptionFilter[]>()))
                 .Callback((string subscriptionId, SubscriptionFilter[] filters) => RemoveSubscription(subscriptionId, filters));
+
             Setup(connection => connection.ReplaceSubscription(It.IsAny<string>(), It.IsAny<SubscriptionFilter[]>()))
                 .Callback((string subscriptionId, SubscriptionFilter[] filters) => ReplaceSubscription(subscriptionId, filters));
+
             Setup(connection => connection.ClearSubscriptions(It.IsAny<string>()))
                 .Callback((string subscriptionId) => ClearSubscriptions(subscriptionId));
+
             Setup(connection => connection.HandleMessages(It.IsAny<DMSMessage[]>()))
                 .Returns((DMSMessage[] messages) => HandleMessages(messages));
+
             Setup(connection => connection.HandleMessage(It.IsAny<DMSMessage>()))
                 .Returns((DMSMessage message) => HandleMessages(new[] { message }));
+
             Setup(connection => connection.HandleSingleResponseMessage(It.IsAny<DMSMessage>()))
                 .Returns((DMSMessage message) => HandleMessages(new[] { message }).SingleOrDefault());
         }
 
         /// <summary>
-        /// Raises <see cref="IConnection.OnNewMessage"/> for every active subscription.
+        /// Raises <see cref="IConnection.OnNewMessage"/> for every active subscription, ignoring the filters.
         /// </summary>
         /// <param name="message">The message to publish.</param>
         public void NotifySubscriptions(DMSMessage message)
@@ -58,23 +62,30 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
                 throw new ArgumentNullException(nameof(message));
             }
 
-            NotifySubscriptions(message, filters => message);
+            NotifySubscriptions(message, (filters, msg) => true);
         }
 
         /// <summary>
         /// Raises <see cref="IConnection.OnNewMessage"/> when an active subscription matches the message.
         /// </summary>
-        /// <param name="message">The parameter change message to publish.</param>
-        internal void NotifySubscriptions(ParameterChangeEventMessage message)
+        /// <typeparam name="TMessage">The type of the message.</typeparam>
+        /// <param name="message">The message to publish.</param>
+        /// <param name="passesFilters">A function to determine if the message passes the subscription filters.</param>
+        public void NotifySubscriptions<TMessage>(TMessage message, Func<IReadOnlyCollection<SubscriptionFilter>, TMessage, bool> passesFilters ) where TMessage : DMSMessage
         {
             if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
 
-            NotifySubscriptions(
-                message,
-                filters => filters.Any(filter => Matches(filter, message)) ? message : null);
+            foreach (var subscription in subscriptions.Values)
+            {
+                bool passes = passesFilters(subscription.Filters.ToArray(), message);
+                if (passes)
+                {
+                    RaiseOnNewMessage(subscription.SetId, message);
+                }
+            }
         }
 
         private DMSMessage[] HandleMessages(DMSMessage[] messages)
@@ -93,21 +104,17 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
                     throw new ArgumentException("The message collection cannot contain null values.", nameof(messages));
                 }
 
-                if (customMessageHandlers.TryGetValue(message.GetType(), out var customHandler))
+                if (messageHandlers.TryGetValue(message.GetType(), out var customHandler))
                 {
                     var customResponse = customHandler(message);
                     if (customResponse != null)
                     {
                         responses.Add(customResponse);
                     }
-
-                    continue;
                 }
-
-                var defaultResponses = messageHandler(new[] { message });
-                if (defaultResponses != null)
+                else
                 {
-                    responses.AddRange(defaultResponses.Where(response => response != null));
+                    // TODO how to handle messages without a registered handler? For now, we just ignore them.
                 }
             }
 
@@ -128,7 +135,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
                 throw new ArgumentNullException(nameof(handler));
             }
 
-            if (!customMessageHandlers.TryAdd(typeof(TMessage), message => handler((TMessage)message)))
+            if (!messageHandlers.TryAdd(typeof(TMessage), message => handler((TMessage)message)))
             {
                 throw new InvalidOperationException($"A message handler for '{typeof(TMessage).FullName}' is already registered.");
             }
@@ -142,37 +149,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         public bool UnregisterMessageHandler<TMessage>()
             where TMessage : DMSMessage
         {
-            return customMessageHandlers.TryRemove(typeof(TMessage), out _);
-        }
-
-        internal void SetMessageHandler(Func<DMSMessage[], DMSMessage[]> handler)
-        {
-            messageHandler = handler ?? throw new ArgumentNullException(nameof(handler));
-        }
-
-        internal void NotifySubscriptions<TMessage>(
-            TMessage message,
-            Func<IReadOnlyCollection<SubscriptionFilter>, TMessage> applyFilters)
-            where TMessage : DMSMessage
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            if (applyFilters == null)
-            {
-                throw new ArgumentNullException(nameof(applyFilters));
-            }
-
-            foreach (var subscription in subscriptions.Values)
-            {
-                var filteredMessage = applyFilters(subscription.Filters.ToArray());
-                if (filteredMessage != null)
-                {
-                    RaiseOnNewMessage(subscription.SetId, filteredMessage);
-                }
-            }
+            return messageHandlers.TryRemove(typeof(TMessage), out _);
         }
 
         private void Subscribe(SubscriptionFilter[] filters)
@@ -247,25 +224,6 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
             }
 
             subscriptions.TryRemove(subscriptionId, out _);
-        }
-
-        private static bool Matches(SubscriptionFilter filter, ParameterChangeEventMessage message)
-        {
-            var messageType = filter.ToTypeObject();
-
-            if (messageType == null || !messageType.IsInstanceOfType(message))
-            {
-                return false;
-            }
-
-            if (!(filter is SubscriptionFilterElement elementFilter))
-            {
-                return true;
-            }
-
-            var agentMatches = elementFilter.DmaID < 0 || elementFilter.DmaID == message.DataMinerID;
-            var elementMatches = elementFilter.ElementID < 0 || elementFilter.ElementID == message.ElementID;
-            return agentMatches && elementMatches;
         }
 
         private void RaiseOnNewMessage(string subscriptionId, DMSMessage message)

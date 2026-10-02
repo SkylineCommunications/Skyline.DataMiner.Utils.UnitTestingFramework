@@ -1,42 +1,69 @@
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
+namespace Skyline.DataMiner.Utils.UnitTestingFramework.Dev.Common.Dom
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Dev.Common;
 
     /// <summary>
     /// Provides in-memory DOM behavior for a simulated DataMiner System.
     /// </summary>
-    public sealed class DomSystemMock
+    public sealed class DomConfiguration
     {
-        private readonly Dictionary<string, DomCacheMock> moduleCaches = new Dictionary<string, DomCacheMock>(StringComparer.Ordinal);
-        private readonly Action<DMSMessage> notifySubscriptions;
+        private readonly Dictionary<string, DomModule> modules = new Dictionary<string, DomModule>(StringComparer.Ordinal);
+
+        private Action<DMSMessage> notifySubscriptions;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DomSystemMock"/> class.
+        /// Initializes a new instance of the <see cref="DomConfiguration"/> class.
         /// </summary>
-        /// <param name="notifySubscriptions">The callback used to publish DOM instance changes.</param>
-        internal DomSystemMock(Action<DMSMessage> notifySubscriptions)
+        internal DomConfiguration(IEnumerable<DomModule> modules = null)
         {
-            this.notifySubscriptions = notifySubscriptions ?? throw new ArgumentNullException(nameof(notifySubscriptions));
+            if (modules != null)
+            {
+                foreach (var module in modules)
+                {
+                    this.modules[module.ID] = module;
+                }
+            }
         }
 
-        internal DomCacheMock CreateCache(string moduleId)
+        /// <summary>
+        /// Attaches the DOM configuration to a connection mock, enabling it to handle DOM-related messages.
+        /// </summary>
+        /// <param name="connectionMock">The connection mock to attach to.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="connectionMock"/> is <c>null</c>.</exception>
+        public void AttachTo(IConnectionMock connectionMock)
         {
-            ValidateModuleId(moduleId);
-
-            if (!moduleCaches.TryGetValue(moduleId, out var cache))
+            if (connectionMock == null)
             {
-                cache = new DomCacheMock();
-                moduleCaches.Add(moduleId, cache);
+                throw new ArgumentNullException(nameof(connectionMock));
             }
 
-            return cache;
+            notifySubscriptions = connectionMock.NotifySubscriptions;
+
+            connectionMock.RegisterMessageHandler<ManagerStoreReadRequest<DomDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreUpdateRequest<DomDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreCreateRequest<DomDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreDeleteRequest<DomDefinition>>(HandleMessage);
+
+            connectionMock.RegisterMessageHandler<ManagerStoreReadRequest<SectionDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreUpdateRequest<SectionDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreCreateRequest<SectionDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreDeleteRequest<SectionDefinition>>(HandleMessage);
+
+            connectionMock.RegisterMessageHandler<ManagerStoreReadRequest<DomBehaviorDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreUpdateRequest<DomBehaviorDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreCreateRequest<DomBehaviorDefinition>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreDeleteRequest<DomBehaviorDefinition>>(HandleMessage);
+
+            connectionMock.RegisterMessageHandler<ManagerStoreReadRequest<DomInstance>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreUpdateRequest<DomInstance>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreCreateRequest<DomInstance>>(HandleMessage);
+            connectionMock.RegisterMessageHandler<ManagerStoreDeleteRequest<DomInstance>>(HandleMessage);
         }
 
         /// <summary>
@@ -46,7 +73,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         {
             ValidateModuleId(moduleId);
             var values = Materialize(instances, nameof(instances));
-            CreateCache(moduleId).SetInstances(values);
+            GetOrCreateCache(moduleId).SetInstances(values);
         }
 
         /// <summary>
@@ -56,7 +83,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         {
             ValidateModuleId(moduleId);
             var values = Materialize(definitions, nameof(definitions));
-            CreateCache(moduleId).SetDefinitions(values);
+            GetOrCreateCache(moduleId).SetDefinitions(values);
         }
 
         /// <summary>
@@ -66,7 +93,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         {
             ValidateModuleId(moduleId);
             var values = Materialize(definitions, nameof(definitions));
-            CreateCache(moduleId).SetSectionDefinitions(values);
+            GetOrCreateCache(moduleId).SetSectionDefinitions(values);
         }
 
         /// <summary>
@@ -76,20 +103,20 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         {
             ValidateModuleId(moduleId);
             var values = Materialize(definitions, nameof(definitions));
-            CreateCache(moduleId).SetBehaviorDefinitions(values);
+            GetOrCreateCache(moduleId).SetBehaviorDefinitions(values);
         }
 
-        /// <summary>
-        /// Handles DOM SLNet messages sent through the shared connection mock.
-        /// </summary>
-        internal DMSMessage[] HandleMessages(DMSMessage[] messages)
+        internal DomModule GetOrCreateCache(string moduleId)
         {
-            if (messages == null)
+            ValidateModuleId(moduleId);
+
+            if (!modules.TryGetValue(moduleId, out var cache))
             {
-                throw new ArgumentNullException(nameof(messages));
+                cache = new DomModule(moduleId);
+                modules.Add(moduleId, cache);
             }
 
-            return messages.Select(HandleMessage).ToArray();
+            return cache;
         }
 
         private DMSMessage HandleMessage(DMSMessage message)
@@ -113,7 +140,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
             {
                 case ManagerStoreReadRequest<DomDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     var definitions = request.Query.ExecuteInMemory(cache.Definitions.Values).ToList();
                     response = new ManagerStoreCrudResponse<DomDefinition>(definitions);
                     return true;
@@ -121,7 +148,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreCreateRequest<DomDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.Definitions[request.Object.ID.Id] = request.Object;
                     response = new ManagerStoreCrudResponse<DomDefinition>(request.Object);
                     return true;
@@ -129,7 +156,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreUpdateRequest<DomDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.Definitions[request.Object.ID.Id] = request.Object;
                     response = new ManagerStoreCrudResponse<DomDefinition>(request.Object);
                     return true;
@@ -137,7 +164,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreDeleteRequest<DomDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.Definitions.Remove(request.Object.ID.Id);
                     response = new ManagerStoreCrudResponse<DomDefinition>(request.Object);
                     return true;
@@ -145,7 +172,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreReadRequest<SectionDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     var definitions = request.Query.ExecuteInMemory(cache.SectionDefinitions.Values).ToList();
                     response = new ManagerStoreCrudResponse<SectionDefinition>(definitions);
                     return true;
@@ -153,7 +180,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreCreateRequest<SectionDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.SectionDefinitions[request.Object.GetID().Id] = request.Object;
                     response = new ManagerStoreCrudResponse<SectionDefinition>(request.Object);
                     return true;
@@ -161,7 +188,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreUpdateRequest<SectionDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.SectionDefinitions[request.Object.GetID().Id] = request.Object;
                     response = new ManagerStoreCrudResponse<SectionDefinition>(request.Object);
                     return true;
@@ -169,7 +196,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreDeleteRequest<SectionDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.SectionDefinitions.Remove(request.Object.GetID().Id);
                     response = new ManagerStoreCrudResponse<SectionDefinition>(request.Object);
                     return true;
@@ -177,7 +204,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreReadRequest<DomInstance> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     var instances = request.Query.ExecuteInMemory(cache.Instances.Values).ToList();
                     response = new ManagerStoreCrudResponse<DomInstance>(instances);
                     return true;
@@ -185,7 +212,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreCreateRequest<DomInstance> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.Instances[request.Object.ID.Id] = request.Object;
                     response = new ManagerStoreCrudResponse<DomInstance>(request.Object);
                     NotifyInstanceChange(request.ModuleId, request.Object, DomInstanceChangeType.Created);
@@ -194,7 +221,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreUpdateRequest<DomInstance> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.Instances[request.Object.ID.Id] = request.Object;
                     response = new ManagerStoreCrudResponse<DomInstance>(request.Object);
                     NotifyInstanceChange(request.ModuleId, request.Object, DomInstanceChangeType.Updated);
@@ -203,7 +230,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreDeleteRequest<DomInstance> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.Instances.Remove(request.Object.ID.Id);
                     response = new ManagerStoreCrudResponse<DomInstance>(request.Object);
                     NotifyInstanceChange(request.ModuleId, request.Object, DomInstanceChangeType.Deleted);
@@ -212,7 +239,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreReadRequest<DomBehaviorDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     var definitions = request.Query.ExecuteInMemory(cache.BehaviorDefinitions.Values).ToList();
                     response = new ManagerStoreCrudResponse<DomBehaviorDefinition>(definitions);
                     return true;
@@ -220,7 +247,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreCreateRequest<DomBehaviorDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.BehaviorDefinitions[request.Object.ID.Id] = request.Object;
                     response = new ManagerStoreCrudResponse<DomBehaviorDefinition>(request.Object);
                     return true;
@@ -228,7 +255,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreUpdateRequest<DomBehaviorDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.BehaviorDefinitions[request.Object.ID.Id] = request.Object;
                     response = new ManagerStoreCrudResponse<DomBehaviorDefinition>(request.Object);
                     return true;
@@ -236,7 +263,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 
                 case ManagerStoreDeleteRequest<DomBehaviorDefinition> request:
                 {
-                    var cache = CreateCache(request.ModuleId);
+                    var cache = GetOrCreateCache(request.ModuleId);
                     cache.BehaviorDefinitions.Remove(request.Object.ID.Id);
                     response = new ManagerStoreCrudResponse<DomBehaviorDefinition>(request.Object);
                     return true;

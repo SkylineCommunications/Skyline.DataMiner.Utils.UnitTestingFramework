@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
 {
-    using System.Collections.Generic;
+    using System;
+    using System.Linq;
     using Moq;
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Properties;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Dev.Common;
 
     /// <summary>
     /// A pre-arranged mock of <see cref="IDms"/>.
@@ -20,41 +16,20 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         private readonly Cache cache;
 
         /// <summary>
-        /// Gets the SLNet connection mock shared by this DataMiner System and all its elements.
-        /// </summary>
-        public IConnectionMock Connection { get; }
-
-        /// <summary>
-        /// Gets the DOM state that belongs to this DataMiner System mock.
-        /// </summary>
-        public DomSystemMock Dom { get; }
-        public IPropertyDefinitionCollection<IDmsElementPropertyDefinition> ElementPropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsElementPropertyDefinition>();
-        public IPropertyDefinitionCollection<IDmsServicePropertyDefinition> ServicePropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsServicePropertyDefinition>();
-        public IPropertyDefinitionCollection<IDmsViewPropertyDefinition> ViewPropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsViewPropertyDefinition>();
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="IDmsMock"/> class.
         /// </summary>
-        public IDmsMock()
+        public IDmsMock(IConnectionMock connectionMock = null)
         {
-            cache = new Cache();
+            cache = new Cache(connectionMock);
             cache.AddDms(this);
-            Connection = cache.GetConnection();
-            Dom = new DomSystemMock(Connection.NotifySubscriptions);
-            Connection.SetMessageHandler(Dom.HandleMessages);
+
             Setup(dms => dms.ElementPropertyDefinitions).Returns(() => ElementPropertyDefinitions);
             Setup(dms => dms.ServicePropertyDefinitions).Returns(() => ServicePropertyDefinitions);
             Setup(dms => dms.ViewPropertyDefinitions).Returns(() => ViewPropertyDefinitions);
             Setup(dms => dms.AgentExists(It.IsAny<int>())).Returns((int agentId) => cache.GetDma(agentId) != null);
             Setup(dms => dms.GetAgent(It.IsAny<int>())).Returns((int agentId) =>
             {
-                var dmaMock = cache.GetDma(agentId);
-
-                if (dmaMock == null)
-                {
-                    throw new AgentNotFoundException(agentId);
-                }
-
+                var dmaMock = cache.GetDma(agentId) ?? throw new AgentNotFoundException(agentId);
                 return dmaMock.Object;
             });
             Setup(dms => dms.GetAgentReference(It.IsAny<int>())).Returns((int agentId) =>
@@ -246,6 +221,12 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
                 return protocolMock.Object;
             });
         }
+
+        public IPropertyDefinitionCollection<IDmsElementPropertyDefinition> ElementPropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsElementPropertyDefinition>();
+
+        public IPropertyDefinitionCollection<IDmsServicePropertyDefinition> ServicePropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsServicePropertyDefinition>();
+
+        public IPropertyDefinitionCollection<IDmsViewPropertyDefinition> ViewPropertyDefinitions { get; set; } = CreateEmptyPropertyDefinitionCollection<IDmsViewPropertyDefinition>();
 
         public IDmsProtocolMock AddProtocol(string pathToProtocolXml)
         {

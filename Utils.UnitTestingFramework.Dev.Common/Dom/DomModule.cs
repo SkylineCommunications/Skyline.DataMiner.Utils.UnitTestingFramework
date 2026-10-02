@@ -1,13 +1,22 @@
-namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
+namespace Skyline.DataMiner.Utils.UnitTestingFramework.Dev.Common.Dom
 {
     using System;
     using System.Collections.Generic;
-
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;
 
-    internal sealed class DomCacheMock
+    /// <summary>
+    /// Represents a DOM module containing definitions, instances, and behavior definitions.
+    /// </summary>
+    internal sealed class DomModule
     {
+        internal DomModule(string id)
+        {
+            ID = id;
+        }
+
+        internal string ID { get; }
+
         internal Dictionary<Guid, DomDefinition> Definitions { get; } = new Dictionary<Guid, DomDefinition>();
 
         internal Dictionary<Guid, SectionDefinition> SectionDefinitions { get; } = new Dictionary<Guid, SectionDefinition>();

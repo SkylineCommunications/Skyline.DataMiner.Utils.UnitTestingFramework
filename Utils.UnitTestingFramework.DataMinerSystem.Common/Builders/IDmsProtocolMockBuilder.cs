@@ -6,6 +6,9 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
+    /// <summary>
+    /// Builder class for constructing a <see cref="IDmsProtocolMock"/> with its properties and configuration.
+    /// </summary>
     public sealed class IDmsProtocolMockBuilder
     {
         private readonly string name;
@@ -13,12 +16,19 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
         private readonly Dictionary<int, StandaloneParameterDefinition> parameterDefinitions = new Dictionary<int, StandaloneParameterDefinition>();
         private readonly Dictionary<int, TableDefinition> tableDefinitions = new Dictionary<int, TableDefinition>();
 
-        public IDmsProtocolMockBuilder(string name, string version = IDmsProtocolMock.DefaultVersion)
+        internal IDmsProtocolMockBuilder(string name, string version = IDmsProtocolMock.DefaultVersion)
         {
             this.name = name;
             this.version = version;
         }
 
+        /// <summary>
+        /// Adds a parameter definition to the protocol mock being built.
+        /// </summary>
+        /// <param name="parameterDefinition">The parameter definition to add.</param>
+        /// <returns>The current <see cref="IDmsProtocolMockBuilder"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="parameterDefinition"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if a parameter definition with the same ID has already been added.</exception>
         public IDmsProtocolMockBuilder AddParameterDefinition(StandaloneParameterDefinition parameterDefinition)
         {
             if (parameterDefinition == null)
@@ -35,6 +45,14 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
             return this;
         }
 
+        /// <summary>
+        /// Adds a table definition to the protocol mock being built.
+        /// </summary>
+        /// <param name="tableId">The ID of the table.</param>
+        /// <param name="tableDefinition">The table definition to add.</param>
+        /// <returns>The current <see cref="IDmsProtocolMockBuilder"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="tableDefinition"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if a table definition with the same ID has already been added.</exception>
         public IDmsProtocolMockBuilder AddTableDefinition(int tableId, TableDefinition tableDefinition)
         {
             if (tableDefinition == null)
@@ -51,7 +69,7 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
             return this;
         }
 
-        public IDmsProtocolMock Build()
+        internal IDmsProtocolMock Build()
         {
             var protocolMock = new IDmsProtocolMock(name, version);
 
@@ -65,18 +83,6 @@ namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
                 protocolMock.AddTableDefinition(tableDefinition.Key, tableDefinition.Value);
             }
 
-            return protocolMock;
-        }
-
-        internal IDmsProtocolMock Build(IDmsMock dmsMock)
-        {
-            if (dmsMock == null)
-            {
-                throw new ArgumentNullException(nameof(dmsMock));
-            }
-
-            var protocolMock = Build();
-            dmsMock.AddProtocol(protocolMock);
             return protocolMock;
         }
     }

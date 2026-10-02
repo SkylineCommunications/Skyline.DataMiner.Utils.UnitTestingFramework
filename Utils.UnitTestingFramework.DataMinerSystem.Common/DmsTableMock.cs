@@ -11,6 +11,7 @@
     using Skyline.DataMiner.Core.DataMinerSystem.Common;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Selectors;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Subscription.Monitors;
+    using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
 
     /// <summary>
@@ -327,7 +328,7 @@
 
             if (!columnMocks.TryGetValue(cacheKey, out var columnMockObject))
             {
-                var columnMockType = typeof(DmsColumnMock<>).MakeGenericType(columnType);
+                var columnMockType = typeof(IDmsColumnMock<>).MakeGenericType(columnType);
                 var columnMock = (Mock)Activator.CreateInstance(columnMockType, this, columnPid);
 
                 columnMockObject = columnMock.Object;

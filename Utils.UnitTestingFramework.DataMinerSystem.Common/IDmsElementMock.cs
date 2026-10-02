@@ -10,6 +10,7 @@
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Selectors;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Subscription.Monitors;
     using Skyline.DataMiner.Core.DataMinerSystem.Common.Templates;
+    using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Standalone;
     using Skyline.DataMiner.Utils.UnitTestingFramework.Common.Model.Table;
@@ -142,6 +143,7 @@
 
         /// Gets or sets the element description returned by the mock.
         public string Description { get; set; } = String.Empty;
+
         public string Type { get; set; } = String.Empty;
 
         /// Gets or sets the protocol returned by the mock.
@@ -386,7 +388,26 @@
                 NewValue = ToParameterValue(e.NewValue),
             };
 
-            cache.GetConnection().NotifySubscriptions(message);
+            cache.GetConnection().NotifySubscriptions(message, (filters, msg) => filters.Any(filter => MessageMatchesFilter(filter, msg)));
+        }
+
+        private static bool MessageMatchesFilter(SubscriptionFilter filter, ParameterChangeEventMessage message)
+        {
+            var messageType = filter.ToTypeObject();
+
+            if (messageType == null || !messageType.IsInstanceOfType(message))
+            {
+                return false;
+            }
+
+            if (!(filter is SubscriptionFilterElement elementFilter))
+            {
+                return true;
+            }
+
+            var agentMatches = elementFilter.DmaID < 0 || elementFilter.DmaID == message.DataMinerID;
+            var elementMatches = elementFilter.ElementID < 0 || elementFilter.ElementID == message.ElementID;
+            return agentMatches && elementMatches;
         }
 
         private void TableModel_RowChanged(object sender, RowChangedEventArgs e)

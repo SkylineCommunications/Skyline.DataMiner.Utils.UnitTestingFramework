@@ -40,7 +40,7 @@
         [TestInitialize]
         public void TestInitialize()
         {
-            dmsMock = new DmsBuilder()
+            dmsMock = new IDmsBuilder()
                 .WithSectionDefinition(ModuleId, () => new SectionDefinitionBuilder()
                     .WithID(SectionDefinitionId)
                     .WithName("Demo status section")

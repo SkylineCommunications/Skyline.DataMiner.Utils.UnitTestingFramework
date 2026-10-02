@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.DataMinerSystem.Common
+﻿namespace Skyline.DataMiner.Utils.UnitTestingFramework.Common
 {
     using System;
     using System.Globalization;
